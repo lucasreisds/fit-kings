@@ -8,6 +8,16 @@
 
 **Input**: Descrição do usuário: aplicativo mobile-first para montar, executar e acompanhar treinos de academia, com histórico completo, comparação planejado x realizado, aviso de possibilidade de aumento de carga e base de dados preparada para análises futuras com IA.
 
+## Clarifications
+
+### Session 2026-09-17
+
+- Q: Os treinos e o histórico devem existir apenas no aparelho, ou o usuário precisa de conta para acessá-los em outro dispositivo e recuperá-los se trocar de celular? (FR-062) → A: Opção C — conta de usuário com sincronização automática em nuvem.
+- Q: Ao adicionar um exercício a um treino, o usuário escolhe de uma lista pronta, digita o nome livremente, ou as duas coisas? (FR-011) → A: Opção A — catálogo de exercícios pré-cadastrado (curado pelo proprietário do aplicativo) somado a exercícios personalizados criados pelo usuário, cada exercício com identificação estável que preserva o histórico e a comparação de desempenho ao longo do tempo.
+- Q: O que exatamente conta como "superou a meta" para o aplicativo avisar que dá para aumentar a carga? (FR-043) → A: Repetições realizadas estritamente maiores que as planejadas em todas as séries E RIR realizado maior ou igual ao RIR planejado nas séries em que o RIR foi informado; sem RIR informado, vale apenas o critério de repetições.
+- Q: Quando o usuário inicia um treino, os campos já vêm preenchidos com a carga do plano ou com a carga realmente usada na última execução? (FR-016, FR-017) → A: Nenhuma das duas — a carga nunca vem pré-preenchida entre sessões. A carga da última execução é exibida como informação no cabeçalho do exercício, com opção de aplicar por toque. Dentro da mesma execução, a série seguinte herda a carga informada na série anterior. Repetições e RIR planejados continuam vindo do plano, por serem a base de comparação de FR-043.
+- Q: O usuário pode trocar ou acrescentar um exercício que não está no plano durante a execução? (FR-016, FR-023) → A: Sim — a sessão continua partindo de um treino salvo, mas permite adicionar exercícios fora do plano e pular exercícios planejados. Exercício planejado que termine sem nenhuma série válida não conta como execução finalizada para FR-043 e a indicação ativa anterior permanece como referência. Exercício adicionado fora do plano é registrado normalmente no histórico, não gera indicação de progressão naquela sessão por não ter metas planejadas, e passa a ser avaliado quando for planejado em um treino.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Montar e manter treinos (Priority: P1)
@@ -38,12 +48,15 @@ Como praticante em plena execução do treino, quero iniciar um treino salvo e r
 
 **Acceptance Scenarios**:
 
-1. **Given** um treino salvo, **When** inicio sua execução, **Then** o sistema cria uma sessão em andamento já preenchida com os valores planejados como sugestão, pronta para eu confirmar ou ajustar.
+1. **Given** um treino salvo, **When** inicio sua execução, **Then** o sistema cria uma sessão em andamento exibindo as repetições e o RIR planejados de cada série, com o campo de carga vazio e a carga da última execução visível no cabeçalho do exercício.
 2. **Given** uma sessão em andamento no exercício "Supino reto", **When** registro a carga, as repetições e o RIR realizados da série 1, **Then** a série é marcada como concluída sem que eu precise sair da tela de execução do treino.
 3. **Given** um exercício com RIR planejado 2, **When** registro RIR realizado 1, **Then** o aplicativo exibe os dois valores de forma distinta e sinaliza visualmente a diferença entre planejado e realizado.
 4. **Given** uma sessão em andamento, **When** realizo uma série a mais do que o planejado para um exercício, **Then** consigo adicionar essa série extra e ela é registrada como parte da execução.
-5. **Given** uma sessão em andamento, **When** pulo um exercício ou uma série, **Then** posso marcá-lo como não realizado e concluir a sessão sem que os dados dos demais exercícios sejam afetados.
-6. **Given** todas as séries registradas, **When** concluo a sessão, **Then** vejo um resumo com a comparação planejado x realizado de cada exercício e a sessão passa a constar no histórico.
+5. **Given** que registrei a série 1 de um exercício com 40 kg, **When** avanço para a série 2 do mesmo exercício, **Then** o campo de carga já vem com 40 kg, herdado da série anterior, e posso alterá-lo.
+6. **Given** um exercício com execução anterior registrada a 42,5 kg, **When** o inicio em uma nova sessão, **Then** vejo 42,5 kg no cabeçalho do exercício e consigo aplicar esse valor ao campo de carga com um único toque.
+7. **Given** uma sessão em andamento e o aparelho do exercício planejado ocupado, **When** adiciono um exercício que não está no plano, **Then** consigo registrar suas séries normalmente e elas passam a integrar o histórico daquela sessão.
+8. **Given** uma sessão em andamento, **When** pulo um exercício ou uma série, **Then** posso marcá-lo como não realizado e concluir a sessão sem que os dados dos demais exercícios sejam afetados.
+9. **Given** todas as séries registradas, **When** concluo a sessão, **Then** vejo um resumo com a comparação planejado x realizado de cada exercício e a sessão passa a constar no histórico.
 
 ---
 
@@ -115,6 +128,24 @@ Como praticante, quero visualizar como a carga de cada exercício evoluiu ao lon
 
 ---
 
+### User Story 7 - Acessar meus treinos em qualquer dispositivo (Priority: P7)
+
+Como praticante, quero entrar na minha conta em qualquer aparelho e encontrar meus treinos e todo o meu histórico, para não depender de um único celular e não perder anos de registro se trocar de aparelho.
+
+**Why this priority**: A conta é pré-requisito estrutural de todas as demais jornadas, mas o valor percebido da sincronização só aparece depois que existe histórico acumulado ou um segundo dispositivo em uso. Por isso é construída cedo e priorizada por último em termos de entrega de valor ao usuário.
+
+**Independent Test**: Pode ser testada criando uma conta, cadastrando treinos e registrando sessões em um aparelho, entrando com a mesma conta em outro aparelho e confirmando que treinos e histórico aparecem íntegros.
+
+**Acceptance Scenarios**:
+
+1. **Given** que não possuo conta, **When** me cadastro e faço login, **Then** passo a ter um espaço de dados próprio, isolado do de qualquer outro usuário.
+2. **Given** treinos e histórico registrados no celular, **When** faço login com a mesma conta em um tablet, **Then** os mesmos treinos e o mesmo histórico ficam disponíveis nesse aparelho.
+3. **Given** que estou sem conexão na academia, **When** executo e concluo um treino inteiro, **Then** consigo registrar tudo normalmente e, ao recuperar a conexão, os dados são sincronizados sem intervenção minha.
+4. **Given** um aparelho perdido ou trocado, **When** instalo o aplicativo em um novo aparelho e faço login, **Then** recupero meus treinos e meu histórico completo.
+5. **Given** que estou com a sincronização pendente, **When** consulto o aplicativo, **Then** vejo de forma discreta que existem dados ainda não sincronizados, sem que isso bloqueie meu uso.
+
+---
+
 ### Edge Cases
 
 - **Treino editado após execuções**: o usuário altera séries, cargas ou exercícios de um treino que já foi executado — o histórico anterior deve permanecer exatamente como foi registrado.
@@ -122,14 +153,21 @@ Como praticante, quero visualizar como a carga de cada exercício evoluiu ao lon
 - **Exercício removido ou renomeado**: o histórico e a comparação ao longo do tempo devem continuar coerentes para as execuções anteriores.
 - **Séries a mais ou a menos que o planejado**: o usuário faz 4 séries onde planejou 3, ou abandona o exercício na 2ª de 4 séries.
 - **Exercício ou série pulada**: deve ser distinguível de "não registrada" para não contaminar as análises de progressão.
+- **Exercício planejado totalmente pulado**: nenhuma série válida registrada — não conta como nova execução e a indicação de progressão anterior daquele exercício permanece ativa.
+- **Exercício adicionado fora do plano**: registrado no histórico sem metas planejadas, sem gerar indicação de progressão naquela sessão.
 - **Campos parcialmente preenchidos**: o usuário registra carga e repetições, mas não informa o RIR realizado.
 - **Sessão abandonada**: sessão iniciada e nunca concluída, permanecendo aberta por dias.
 - **Duas sessões simultâneas**: o usuário tenta iniciar um novo treino com outra sessão ainda em andamento.
 - **Exercício sem carga externa**: exercícios de peso corporal ou com carga zero, onde a progressão se dá por repetições.
 - **Primeira execução de um exercício**: não há base histórica para comparação nem para aviso de progressão.
 - **Empate de desempenho**: o realizado é idêntico ao planejado em todas as séries — não deve gerar aviso de aumento de carga.
-- **Desempenho irregular entre séries**: planejado 3x8 e realizado 10, 8 e 6 — o critério de aviso precisa tratar esse caso de forma previsível.
+- **Desempenho irregular entre séries**: planejado 3x8 e realizado 10, 8 e 6 — não atende ao critério de FR-043, pois nem todas as séries superaram as repetições planejadas, e nenhum aviso de aumento de carga é gerado.
 - **Dropset**: o registro precisa acomodar múltiplos degraus de carga e repetições dentro de uma mesma série.
+- **Conflito de sincronização**: o mesmo treino é editado em dois aparelhos enquanto ambos estão sem conexão.
+- **Sessão em andamento e múltiplos aparelhos**: o usuário inicia um treino no celular e abre o aplicativo no tablet antes de concluí-lo.
+- **Primeiro login em aparelho novo**: sincronização inicial de um histórico extenso, possivelmente em rede lenta.
+- **Conexão perdida no meio da sincronização**: o envio é interrompido parcialmente e precisa ser retomado sem duplicar sessões.
+- **Logout com alterações pendentes**: o usuário tenta sair da conta antes de as alterações locais serem sincronizadas.
 - **Armazenamento do dispositivo cheio** durante o registro de uma série.
 - **Data e hora do dispositivo alteradas** entre sessões, afetando a ordenação do histórico.
 - **Histórico extenso**: centenas de sessões acumuladas ao longo de anos, sem degradação perceptível na consulta.
@@ -151,7 +189,7 @@ Como praticante, quero visualizar como a carga de cada exercício evoluiu ao lon
 - **FR-008**: O sistema DEVE permitir definir, por exercício do treino, a quantidade de séries planejadas, as repetições planejadas, a carga planejada e o RIR planejado.
 - **FR-009**: O sistema DEVE permitir que os valores planejados variem entre as séries de um mesmo exercício, e não apenas um valor único para todas elas.
 - **FR-010**: O sistema DEVE persistir os treinos criados, mantendo-os disponíveis para execuções futuras após o fechamento e a reabertura do aplicativo.
-- **FR-011**: O sistema DEVE permitir identificar o exercício a ser executado. [NEEDS CLARIFICATION: o aplicativo oferece um catálogo pré-definido de exercícios para o usuário escolher, o usuário digita o nome livremente, ou ambos?]
+- **FR-011**: O sistema DEVE permitir que o usuário selecione o exercício a ser adicionado ao treino a partir do catálogo de exercícios, conforme FR-071 a FR-077.
 
 #### Abordagens de série
 
@@ -198,8 +236,8 @@ Como praticante, quero visualizar como a carga de cada exercício evoluiu ao lon
 #### Progressão e avisos
 
 - **FR-042**: O sistema DEVE comparar o desempenho realizado de um exercício com o que havia sido planejado para ele.
-- **FR-043**: O sistema DEVE identificar as situações em que o usuário superou a meta planejada do exercício e sinalizar a possibilidade de aumento de carga. [NEEDS CLARIFICATION: qual critério define "superou a meta" — todas as séries acima das repetições planejadas, a maioria delas, ou uma combinação entre repetições e RIR realizado?]
-- **FR-044**: A avaliação de possibilidade de aumento de carga DEVE considerar as repetições realizadas, as séries realizadas, a carga utilizada e o RIR realizado, quando informado.
+- **FR-043**: O sistema DEVE sinalizar a possibilidade de aumento de carga de um exercício quando, na sua execução anterior, ambas as condições forem verdadeiras: (a) as repetições realizadas foram estritamente maiores que as repetições planejadas em todas as séries planejadas; e (b) o RIR realizado foi maior ou igual ao RIR planejado em todas as séries em que o RIR foi informado.
+- **FR-044**: Quando o RIR realizado não tiver sido informado em nenhuma série do exercício, a avaliação DEVE ignorar a condição (b) de FR-043 e aplicar somente a condição (a).
 - **FR-045**: O sistema DEVE apresentar, no contexto do exercício durante uma nova execução, as informações de desempenho da execução anterior do mesmo exercício.
 - **FR-046**: O sistema DEVE apresentar o aviso de possibilidade de aumento de carga sem bloquear, interromper ou exigir interação para que o usuário prossiga com o treino.
 - **FR-047**: O sistema DEVE permitir que o usuário consulte os dados que fundamentam o aviso de progressão apresentado.
@@ -224,20 +262,65 @@ Como praticante, quero visualizar como a carga de cada exercício evoluiu ao lon
 - **FR-060**: O modelo de dados DEVE permitir a inclusão de novos atributos por série e por exercício sem invalidar os registros históricos já existentes.
 - **FR-061**: O sistema DEVE preservar os dados necessários para análises futuras de progressão de cargas, evolução de repetições, evolução do RIR, frequência de treinos e histórico por exercício.
 
-#### Acesso aos dados
+#### Conta de usuário e sincronização
 
-- **FR-062**: O sistema DEVE garantir que os treinos e o histórico do usuário estejam disponíveis para consulta e execução no seu dispositivo. [NEEDS CLARIFICATION: o escopo inicial contempla apenas um usuário local no dispositivo, ou exige conta de usuário com sincronização entre dispositivos e recuperação após troca de aparelho?]
+- **FR-062**: O sistema DEVE permitir que o usuário crie uma conta e faça login para acessar seus treinos e seu histórico.
+- **FR-063**: O sistema DEVE manter os dados de cada conta isolados, de modo que um usuário nunca acesse treinos ou histórico de outro.
+- **FR-064**: O sistema DEVE sincronizar automaticamente treinos, sessões e histórico entre todos os dispositivos em que a mesma conta estiver autenticada.
+- **FR-065**: O sistema DEVE permitir o uso completo do aplicativo sem conexão — criar e editar treinos, executar sessões e consultar o histórico já presente no dispositivo — enfileirando as alterações locais.
+- **FR-066**: O sistema DEVE sincronizar automaticamente as alterações pendentes assim que a conexão for restabelecida, sem exigir ação do usuário.
+- **FR-067**: O sistema DEVE indicar ao usuário, de forma discreta e não bloqueante, quando existirem alterações ainda não sincronizadas.
+- **FR-068**: O sistema DEVE resolver conflitos de sincronização de forma determinística e sem perda de sessões registradas: sessões de treino são tratadas como registros imutáveis após a conclusão e nunca são mescladas nem sobrescritas; para treinos editados em mais de um dispositivo, prevalece a alteração mais recente.
+- **FR-069**: O sistema DEVE restaurar os treinos e o histórico completo do usuário ao fazer login em um dispositivo novo ou reinstalado.
+- **FR-070**: O sistema DEVE proteger as credenciais e os dados de treino do usuário em trânsito e em repouso, e DEVE permitir que o usuário encerre a sessão de um dispositivo.
+
+#### Catálogo de exercícios
+
+- **FR-071**: O sistema DEVE oferecer um catálogo de exercícios pré-cadastrados, disponível para seleção ao montar treinos.
+- **FR-072**: O sistema DEVE permitir que o usuário crie exercícios personalizados quando o exercício desejado não existir no catálogo.
+- **FR-073**: Cada exercício DEVE possuir um identificador estável e imutável, independente do seu nome de exibição e da sua origem.
+- **FR-074**: O sistema DEVE vincular treinos, sessões e histórico ao identificador estável do exercício, de modo que renomear um exercício mantenha íntegras todas as execuções anteriores e todas as comparações de desempenho.
+- **FR-075**: O sistema DEVE permitir buscar e filtrar exercícios ao adicioná-los a um treino.
+- **FR-076**: O sistema NÃO DEVE permitir a exclusão definitiva de um exercício que possua execuções registradas no histórico; nesse caso DEVE oferecer apenas ocultá-lo de novas seleções, preservando os registros existentes.
+- **FR-077**: O sistema DEVE tratar exercícios personalizados e exercícios do catálogo de forma equivalente para fins de execução, histórico, comparação de desempenho e aviso de progressão.
+
+#### Detalhamento do critério de aumento de carga
+
+- **FR-078**: O sistema NÃO DEVE sinalizar possibilidade de aumento de carga quando qualquer série planejada do exercício tiver sido marcada como não realizada ou não tiver registro, ainda que as demais séries atendam ao critério.
+- **FR-079**: Séries extras registradas além das planejadas NÃO DEVEM ser consideradas na avaliação do critério de FR-043 e não invalidam o aviso.
+- **FR-080**: A carga de referência do aviso DEVE ser a carga efetivamente utilizada na execução anterior do exercício, e não a carga que havia sido planejada.
+- **FR-081**: Quando as repetições realizadas forem iguais às planejadas em todas as séries, o sistema NÃO DEVE sinalizar possibilidade de aumento de carga.
+
+#### Preenchimento da carga durante a execução
+
+- **FR-082**: O sistema NÃO DEVE pré-preencher o campo de carga da primeira série de um exercício ao iniciar uma sessão, nem a partir do plano do treino nem a partir do histórico; a carga DEVE ser informada pelo usuário.
+- **FR-083**: O sistema DEVE exibir, no cabeçalho do exercício durante a execução, a carga utilizada na execução anterior do mesmo exercício, quando existir.
+- **FR-084**: O sistema DEVE permitir aplicar a carga da execução anterior ao campo de carga com um único toque.
+- **FR-085**: Dentro de uma mesma sessão, o campo de carga de uma série DEVE ser preenchido automaticamente com a carga informada na série anterior do mesmo exercício, permanecendo editável.
+- **FR-086**: As repetições planejadas e o RIR planejado exibidos durante a execução DEVEM vir do plano registrado na sessão, por serem a base de comparação de FR-043.
+
+#### Exercícios fora do plano e exercícios pulados
+
+- **FR-087**: O sistema DEVE permitir adicionar, durante a execução, exercícios que não constam no plano da sessão.
+- **FR-088**: O sistema DEVE registrar no histórico os exercícios adicionados fora do plano com os mesmos dados das demais séries — carga, repetições realizadas e RIR realizado — identificando-os como exercícios sem plano associado.
+- **FR-089**: O sistema NÃO DEVE gerar indicação de progressão para um exercício adicionado fora do plano na sessão em que foi adicionado, por não existir meta de repetições e RIR planejados para comparação.
+- **FR-090**: Um exercício executado sem plano DEVE passar a ser avaliado por FR-043 a partir do momento em que for incluído no plano de um treino e executado.
+- **FR-091**: O sistema DEVE permitir pular um exercício planejado durante a execução, mantendo a sessão válida e concluível.
+- **FR-092**: Uma série é considerada válida quando possui repetições realizadas registradas e não está marcada como não realizada.
+- **FR-093**: Um exercício planejado que encerre a sessão sem nenhuma série válida registrada NÃO DEVE ser considerado uma execução finalizada para fins de FR-043; uma indicação de progressão ativa para esse exercício DEVE permanecer válida e continuar sendo apresentada.
+- **FR-094**: Sempre que esta especificação se referir à execução anterior de um exercício, DEVE ser considerada a sessão concluída mais recente em que aquele exercício teve ao menos uma série válida registrada.
 
 ### Key Entities
 
-- **Exercício**: movimento identificável e reutilizável entre treinos e sessões (ex.: "Supino reto"). Possui identidade estável ao longo do tempo, que é o que permite comparar execuções históricas. Pode ter atributos descritivos como grupo muscular e equipamento.
+- **Exercício**: movimento identificável e reutilizável entre treinos e sessões (ex.: "Supino reto"). Possui um identificador estável e imutável, independente do nome exibido — é ele que permite comparar execuções históricas mesmo após renomeações. Tem origem no catálogo pré-cadastrado ou é personalizado, criado pelo usuário, sem diferença de tratamento entre os dois casos. Pode ter atributos descritivos como grupo muscular e equipamento.
 - **Treino**: modelo reutilizável criado pelo usuário, com nome e uma lista ordenada de itens. É o que o usuário monta antes de ir à academia.
 - **Item de treino**: a presença de um exercício dentro de um treino, com sua posição na ordem, a abordagem de série escolhida e os valores planejados (séries, repetições, carga, RIR).
 - **Série planejada**: o alvo de uma série específica de um item de treino — repetições, carga e RIR planejados. Permite que séries de um mesmo exercício tenham alvos diferentes.
 - **Abordagem de série**: o tipo de execução aplicado ao exercício (tradicional, dropset e futuros). Determina a estrutura de registro esperada para aquele exercício.
 - **Sessão de treino**: uma execução concreta de um treino em uma data e horário, com estado (em andamento, concluída, descartada) e uma cópia dos valores planejados vigentes no início. É a unidade do histórico.
-- **Exercício da sessão**: o exercício tal como foi executado dentro de uma sessão, com sua ordem, sua abordagem e seu estado (realizado, parcialmente realizado, não realizado).
+- **Exercício da sessão**: o exercício tal como foi executado dentro de uma sessão, com sua ordem, sua abordagem e seu estado (realizado, parcialmente realizado, não realizado). Pode ter origem no plano da sessão ou ter sido adicionado durante a execução, caso em que não possui metas planejadas associadas.
 - **Série realizada**: o registro efetivo de uma série executada — carga utilizada, repetições realizadas, RIR realizado, momento do registro e vínculo com a série planejada correspondente, quando houver. Para dropsets, contém os degraus executados.
+- **Conta de usuário**: a identidade sob a qual os treinos e o histórico são armazenados e sincronizados. Delimita o isolamento dos dados e é o vínculo que permite recuperar tudo em um novo dispositivo.
 - **Aviso de progressão**: a indicação de possibilidade de aumento de carga associada a um exercício, derivada do histórico, com os dados de origem que a fundamentam.
 
 ## Success Criteria *(mandatory)*
@@ -258,6 +341,17 @@ Como praticante, quero visualizar como a carga de cada exercício evoluiu ao lon
 - **SC-012**: 90% dos usuários concluem e registram seu primeiro treino completo sem abandonar a execução e sem precisar de suporte.
 - **SC-013**: Nenhuma sessão concluída é perdida ou alterada após edição ou exclusão do treino que a originou, verificado em 100% dos casos de teste.
 - **SC-014**: A adição de um novo tipo de abordagem de série não exige alteração nos registros históricos existentes nem invalida sessões anteriores.
+- **SC-015**: Ao fazer login em um aparelho novo, 100% dos treinos e das sessões concluídas do usuário são recuperados.
+- **SC-016**: Alterações feitas sem conexão são sincronizadas automaticamente em até 30 segundos após o restabelecimento da conexão, sem nenhuma ação do usuário.
+- **SC-017**: Nenhuma sessão concluída é perdida, duplicada ou alterada em cenários de conflito entre dispositivos, verificado em 100% dos casos de teste.
+- **SC-018**: Nenhum usuário consegue acessar treinos ou histórico de outra conta, verificado em 100% dos casos de teste de isolamento.
+- **SC-019**: Renomear um exercício preserva 100% das suas execuções históricas e não interrompe a comparação de desempenho ao longo do tempo.
+- **SC-020**: O usuário localiza e adiciona um exercício do catálogo a um treino em no máximo 3 toques a partir da tela de edição do treino.
+- **SC-021**: O critério de aumento de carga produz o mesmo resultado para os mesmos dados de entrada em 100% das avaliações, sem variação entre execuções.
+- **SC-022**: Nenhum campo de carga é apresentado preenchido na primeira série de um exercício em uma nova sessão, verificado em 100% dos casos de teste.
+- **SC-023**: Aplicar a carga da execução anterior ao campo de carga exige exatamente 1 toque.
+- **SC-024**: Um exercício planejado e totalmente pulado não altera a indicação de progressão vigente daquele exercício, verificado em 100% dos casos de teste.
+- **SC-025**: Exercícios adicionados fora do plano aparecem integralmente no histórico da sessão, com carga, repetições e RIR registrados.
 
 ## Assumptions
 
@@ -266,19 +360,26 @@ Como praticante, quero visualizar como a carga de cada exercício evoluiu ao lon
 - A implementação da funcionalidade de Inteligência Artificial de análise não faz parte do escopo inicial; o que se exige agora é apenas que os dados sejam preservados de forma estruturada e completa o suficiente para viabilizá-la depois (FR-059 a FR-061).
 - Funcionalidades comuns de aplicativos de treino não citadas na descrição são consideradas fora do escopo desta especificação: cronômetro de descanso, planos periodizados por semana, notas de sessão, registro de peso corporal e medidas, mídia demonstrativa dos exercícios, exportação de dados, compartilhamento social e integração com dispositivos vestíveis. Podem ser especificadas como features futuras.
 - A rotina de treinos é montada pelo próprio usuário; não há perfil de treinador nem prescrição de treino por terceiros.
+- Conta de usuário e sincronização em nuvem fazem parte do escopo inicial. Não fazem parte dele: compartilhamento de treinos entre contas, perfis com múltiplos papéis e colaboração entre usuários.
+- O método de autenticação (e-mail e senha, login social ou ambos) será definido na fase de planejamento; a escolha não altera nenhum requisito desta especificação.
+- O catálogo inicial de exercícios é cadastrado e mantido pelo proprietário do aplicativo, não pelos usuários finais. Uma interface de administração do catálogo dentro do aplicativo não faz parte do escopo inicial.
+- O aplicativo terá inicialmente um único usuário (o próprio proprietário). A conta e a sincronização existem para o uso em múltiplos dispositivos e para a preservação do histórico, não para atender uma base de usuários.
 
 ### Dados e domínio
 
 - **RIR** (Reps In Reserve) é registrado como um número inteiro não negativo, representando quantas repetições o usuário acredita que ainda conseguiria realizar ao encerrar a série.
+- Um RIR realizado maior que o planejado significa que a série terminou com mais folga do que o pretendido, ou seja, que a carga estava leve demais — por isso o RIR entra no critério de aumento de carga na direção de FR-043 (b).
 - As repetições planejadas são definidas como um valor-alvo por série. Faixas de repetições (ex.: 8–12) são tratadas como evolução futura e não fazem parte do escopo inicial.
 - A carga é registrada em quilogramas, com suporte a valores fracionados (ex.: 2,5 kg). Outras unidades são evolução futura.
 - Exercícios sem carga externa são suportados com carga zero, e sua progressão é observada pelas repetições.
 - O histórico é mantido indefinidamente, sem expurgo automático; o volume de dados por usuário é pequeno o suficiente para que isso não seja um problema.
 - A sessão de treino guarda uma cópia do plano vigente no seu início; essa é a razão pela qual editar ou excluir um treino não afeta o histórico.
+- Uma sessão em andamento pertence ao aparelho em que foi iniciada e só fica disponível nos demais aparelhos após ser concluída ou descartada. Retomar uma sessão em andamento em outro aparelho é evolução futura.
 
 ### Uso e ambiente
 
-- O uso principal ocorre no smartphone, dentro da academia, com o aparelho na mão e frequentemente com conexão de rede instável ou ausente.
+- O uso principal ocorre no smartphone, dentro da academia, com o aparelho na mão e frequentemente com conexão de rede instável ou ausente. Por isso o aplicativo é offline-first: a conexão é necessária para sincronizar, nunca para treinar.
+- A conexão é necessária no primeiro login de um dispositivo, para autenticar e trazer os dados da conta.
 - A prioridade de experiência é iPhone, seguido de Android e, por último, tablets; tablets devem funcionar adequadamente, mas não recebem otimização dedicada de layout no escopo inicial.
 - A orientação retrato é a orientação suportada no escopo inicial.
 
