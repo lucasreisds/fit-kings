@@ -68,8 +68,72 @@ Decisões incorporadas na sessão de 2026-09-17:
 
 Totais após a clarificação: 7 user stories, 94 requisitos funcionais, 25 critérios de sucesso, 10 entidades, 0 marcadores em aberto.
 
+### Iteração de validação 3 — 2026-09-19 (revisão de escopo: MVP local)
+
+**Resultado**: 16/16 itens aprovados. Nenhuma regressão.
+
+Revisão solicitada pelo proprietário do produto: retirar conta de usuário, backup em nuvem e sincronização do escopo desta versão, substituindo-os por exportação e importação em arquivo.
+
+| # | Tema | Decisão | Impacto na spec |
+|---|------|---------|-----------------|
+| D1 | Escopo de continuidade dos dados | MVP local ao dispositivo, sem servidor e sem rede | US7 original removida, FR-062 a FR-070 removidos, SC-015 a SC-018 reescritos, entidade Conta de usuário removida, 5 casos de borda de sincronização removidos |
+| D2 | Substituição | Exportação e importação do conjunto de dados em arquivo | Nova US7 com 7 cenários, FR-095 a FR-111, entidade Arquivo de backup, 8 casos de borda novos |
+| D3 | Escopo do arquivo | Conjunto completo (treinos + exercícios personalizados + sessões), não apenas o histórico | FR-095, SC-015, SC-026 |
+| D4 | Semântica da importação | Mesclagem por identificador estável, idempotente, com a regra de precedência do antigo FR-068 | FR-101 a FR-105, SC-017 |
+| D5 | Mitigação da perda de dados | Data do último backup e lembrete periódico não bloqueante | FR-109, FR-110, SC-028 |
+| D6 | Independência de rede | FR-057 e SC-011 reforçados em vez de removidos | FR-057, SC-011, FR-111 |
+
+**Totais após a revisão**: 7 user stories, 102 requisitos funcionais, 28 critérios de sucesso, 10 entidades, 27 casos de borda, 0 marcadores em aberto.
+
+Observações registradas durante a validação:
+
+- **Numeração**: FR-062 a FR-070 foram removidos sem reaproveitamento dos números, preservando a validade das referências históricas (o registro de clarificação de 2026-09-17 cita FR-062). A lacuna está documentada por uma nota de revisão na própria seção de requisitos. A entrada de clarificação superada foi marcada como tal, para não ser lida como vigente.
+- **Detalhes de implementação**: a nova seção *Assumptions › Premissas de modelo de dados para evolução futura* registra restrições de modelagem (identificadores gerados no cliente, campos de criação e alteração, exclusão lógica, identidade estável do exercício, carimbos em UTC). São restrições declaradas pelo solicitante e vinculantes para o planejamento, não escolhas de tecnologia — nenhum formato, banco ou biblioteca é nomeado. Mesmo tratamento dado às preferências de Glassmorphism e `frontend-design` na iteração 1.
+- **Escopo**: a redução foi validada contra a premissa já registrada de usuário único. Conta, backup em nuvem e sincronização permanecem declarados como evolução futura, e as premissas de modelo de dados existem para que essa fase não exija migração nem reescrita do histórico.
+- **Cobertura**: os casos de borda de sincronização removidos foram substituídos por casos equivalentes do novo mecanismo (arquivo corrompido, versão anterior do formato, importação repetida, importação em aparelho com dados mais recentes, registro excluído presente no arquivo, usuário que nunca exporta).
+
+### Iteração de validação 4 — 2026-09-19 (após `/speckit-clarify`, pós-emenda constitucional v1.1.0)
+
+**Resultado**: 16/16 itens aprovados. Nenhuma regressão.
+
+*Registrada retroativamente.* No momento em que ocorreu, o `/speckit-clarify` proíbe alterar o arquivo de checklist além do estado dos checkboxes, para evitar diferenças ruidosas — por isso a iteração não foi anotada na ocasião.
+
+A ratificação da constituição (v1.0.0) e suas emendas seguintes expuseram ambiguidades na spec. Três perguntas, três respostas:
+
+| # | Tema | Decisão | Impacto na spec |
+|---|------|---------|-----------------|
+| Q1 | Correção de sessão concluída | Permitida apenas sobre valores de séries existentes — carga, repetições e RIR —, gerando nova versão do registro; data, horário e ordem cronológica imutáveis | FR-112 a FR-118, SC-029, SC-030, 3 casos de borda |
+| Q2 | Importação de sessão corrigida | Mesclagem por identificador; versão do arquivo mais recente entra como nova versão local preservando a anterior; versão não mais recente é operação nula | FR-102 reescrito, SC-031, 2 casos de borda |
+| Q3 | Herança de carga entre séries | Mantida dentro do mesmo exercício na mesma sessão; valor herdado é dado efetivo e visualmente indistinguível de um digitado; nunca alcança a primeira série nem atravessa exercícios | FR-085 reescrito, FR-119, SC-032 |
+
+Decorrência: emenda constitucional **v1.2.0**, alinhando os Princípios I e II às decisões Q2 e Q3.
+
+### Iteração de validação 5 — 2026-09-19 (fase de planejamento e abertura da direção visual)
+
+**Resultado**: 16/16 itens aprovados. Nenhuma regressão.
+
+Reúne as revisões da spec originadas em `/speckit-plan` e a decisão posterior do proprietário sobre estilo visual.
+
+| # | Tema | Decisão | Impacto na spec |
+|---|------|---------|-----------------|
+| P1 | Confiabilidade do armazenamento | Verificar e solicitar a marcação de persistência; não operar como se o armazenamento fosse confiável sem confirmação; estado degradado sinalizado com lembrete de backup mais frequente | FR-120 a FR-123, SC-033, 2 casos de borda |
+| P2 | Geração de identificadores | Caminho único em todos os ambientes; ambiente sem as garantias necessárias recusa operar com mensagem explícita, sem mecanismo alternativo | FR-124, SC-034, 2 casos de borda |
+| P3 | Independência de rede | FR-057 precisado: a proibição alcança a execução, não o ato de instalar o aplicativo | FR-057 |
+| P4 | Direção visual | **Glassmorphism deixa de ser estilo definido.** Nenhum estilo específico é obrigatório; a escolha passa para a implementação, delimitada por 5 restrições verificáveis na constituição | *Assumptions › Direcionamentos para a fase de planejamento* reescrito |
+
+Decorrências constitucionais: **v1.3.0** (Princípios III e IV) e **v1.4.0** (Restrições de Produto e Plataforma).
+
+**Totais após a iteração 5**: 7 user stories, 115 requisitos funcionais, 34 critérios de sucesso, 10 entidades, 36 casos de borda, 0 marcadores em aberto.
+
+Observações registradas durante a validação:
+
+- **Supersessão de Glassmorphism**: as notas das iterações 1 e 3 citam Glassmorphism como preferência declarada do solicitante. **Aquelas menções foram superadas pela iteração 5** e permanecem no arquivo por serem registro datado do que era verdade naquelas validações. A spec não contém mais nenhuma menção ao estilo.
+- **Restrições mais rígidas, não mais frouxas**: remover a obrigatoriedade do estilo não afrouxou a exigência visual. A regra anterior admitia o efeito "com moderação"; as 5 restrições proíbem transparência e blur na tela de execução, exigem contraste garantido por construção e fixam carga, repetições e RIR como maior hierarquia visual. Os pisos do Princípio II permanecem intocados.
+- **Detalhes de implementação**: FR-120 a FR-124 foram redigidos sem citar nenhuma API, biblioteca ou plataforma — as chamadas concretas ficaram em `research.md`, onde pertencem. O item "No implementation details" continua aprovado.
+- **Numeração**: nenhum número de requisito foi reaproveitado em nenhuma das cinco iterações. A lacuna de FR-062 a FR-070 permanece documentada na própria seção de requisitos.
+
 ### Pendência
 
-Nenhuma. A especificação está pronta para `/speckit-plan`.
+Nenhuma. A especificação está consistente com a constituição v1.4.0, e os artefatos de planejamento — `plan.md`, `research.md`, `data-model.md`, `contracts/backup-file.md`, `quickstart.md` e `tasks.md` — estão gerados.
 
-Recomendação anterior que permanece válida: `.specify/memory/constitution.md` continua com o conteúdo padrão do template. Rodar `/speckit-constitution` antes do planejamento faria o plano nascer alinhado aos princípios do projeto.
+Próximo passo recomendado: `/speckit-analyze`, para a análise cruzada de consistência entre spec, plan e tasks, antes de `/speckit-implement`.
