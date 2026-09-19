@@ -1,7 +1,7 @@
 # Phase 0 — Research: Aplicativo de Treinos de Academia
 
 **Feature**: `001-workout-tracking-app` | **Date**: 2026-09-19
-**Spec**: [spec.md](./spec.md) | **Constituição**: v1.2.0
+**Spec**: [spec.md](./spec.md) | **Constituição**: v1.4.0
 
 Este documento resolve os pontos marcados como NEEDS CLARIFICATION no Technical Context do
 [plan.md](./plan.md). Cada decisão registra a razão e as alternativas descartadas.

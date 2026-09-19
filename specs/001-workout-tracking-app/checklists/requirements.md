@@ -132,8 +132,29 @@ Observações registradas durante a validação:
 - **Detalhes de implementação**: FR-120 a FR-124 foram redigidos sem citar nenhuma API, biblioteca ou plataforma — as chamadas concretas ficaram em `research.md`, onde pertencem. O item "No implementation details" continua aprovado.
 - **Numeração**: nenhum número de requisito foi reaproveitado em nenhuma das cinco iterações. A lacuna de FR-062 a FR-070 permanece documentada na própria seção de requisitos.
 
+### Iteração de validação 6 — 2026-09-19 (achados de `/speckit-analyze`)
+
+**Resultado**: 16/16 itens aprovados. Nenhuma regressão.
+
+`/speckit-analyze` é read-only: reporta e não grava. Esta iteração é o registro da correção dos quatro achados que ele levantou.
+
+| # | Achado | Decisão | Impacto nos artefatos |
+|---|--------|---------|-----------------------|
+| D1 | A skill `frontend-design` é obrigatória "na implementação das telas", mas só tinha tarefa em US1, US7, US5 e US6 — faltavam US2, US3 e US4, incluindo a tela de execução, além das telas da própria fundação | Cobertura fechada tela por tela, com tabela de rastreamento em `tasks.md`. T042 continua sendo a única tarefa que **decide** a direção; as demais aplicam | T124 (US2), T125 (US3), T126 (US4), T127 (telas da Phase 2) |
+| D2 | `exerciciosSessao.estado` era declarado cache recalculável, mas nenhuma tarefa implementava a reconstrução — e a reconstrução seria impossível, porque `nao_realizado` é intenção do usuário e não deriva das séries | **Intenção separada de derivação.** `estado` sai do esquema; entra `naoRealizado: boolean` como autoridade, e o trio vira função pura `estadoExercicioSessao()`. Some o cache e some a necessidade de reconstrução | FR-125, FR-126, 1 caso de borda; `data-model.md` §`exerciciosSessao` e §*Estado derivado*; T128 a T130; T063, T071 e T088 ajustadas |
+| B1 | O intervalo do lembrete de backup nunca fora definido; SC-028 citava "o intervalo definido", que não existia, deixando FR-110, FR-122, SC-028 e SC-033 intestáveis | **7 dias**, reduzidos para **2 dias** sem persistência concedida. Contagem ancorada na última exportação **concluída com sucesso** — não em tentativa falha nem em lembrete exibido. Nunca apresentado durante sessão em andamento: vencendo no meio do treino, aparece no encerramento | FR-110 e FR-122 reescritos, SC-028 e SC-033 reescritos, 1 caso de borda; `data-model.md` §`metaAplicacao`; T055, T056 e T132 |
+| E1 | Nada testava que renomear exercício preserva o histórico (SC-019), nem que exportar→importar preserva a identidade do exercício (SC-026, FR-105) | Dois testes automatizados, com os cenários detalhados em `quickstart.md` | T131, T133 |
+
+**Totais após a iteração 6**: 7 user stories, 117 requisitos funcionais, 34 critérios de sucesso, 10 entidades, 38 casos de borda, 0 marcadores em aberto.
+
+Observações registradas durante a validação:
+
+- **Nenhuma emenda constitucional foi necessária.** Os quatro achados eram lacunas de especificação e de rastreabilidade, não conflitos com a constituição. A v1.4.0 permanece vigente e intocada.
+- **D2 é a única mudança de esquema.** Ela torna literalmente verdadeira a afirmação do `data-model.md` de que `sessaoVersoes.vigente` é o único cache do modelo — antes a própria página se contradizia, listando `estado` como cache duas linhas acima.
+- **Numeração**: FR-125 e FR-126 são números novos; nenhum número foi reaproveitado, mantendo a regra observada nas seis iterações. As tarefas T124 a T133 foram acrescentadas nas fases a que pertencem, sem renumerar T001 a T123, que são referenciados por `plan.md`, `research.md` e `quickstart.md`.
+
 ### Pendência
 
-Nenhuma. A especificação está consistente com a constituição v1.4.0, e os artefatos de planejamento — `plan.md`, `research.md`, `data-model.md`, `contracts/backup-file.md`, `quickstart.md` e `tasks.md` — estão gerados.
+Nenhuma. A especificação está consistente com a constituição v1.4.0, os quatro achados de `/speckit-analyze` estão fechados, e os artefatos de planejamento — `plan.md`, `research.md`, `data-model.md`, `contracts/backup-file.md`, `quickstart.md` e `tasks.md` — estão gerados e consistentes entre si.
 
-Próximo passo recomendado: `/speckit-analyze`, para a análise cruzada de consistência entre spec, plan e tasks, antes de `/speckit-implement`.
+Próximo passo recomendado: remover os Sync Impact Reports da constituição (T122) e seguir para `/speckit-implement`.

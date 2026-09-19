@@ -10,7 +10,13 @@ description: "Task list for 001-workout-tracking-app"
 **Prerequisites**: [plan.md](./plan.md), [spec.md](./spec.md), [research.md](./research.md),
 [data-model.md](./data-model.md), [contracts/backup-file.md](./contracts/backup-file.md)
 
-**Constituição**: v1.3.0 — os portões de teste da seção *Fluxo de Desenvolvimento* são obrigatórios.
+**Constituição**: v1.4.0 — os portões de teste da seção *Fluxo de Desenvolvimento* são obrigatórios.
+
+> **Numeração**: as tarefas T124 a T132 foram acrescentadas depois da geração original para fechar
+> os quatro achados de `/speckit-analyze` (D1, D2, B1, E1). Elas aparecem na fase a que pertencem, e
+> não no fim do arquivo — por isso a numeração não é crescente ao longo do documento. Os IDs de
+> T001 a T123 não foram remexidos de propósito: `plan.md`, `research.md` e `quickstart.md` os
+> referenciam, e renumerar 123 tarefas para ganhar ordem visual quebraria essas referências.
 
 **Tests**: **incluídos e obrigatórios.** Não são opcionais aqui: a constituição define quatro
 portões de teste sem os quais nenhuma entrega é concluída, e 14 critérios de sucesso da spec exigem
@@ -111,6 +117,7 @@ planejados, fechar e reabrir o aplicativo, e confirmar que tudo permanece ínteg
 - [ ] T040 [US1] Implementar a abordagem dropset com degraus de carga e repetições em `fit-kings/src/funcionalidades/treinos/EditorDropset.tsx` (FR-013)
 - [ ] T041 [US1] Implementar a exclusão de treino com confirmação explícita em `fit-kings/src/funcionalidades/treinos/` (FR-003)
 - [ ] T042 [US1] **Decidir a direção visual do produto** com a skill `frontend-design` e aplicá-la às telas de US1, registrando a decisão e sua avaliação contra os 5 critérios de D9 em `fit-kings/docs/direcao-visual.md` — a constituição v1.4.0 não obriga nenhum estilo, mas reprova qualquer um que falhe em um dos critérios
+- [ ] T127 [US1] Aplicar a direção visual decidida em T042 às telas já construídas na fundação — app shell e navegação (T020), aviso de persistência (T023) e tela de diagnóstico (T024) — em `fit-kings/src/app/`, `fit-kings/src/ui/AvisoPersistencia.tsx` e `fit-kings/src/funcionalidades/diagnostico/`. Essas telas são construídas na Phase 2, **antes** de a direção existir; sem esta tarefa elas ficariam como a única parte do aplicativo fora da exigência da constituição
 
 **Checkpoint**: dá para montar e manter treinos. O aplicativo já substitui a anotação em papel.
 
@@ -136,6 +143,7 @@ que tudo aparece íntegro; importar o mesmo arquivo duas vezes sem duplicar nada
 - [ ] T043 [P] [US7] Teste de unidade: validação do arquivo — `formatVersion` desconhecido, JSON truncado, referência não resolvida, `id` duplicado — em `fit-kings/tests/unidade/domain/backup/validacao.test.ts` (FR-106)
 - [ ] T044 [P] [US7] Teste de unidade: mesclagem por identificador, precedência por `alteradoEm` e idempotência, em `fit-kings/tests/unidade/domain/backup/mesclagem.test.ts` (FR-101, FR-103, FR-104)
 - [ ] T045 [P] [US7] Teste ponta a ponta do **Portão 3**: exportar, importar, importar de novo sem duplicar, e recusar arquivo inválido sem alterar dado existente, em `fit-kings/tests/e2e/backup.spec.ts` (SC-017, SC-018)
+- [ ] T132 [P] [US7] Teste de unidade da regra do lembrete de backup em `fit-kings/tests/unidade/funcionalidades/lembreteBackup.test.ts` — relógio controlado, sem interface. Casos obrigatórios: 6 dias não apresenta e 8 dias apresenta com persistência concedida; 1 dia não apresenta e 3 dias apresentam sem persistência concedida; `ultimoBackupEm` nulo ancora no primeiro registro; exportação que **falha** não move a âncora; lembrete exibido não move a âncora e continua vencido na avaliação seguinte; intervalo vencido com sessão `em_andamento` não apresenta, e passa a apresentar ao concluir e ao descartar a sessão (FR-110, FR-122, SC-028, SC-033)
 
 ### Implementation for User Story 7
 
@@ -148,8 +156,8 @@ que tudo aparece íntegro; importar o mesmo arquivo duas vezes sem duplicar nada
 - [ ] T052 [US7] Implementar a seleção de arquivo para importação em `fit-kings/src/funcionalidades/backup/SelecionarArquivo.tsx` (FR-100)
 - [ ] T053 [US7] Implementar a tela de resumo pré-importação com confirmação explícita em `fit-kings/src/funcionalidades/backup/ResumoImportacao.tsx` (FR-107)
 - [ ] T054 [US7] Implementar o relatório pós-importação — importados, atualizados e ignorados por não serem mais recentes — em `fit-kings/src/funcionalidades/backup/RelatorioImportacao.tsx` (FR-108)
-- [ ] T055 [US7] Implementar o registro e a exibição da data do último backup em `fit-kings/src/funcionalidades/backup/` (FR-109)
-- [ ] T056 [US7] Implementar o lembrete periódico não bloqueante, com frequência aumentada quando a persistência não for concedida, em `fit-kings/src/funcionalidades/backup/LembreteBackup.tsx` (FR-110, FR-122, SC-028, SC-033)
+- [ ] T055 [US7] Implementar o registro e a exibição da data do último backup em `fit-kings/src/funcionalidades/backup/` — `metaAplicacao.ultimoBackupEm` é escrito **somente** após a exportação concluir com sucesso, nunca ao iniciá-la e nunca após falha (FR-109, FR-110)
+- [ ] T056 [US7] Implementar o lembrete de backup não bloqueante em `fit-kings/src/funcionalidades/backup/LembreteBackup.tsx` — intervalo de **7 dias** desde `ultimoBackupEm`, reduzido para **2 dias** quando `persistenciaConcedida !== true`; âncora no primeiro registro do usuário quando nunca houve exportação; **exibir o lembrete não reinicia a contagem** — só a exportação bem-sucedida reinicia; e o lembrete **não é apresentado durante sessão `em_andamento`**, ficando para o encerramento dela por conclusão ou descarte (FR-110, FR-122, SC-028, SC-033)
 - [ ] T057 [US7] Aplicar a skill `frontend-design` às telas de US7
 
 **Checkpoint**: os dados de US1 já têm rede de proteção. A partir daqui, nada construído fica sem backup.
@@ -169,11 +177,14 @@ exercícios e concluir; o resumo mostra planejado x realizado.
 - [ ] T059 [P] [US2] Teste de unidade: herança de carga não alcança a primeira série de um exercício nem atravessa exercícios distintos, em `fit-kings/tests/unidade/domain/heranca.test.ts` (FR-085)
 - [ ] T060 [P] [US2] Teste de integração: cada série confirmada é gravada em transação própria e sobrevive à recarga, em `fit-kings/tests/integracao/execucao.test.ts` (FR-033)
 - [ ] T061 [P] [US2] Teste de integração: a sessão preserva cópia dos valores planejados e não muda quando o treino é editado depois, em `fit-kings/tests/integracao/snapshotPlano.test.ts` (FR-017)
+- [ ] T129 [P] [US2] Teste de unidade de `estadoExercicioSessao()` em `fit-kings/tests/unidade/domain/estadoExercicioSessao.test.ts` — casos de fronteira exigidos pelo Princípio V: nenhuma série e sem marcação → não alcançado; nenhuma série e marcação ativa → `nao_realizado`; todas as séries planejadas válidas → `realizado`; parte delas válida → `parcial`; série extra não altera o estado; série marcada como não realizada não conta como válida; e **marcação ativa com série válida → estado inconsistente explícito**, nunca `realizado` nem `nao_realizado` por escolha silenciosa (FR-125, FR-126)
+- [ ] T130 [P] [US2] Teste de integração dos invariantes de FR-126 em `fit-kings/tests/integracao/exercicioNaoRealizado.test.ts` — marcar exercício como não realizado preserva as séries já gravadas nele, e gravar uma série limpa `naoRealizado` na mesma transação (FR-126)
 
 ### Implementation for User Story 2
 
 - [ ] T062 [P] [US2] Implementar as transições de estado da sessão em `fit-kings/src/domain/sessao/estado.ts` — `em_andamento → concluida | descartada`, sem retorno
-- [ ] T063 [US2] Implementar o repositório de sessões, versões, exercícios da sessão e séries realizadas em `fit-kings/src/dados/repositorios/sessoes.ts` — grava a versão inicial com `motivo: 'inicial'` e `numero: 1`
+- [ ] T128 [P] [US2] Implementar `estadoExercicioSessao()` como função pura em `fit-kings/src/domain/sessao/estadoExercicio.ts` — recebe as séries do exercício e `naoRealizado`, devolve `realizado | parcial | nao_realizado | nao_alcancado | inconsistente`. **Regra única, em um só lugar**: nenhuma tela, repositório ou consulta pode recalcular esse estado por conta própria. O valor `inconsistente` é retorno de primeira classe, não exceção (FR-125, FR-126, Princípio V)
+- [ ] T063 [US2] Implementar o repositório de sessões, versões, exercícios da sessão e séries realizadas em `fit-kings/src/dados/repositorios/sessoes.ts` — grava a versão inicial com `motivo: 'inicial'` e `numero: 1`; `exerciciosSessao` persiste `naoRealizado: boolean` e **nunca** um campo de estado, que é sempre derivado por T128 (FR-125)
 - [ ] T064 [US2] Implementar o início de sessão com cópia dos valores planejados em `fit-kings/src/funcionalidades/execucao/iniciarSessao.ts` (FR-016, FR-017)
 - [ ] T065 [US2] Impedir duas sessões simultâneas, oferecendo retomar, concluir ou descartar a pendente, em `fit-kings/src/funcionalidades/execucao/` (FR-028)
 - [ ] T066 [US2] Implementar o store da sessão em andamento em `fit-kings/src/funcionalidades/execucao/store.ts` — memória é cache de leitura; o banco é a fonte de verdade (D5)
@@ -181,10 +192,11 @@ exercícios e concluir; o resumo mostra planejado x realizado.
 - [ ] T068 [US2] Implementar a gravação durável por série em `fit-kings/src/funcionalidades/execucao/` — retorno visual de sucesso **somente após** o commit da transação (FR-033, Princípio I)
 - [ ] T069 [US2] Implementar o cabeçalho do exercício com a carga da execução anterior e aplicação por um toque em `fit-kings/src/funcionalidades/execucao/CabecalhoExercicio.tsx` (FR-083, FR-084, SC-023)
 - [ ] T070 [US2] Implementar a herança de carga entre séries em `fit-kings/src/funcionalidades/execucao/` — campo da primeira série **nunca** pré-preenchido entre sessões; valor herdado visualmente indistinguível de um digitado (FR-082, FR-085, FR-119, SC-022, SC-032)
-- [ ] T071 [US2] Implementar séries extras, série ou exercício marcado como não realizado, e exercício adicionado fora do plano em `fit-kings/src/funcionalidades/execucao/` (FR-023, FR-024, FR-087, FR-088, FR-091)
+- [ ] T071 [US2] Implementar séries extras, série ou exercício marcado como não realizado, e exercício adicionado fora do plano em `fit-kings/src/funcionalidades/execucao/` — marcar o exercício como não realizado **não apaga** as séries já gravadas nele, e gravar uma série define `naoRealizado = false` na mesma transação; a exibição do estado vem de T128, inclusive o caso inconsistente, que é sinalizado ao usuário em vez de resolvido em silêncio (FR-023, FR-024, FR-087, FR-088, FR-091, FR-125, FR-126)
 - [ ] T072 [US2] Implementar o registro de dropset com degraus em `fit-kings/src/funcionalidades/execucao/RegistroDropset.tsx` (FR-013, FR-015)
 - [ ] T073 [US2] Implementar a conclusão da sessão com resumo planejado x realizado, e o descarte com confirmação, em `fit-kings/src/funcionalidades/execucao/` (FR-025, FR-026, FR-027)
 - [ ] T074 [US2] Estender o arquivo de backup com as coleções `sessoes`, `exerciciosSessao` e `seriesRealizadas` em `fit-kings/src/domain/backup/` — acréscimo de coleção **não** incrementa `formatVersion`
+- [ ] T124 [US2] Aplicar a skill `frontend-design` às telas de US2, com a **tela de execução** como caso central, e registrar em `fit-kings/docs/direcao-visual.md` a avaliação dela contra os 5 critérios de D9. É a tela onde as restrições da constituição mais apertam: sem transparência, sem blur de fundo, sem efeito cujo custo dependa do conteúdo sob o elemento, e carga, repetições e RIR como os elementos de maior hierarquia visual. A direção escolhida em T042 vale aqui, mas cede à usabilidade se conflitar (Princípio II, D9 critérios 2 e 3)
 
 **Checkpoint**: dá para treinar e registrar. Com US1 e US7, o produto já é utilizável na academia.
 
@@ -210,6 +222,7 @@ encerramento e reabrir — os dados registrados estão íntegros e a sessão é 
 - [ ] T080 [US3] Tratar `visibilitychange` e `pagehide` para consolidar estado ao minimizar ou bloquear a tela, em `fit-kings/src/plataforma/cicloDeVida.ts` (FR-031)
 - [ ] T081 [US3] Implementar o tratamento de sessão abandonada há muito tempo — perguntar se deseja retomar, concluir ou descartar (FR-034, caso de borda "Sessão abandonada")
 - [ ] T082 [US3] Implementar a mensagem compreensível com alternativa de ação quando não for possível salvar um registro, em `fit-kings/src/funcionalidades/execucao/` — **única interrupção permitida durante a sessão**, por servir ao Princípio I (FR-058, Princípio II)
+- [ ] T125 [US3] Aplicar a skill `frontend-design` às telas de US3 — aviso de sessão em andamento na abertura (T077), diálogo de retomar/concluir/descartar (T065, T081) e a mensagem de falha ao persistir (T082). Esta última é a única coisa autorizada a interromper um treino: precisa ser inconfundível e oferecer a alternativa de ação sem ambiguidade, sob as mesmas restrições visuais da tela de execução
 
 **Checkpoint**: a confiabilidade da execução está fechada.
 
@@ -228,12 +241,14 @@ execuções de um exercício isolado e corrigir um valor preservando a versão a
 - [ ] T083 [P] [US4] Teste ponta a ponta do **Portão 2**: editar e excluir o treino de origem não altera a sessão concluída, em `fit-kings/tests/e2e/imutabilidade.spec.ts` (SC-013)
 - [ ] T084 [P] [US4] Teste de integração: correção cria nova versão, preserva a anterior e não altera `iniciadaEm`, `concluidaEm` nem a ordem cronológica, em `fit-kings/tests/integracao/correcao.test.ts` (FR-114, FR-115, SC-029)
 - [ ] T085 [P] [US4] Teste de integração: listar 200 sessões em menos de 2 s e consultar o histórico de um exercício em menos de 1 s, em `fit-kings/tests/integracao/desempenhoHistorico.test.ts` (SC-010)
+- [ ] T131 [P] [US4] Teste de integração: **renomear um exercício preserva o histórico**, em `fit-kings/tests/integracao/identidadeExercicio.test.ts` — com execuções em três sessões concluídas, renomear o exercício e verificar que as três continuam vinculadas ao mesmo `id`, que a consulta de FR-039 devolve as três, que a evolução de cargas produz os mesmos pontos de antes e que a avaliação de progressão não muda. Vale para exercício de catálogo e para personalizado (SC-019, FR-041, FR-073, FR-074)
+- [ ] T133 [P] [US4] Teste ponta a ponta: **exportar → importar preserva a identidade do exercício**, em `fit-kings/tests/e2e/identidadeExercicio.spec.ts` — com histórico de vários exercícios, exportar, limpar o armazenamento do navegador, importar, e verificar que 100% das execuções continuam vinculadas aos mesmos exercícios e que a consulta de evolução de cada um produz resultado idêntico ao do aparelho de origem, valor a valor. Inclui um exercício renomeado depois da exportação, para provar que o vínculo é pelo `id` e não pelo nome (SC-026, FR-105)
 
 ### Implementation for User Story 4
 
 - [ ] T086 [US4] Implementar a consulta de sessões concluídas em ordem cronológica em `fit-kings/src/dados/repositorios/historico.ts`, usando o índice `[estado+concluidaEm]` (FR-036)
 - [ ] T087 [US4] Implementar a consulta de execuções de um exercício ao longo do tempo em `fit-kings/src/dados/repositorios/historico.ts`, restrita às versões vigentes (FR-039)
-- [ ] T088 [US4] Implementar a rotina de reconstrução do índice `sessaoVersoes.vigente` a partir de `sessoes.versaoVigenteId` em `fit-kings/src/dados/repositorios/sessoes.ts` — exigida pela ressalva de cache do Princípio V
+- [ ] T088 [US4] Implementar a rotina de reconstrução do índice `sessaoVersoes.vigente` a partir de `sessoes.versaoVigenteId` em `fit-kings/src/dados/repositorios/sessoes.ts` — exigida pela ressalva de cache do Princípio V. `vigente` é o **único** cache do modelo, e portanto esta é a única rotina de reconstrução que o projeto precisa ter; qualquer campo futuro que a exija é sinal de que ele deveria ser derivação, não coluna
 - [ ] T089 [US4] Implementar a lista do histórico em `fit-kings/src/funcionalidades/historico/ListaHistorico.tsx` (FR-036)
 - [ ] T090 [US4] Implementar o detalhe da sessão com planejado e realizado lado a lado em `fit-kings/src/funcionalidades/historico/DetalheSessao.tsx` (FR-037, FR-038)
 - [ ] T091 [US4] Implementar a visão de histórico por exercício em `fit-kings/src/funcionalidades/historico/HistoricoExercicio.tsx` (FR-039)
@@ -242,6 +257,7 @@ execuções de um exercício isolado e corrigir um valor preservando a versão a
 - [ ] T094 [US4] Exigir confirmação explícita na correção e exibir a marca de correção com a data da última alteração em `fit-kings/src/funcionalidades/historico/` (FR-116, FR-118)
 - [ ] T095 [US4] Ajustar a exportação e a importação para o achatamento na versão vigente, com `corrigida` e `alteradoEm`, em `fit-kings/src/domain/backup/` (FR-102, contrato § achatamento)
 - [ ] T096 [US4] Implementar a regra de importação de sessão corrigida em `fit-kings/src/domain/backup/mesclar.ts` — arquivo mais recente entra como nova versão local preservando a anterior; igual ou anterior é operação nula (FR-102, SC-031)
+- [ ] T126 [US4] Aplicar a skill `frontend-design` às telas de US4 — lista do histórico (T089), detalhe da sessão com planejado e realizado lado a lado (T090), histórico por exercício (T091) e correção de sessão (T092 a T094). A comparação planejado x realizado é densa em número: a direção visual precisa deixá-la legível sem recorrer a cor como único portador de significado, e a marca de correção precisa ser visível sem competir com os valores
 
 **Checkpoint**: o histórico está completo, consultável e corrigível sem destruição.
 
@@ -308,7 +324,7 @@ que os pontos correspondem às cargas registradas nas datas respectivas.
 - [ ] T119 [P] Teste de unidade: leitura de arquivo de `formatVersion` anterior, e recusa explícita de `formatVersion` superior ao suportado, em `fit-kings/tests/unidade/domain/backup/compatibilidade.test.ts` (FR-097)
 - [ ] T120 Executar todos os cenários de [quickstart.md](./quickstart.md) e registrar os resultados
 - [ ] T121 [P] Escrever o README com instruções de execução, HTTPS local e instalação no iPhone, em `fit-kings/README.md`
-- [ ] T122 Remover os Sync Impact Reports de `.specify/memory/constitution.md` antes do commit da constituição
+- [x] T122 Remover os Sync Impact Reports de `.specify/memory/constitution.md` antes do commit da constituição — feito em 2026-09-19, junto da correção dos achados de `/speckit-analyze`; antecipada da Phase 10 porque o arquivo ainda não havia sido empurrado
 - [ ] T123 Revisar toda a implementação contra a constituição v1.4.0 — exigido pela seção *Revisão* antes da integração
 
 ---
@@ -323,7 +339,7 @@ que os pontos correspondem às cargas registradas nas datas respectivas.
 - **US7 (Phase 4)**: depende de US1 — não há o que exportar antes
 - **US2 (Phase 5)**: depende da Phase 2; T074 depende de US7
 - **US3 (Phase 6)**: depende de US2
-- **US4 (Phase 7)**: depende de US2; T095 e T096 dependem de US7
+- **US4 (Phase 7)**: depende de US2; T095, T096 e T133 dependem de US7
 - **US5 (Phase 8)**: depende de US2 e US4
 - **US6 (Phase 9)**: depende de US4
 - **Polish (Phase 10)**: depende de tudo o que se pretende entregar
@@ -405,3 +421,22 @@ A ordem acima **não** é a ordem de prioridade da spec, e a diferença é delib
 - Confirmar que cada teste falha antes de implementar
 - Commitar por tarefa ou grupo lógico
 - Parar em qualquer checkpoint para validar a story de forma independente
+
+### Cobertura da skill `frontend-design`
+
+A constituição exige a skill "na implementação das telas" — todas elas, sem recorte. A cobertura
+fechada, tela por tela:
+
+| Fase | Tarefa | Telas |
+|---|---|---|
+| Phase 2 | coberta por T127 | app shell, aviso de persistência, diagnóstico |
+| US1 | T042 | decide a direção visual e aplica às telas de treino |
+| US7 | T057 | seleção de arquivo, resumo, relatório, lembrete |
+| US2 | T124 | **tela de execução** e demais telas de US2 |
+| US3 | T125 | sessão pendente, retomada, falha ao persistir |
+| US4 | T126 | histórico, detalhe, histórico por exercício, correção |
+| US5, US6 | T112 | aviso de progressão, evolução de cargas |
+| Phase 10 | T116 | valida a direção em aparelho real |
+
+T042 é a única que **decide**; as demais aplicam a decisão dela. As telas da Phase 2 nascem antes
+dessa decisão — daí T127 existir na Phase 3 e não na Phase 2.

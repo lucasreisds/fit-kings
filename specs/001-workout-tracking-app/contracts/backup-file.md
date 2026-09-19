@@ -113,7 +113,7 @@ Nunca há mesclagem campo a campo, e nenhuma versão é destruída.
 | `alteradoEm` do arquivo **mais recente** que o local | Entra como **nova versão local**; a versão anterior do aparelho é preservada. |
 | `alteradoEm` do arquivo **igual ou anterior** ao local | Operação nula. A sessão do aparelho permanece intacta. |
 
-Esta é a propagação de correção admitida pelo Princípio I da constituição v1.2.0: a importação não
+Esta é a propagação de correção admitida pelo Princípio I da constituição v1.4.0: a importação não
 inventa alteração, apenas propaga correção que o próprio usuário fez em outro aparelho, carimbada
 por `alteradoEm`.
 

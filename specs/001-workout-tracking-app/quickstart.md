@@ -79,7 +79,7 @@ npm run test:watch
 
 ## Cenários de validação obrigatórios
 
-Os quatro portões de teste da constituição v1.2.0. Nenhuma entrega é concluída sem eles passando.
+Os quatro portões de teste da constituição v1.4.0. Nenhuma entrega é concluída sem eles passando.
 
 ### Portão 1 — Recuperação após encerramento inesperado
 
@@ -132,6 +132,53 @@ Cobre FR-043, FR-044, FR-078 a FR-081, FR-092 a FR-094, SC-006, SC-007, SC-021.
 
 ---
 
+## Cenários de identidade do exercício
+
+Não são portões constitucionais, mas cobrem dois critérios de sucesso que, até a correção de E1,
+não tinham teste nenhum. Ambos automatizados — T131 e T133.
+
+### Renomeação preserva o histórico (SC-019)
+
+1. Registrar execuções de um exercício em três sessões concluídas.
+2. Renomear o exercício.
+3. **Esperado**: as três execuções continuam vinculadas ao mesmo `id`; a consulta de FR-039 devolve
+   as três; a evolução de cargas produz os mesmos pontos; a avaliação de progressão não muda.
+
+Vale igualmente para exercício de catálogo e personalizado — FR-077 os trata como equivalentes.
+
+### Ciclo de exportação e importação preserva a identidade (SC-026, FR-105)
+
+1. Com histórico de vários exercícios, exportar o backup.
+2. Limpar o armazenamento do navegador.
+3. Importar o arquivo.
+4. **Esperado**: 100% das execuções continuam vinculadas aos mesmos exercícios, e a consulta de
+   evolução de cada um produz resultado idêntico ao de antes, valor a valor.
+5. Repetir com um exercício renomeado **depois** da exportação: o vínculo tem de se dar pelo `id`,
+   nunca pelo nome.
+
+---
+
+## Lembrete de backup — intervalo e supressão durante o treino
+
+Automatizado em T132, com relógio controlado. O intervalo é de **7 dias** desde a última exportação
+concluída com sucesso, e cai para **2 dias** quando a persistência do armazenamento não é concedida.
+
+| Situação | Esperado |
+|---|---|
+| 6 dias desde a última exportação, persistência concedida | Não apresenta |
+| 8 dias desde a última exportação, persistência concedida | Apresenta |
+| 1 dia, persistência **não** concedida | Não apresenta |
+| 3 dias, persistência **não** concedida | Apresenta |
+| Nunca exportou | Conta a partir do primeiro registro criado |
+| Exportação **falhou** | Âncora não se move — continua vencido |
+| Lembrete já foi exibido | Âncora não se move — continua vencido |
+| Intervalo vence com sessão `em_andamento` | Não apresenta durante o treino |
+| A mesma sessão é concluída ou descartada | Apresenta no encerramento |
+
+Cobre FR-110, FR-122, SC-028, SC-033.
+
+---
+
 ## Validações manuais no aparelho
 
 Não automatizáveis. Feitas no iPhone, pelo ícone da tela inicial.
@@ -142,7 +189,7 @@ Não automatizáveis. Feitas no iPhone, pelo ícone da tela inicial.
 2. Registrar dados, reiniciar o aparelho, reabrir. **Esperado**: tudo presente.
 3. Deixar sem uso por vários dias e reabrir. **Esperado**: tudo presente.
 4. **Se a persistência não for concedida**: o aplicativo precisa estar sinalizando o estado
-   degradado e aumentando a frequência do lembrete de backup.
+   degradado e o intervalo do lembrete de backup precisa ter caído de 7 para 2 dias.
 
 **Modo avião** — cobre FR-057, SC-011: com o aplicativo já instalado, ativar o modo avião e
 executar um treino completo do início ao fim, consultar o histórico e exportar o backup. Nada pode

@@ -1,7 +1,7 @@
 # Phase 1 — Data Model: Aplicativo de Treinos de Academia
 
 **Feature**: `001-workout-tracking-app` | **Date**: 2026-09-19
-**Spec**: [spec.md](./spec.md) | **Research**: [research.md](./research.md) | **Constituição**: v1.2.0
+**Spec**: [spec.md](./spec.md) | **Research**: [research.md](./research.md) | **Constituição**: v1.4.0
 
 Armazenamento: IndexedDB via Dexie. Todo nome de tabela e de campo aqui é normativo para a
 implementação.
@@ -145,12 +145,30 @@ O exercício tal como executado, dentro de uma versão de sessão.
 | `abordagem` | `string` | Registrada no histórico (FR-015). |
 | `origem` | `'planejado' \| 'fora_do_plano'` | FR-088. `fora_do_plano` não tem metas. |
 | `itemTreinoId` | `string \| null` | → `itensTreino.id`. `null` quando `origem = 'fora_do_plano'`. |
-| `estado` | `'realizado' \| 'parcial' \| 'nao_realizado'` | FR-024, FR-091. |
+| `naoRealizado` | `boolean` | Marcação explícita do usuário (FR-024, FR-091, FR-125). **Autoridade**, não cache. |
 
 **Índices**: `id`, `sessaoVersaoId`, `exercicioId`, `[exercicioId+sessaoVersaoId]`.
 
 O índice por `exercicioId` é o que sustenta a consulta de histórico de um exercício em menos de
 1 segundo (SC-010, FR-039).
+
+> **Por que não existe um campo `estado` aqui.** O trio realizado / parcial / não realizado parece
+> um bom campo e não é. Dois dos três valores derivam das séries, mas `nao_realizado` não deriva de
+> nada: um exercício que o usuário pulou de propósito e um exercício que a sessão ainda não alcançou
+> têm exatamente as mesmas séries — nenhuma. Persistir o trio inteiro criaria um cache que não
+> fecha, porque a reconstrução a partir das séries apagaria justamente a informação que só existe no
+> campo. O modelo separa as duas coisas: `naoRealizado` persiste a **intenção**, que é dado de
+> origem legítimo e segue o precedente de `seriesRealizadas.naoRealizada`; o estado apresentado é
+> **derivado** por `estadoExercicioSessao()` em `src/domain/`, nunca gravado (FR-125).
+>
+> **Invariantes de FR-126**, garantidos na escrita:
+> 1. Marcar `naoRealizado = true` **não** apaga séries já registradas no exercício.
+> 2. Registrar uma série define `naoRealizado = false` na mesma transação.
+>
+> A combinação `naoRealizado === true` com ao menos uma série válida é, portanto, inalcançável pelo
+> fluxo normal — mas alcançável por arquivo de backup adulterado ou por defeito. A função de domínio
+> **deve** devolvê-la como estado inconsistente explícito e o aplicativo deve sinalizá-la, nunca
+> escolher em silêncio entre a marcação e as séries.
 
 ---
 
@@ -182,12 +200,28 @@ Registro único de estado da instalação. Não é dado de domínio.
 
 | Campo | Tipo | Regra |
 |---|---|---|
-| `ultimoBackupEm` | `string \| null` | UTC. FR-109. |
+| `ultimoBackupEm` | `string \| null` | UTC. FR-109. Escrito **apenas** após exportação concluída com sucesso — nunca ao iniciar uma exportação, nunca após falha, nunca ao exibir o lembrete. `null` = nunca exportou. |
 | `persistenciaConcedida` | `boolean \| null` | Resultado de `navigator.storage.persist()`. `null` = ainda não consultado. |
 | `persistenciaVerificadaEm` | `string \| null` | UTC da última verificação. |
 
 Quando `persistenciaConcedida !== true`, o aplicativo opera em estado degradado declarado: sinaliza
-a condição ao usuário e aumenta a frequência do lembrete de backup.
+a condição ao usuário e reduz de 7 para 2 dias o intervalo do lembrete de backup.
+
+**Regra do lembrete de backup** (FR-110, FR-122, SC-028, SC-033) — determinística, sem campo
+próprio:
+
+```text
+intervalo   = persistenciaConcedida === true ? 7 dias : 2 dias
+ancora      = ultimoBackupEm ?? criadoEm do primeiro registro do usuário
+vencido     = agora - ancora > intervalo
+apresentar  = vencido && não há sessão em_andamento
+```
+
+Não existe campo de "último lembrete exibido", e isso é deliberado: exibir o lembrete não é evento
+que reinicie contagem nenhuma. O lembrete permanece vencido — e continua sendo apresentado — até
+que uma exportação seja concluída com sucesso. Vencendo o intervalo durante uma sessão, a condição
+`apresentar` só passa a valer no encerramento dela, por conclusão ou por descarte, o que satisfaz o
+Princípio II sem precisar de adiamento persistido.
 
 ---
 
@@ -236,10 +270,13 @@ calculado por consulta, no momento do uso:
 | **Indicação de progressão** | Função pura sobre a execução finalizada mais recente do exercício (FR-094), avaliando FR-043, FR-044 e FR-078 a FR-081. |
 | **Execução anterior de um exercício** | Consulta a `exerciciosSessao` por `exercicioId`, restrita a versões vigentes de sessões concluídas, com ao menos uma série válida. |
 | **Carga da última execução** (FR-083) | Derivada da mesma consulta acima. |
-| **Estado do exercício na sessão** | Derivável das séries; persistido apenas como conveniência de leitura e recalculável. |
+| **Estado do exercício na sessão** | `estadoExercicioSessao()` — função pura sobre as séries do exercício e sobre `exerciciosSessao.naoRealizado`. Nunca persistida (FR-125). A marcação é dado de origem; o estado é a projeção dela com as séries. |
 | **Evolução de cargas** (FR-049) | Agregação sobre o histórico, calculada sob demanda. |
 
-Único cache admitido: `sessaoVersoes.vigente`, com rotina de reconstrução obrigatória.
+Único cache admitido em todo o modelo: `sessaoVersoes.vigente`, com rotina de reconstrução
+obrigatória (T088). Nenhum outro campo persistido é derivável dos registros — esta afirmação é
+verificável campo a campo contra as tabelas acima, e qualquer campo novo que a contrarie precisa
+ou virar derivação, ou ganhar sua própria rotina de reconstrução, ou ser recusado.
 
 ---
 
@@ -273,3 +310,8 @@ O Princípio IV exige evolução **aditiva**. A política:
 | Exercício `fora_do_plano` nunca gera indicação na própria sessão | FR-089 |
 | `iniciadaEm` e `concluidaEm` imutáveis sob correção | FR-115 |
 | Correção não adiciona nem remove séries ou exercícios | FR-113 |
+| Estado do exercício na sessão nunca é gravado, só derivado | FR-125 |
+| Marcar exercício como não realizado não apaga séries registradas | FR-126 |
+| Registrar série limpa `naoRealizado` na mesma transação | FR-126 |
+| `naoRealizado` com série válida é inconsistência sinalizada, não resolvida em silêncio | FR-126 |
+| `ultimoBackupEm` só é escrito após exportação bem-sucedida | FR-110 |

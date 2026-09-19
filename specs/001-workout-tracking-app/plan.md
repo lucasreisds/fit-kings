@@ -3,7 +3,7 @@
 **Branch**: `001-workout-tracking-app` | **Date**: 2026-09-19 | **Spec**: [spec.md](./spec.md)
 
 **Input**: Feature specification from `/specs/001-workout-tracking-app/spec.md`
-**Constituição**: v1.3.0 | **Research**: [research.md](./research.md)
+**Constituição**: v1.4.0 | **Research**: [research.md](./research.md)
 
 ## Summary
 
@@ -45,7 +45,7 @@ ver R1 em [research.md](./research.md); sem Xcode, simulador, TestFlight, conta 
 qualquer build nativo
 
 **Scale/Scope**: um usuário, um aparelho principal. Centenas de sessões acumuladas ao longo de
-anos. 7 jornadas de usuário, 110 requisitos funcionais, 32 critérios de sucesso
+anos. 7 jornadas de usuário, 117 requisitos funcionais, 34 critérios de sucesso
 
 ## Constitution Check
 
@@ -57,7 +57,7 @@ anos. 7 jornadas de usuário, 110 requisitos funcionais, 32 critérios de sucess
 | **II. A Academia é o Ambiente de Projeto** | ✅ | ✅ | Direção visual em aberto, delimitada pelas cinco restrições de estilo da constituição v1.4.0: tela de execução sem transparência nem blur, fundos de texto estáveis, campos de registro no topo da hierarquia visual (D9). Herança de carga entre séries conforme FR-085 e FR-119. Sinalização de estado degradado informa sem bloquear. |
 | **III. Autonomia Local** | ❌ | ✅ **resolvido** | Após instalada, a PWA não depende de rede em nenhuma tela. A violação era literal — o princípio alcançava o próprio ato de instalar — e foi resolvida pela emenda v1.3.0, que distingue execução de instalação, com a mesma precisão aplicada a FR-057. |
 | **IV. Modelo de Dados Aditivo** | ✅ | ✅ | `crypto.randomUUID()` em toda entidade, por **caminho único** e sem fallback, com guarda de contexto seguro na inicialização (D11, FR-124); `criadoEm`/`alteradoEm` em UTC com deslocamento local; `excluidoEm` em vez de remoção física; migrações Dexie exclusivamente aditivas; `formatVersion` no backup com política de compatibilidade explícita (D7, D8, [contracts/backup-file.md](./contracts/backup-file.md)). |
-| **V. Domínio Determinístico e Verificável** | ✅ | ✅ | Camada `src/domain/` em TypeScript puro, sem React, sem Dexie, sem DOM. Indicação de progressão nunca persistida — sempre consultada. Único cache admitido é `sessaoVersoes.vigente`, descartável, reconstruível e não-autoridade, conforme a ressalva do próprio princípio. |
+| **V. Domínio Determinístico e Verificável** | ✅ | ✅ | Camada `src/domain/` em TypeScript puro, sem React, sem Dexie, sem DOM. Indicação de progressão nunca persistida — sempre consultada. Estado do exercício na sessão também não: `naoRealizado` persiste a intenção do usuário e `estadoExercicioSessao()` deriva o resto (FR-125, FR-126). Único cache admitido em todo o modelo é `sessaoVersoes.vigente`, descartável, reconstruível e não-autoridade, conforme a ressalva do próprio princípio — e é o único com rotina de reconstrução porque é o único cache. |
 | **Restrições de Produto e Plataforma** | ✅ | ✅ | Retrato fixado no manifesto; operável por toque; contraste garantido por construção via tokens de tema, e não verificado caso a caso; skill `frontend-design` obrigatória na implementação das telas. **A direção visual é decisão aberta** — ver D9. |
 | **Fluxo e Portões de Qualidade** | ⚠️ | ✅ **resolvido** | Os quatro portões estão especificados em [quickstart.md](./quickstart.md). A lacuna de rastreabilidade foi fechada: o comportamento de persistência virou FR-120 a FR-123 e SC-033, e o caminho único de identificador virou FR-124 e SC-034. |
 
