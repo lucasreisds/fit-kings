@@ -1,0 +1,250 @@
+/*
+ * Componentes de entrada e ação — T022, FR-054, SC-009.
+ * Todo alvo interativo tem no mínimo 44 x 44 pt. Sem sombra, sem blur.
+ */
+
+.botao {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--espaco-x2);
+  min-height: var(--alvo-toque);
+  min-width: var(--alvo-toque);
+  padding: 0 var(--espaco-x5);
+  border: 1px solid transparent;
+  border-radius: var(--raio-acao);
+  font-size: var(--texto-corpo);
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 120ms ease-out;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.botao:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.primario {
+  background: var(--par-acao-primaria-fundo);
+  color: var(--par-acao-primaria-texto);
+}
+
+.primario:not(:disabled):active {
+  background: var(--par-acao-primaria-pressionada-fundo);
+}
+
+.secundario {
+  background: var(--par-carta-primaria-fundo);
+  color: var(--par-carta-acento-texto);
+  border-color: var(--cor-contorno);
+}
+
+.secundario:not(:disabled):active {
+  background: var(--cor-acento-tenue);
+}
+
+.discreto {
+  background: transparent;
+  color: var(--par-pagina-acento-texto);
+  padding: 0 var(--espaco-x3);
+}
+
+.destrutivo {
+  background: var(--par-acao-destrutiva-fundo);
+  color: var(--par-acao-destrutiva-texto);
+}
+
+/* Ação primária da tela de execução: alvo maior, largura total, no alcance do
+   polegar. É o toque mais repetido do produto (SC-001). */
+.acaoPrincipal {
+  width: 100%;
+  min-height: var(--alvo-toque-primario);
+  font-size: var(--texto-subtitulo);
+}
+
+/* ------------------------------------------------------------------ */
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-x2);
+}
+
+.rotulo {
+  font-size: var(--texto-rotulo);
+  font-weight: 500;
+  color: var(--par-carta-secundaria-texto);
+}
+
+.entrada {
+  min-height: var(--alvo-toque);
+  padding: var(--espaco-x3) var(--espaco-x4);
+  background: var(--par-carta-primaria-fundo);
+  color: var(--par-carta-primaria-texto);
+  border: 1px solid var(--cor-contorno);
+  border-radius: var(--raio-campo);
+  font-size: var(--texto-corpo);
+  width: 100%;
+}
+
+.entrada::placeholder {
+  color: var(--cor-tinta-secundaria);
+  opacity: 1;
+}
+
+.entrada:invalid {
+  border-color: var(--cor-critico);
+}
+
+.mensagemDeErro {
+  font-size: var(--texto-rotulo);
+  color: var(--par-critico-em-carta-texto);
+}
+
+.dica {
+  font-size: var(--texto-rotulo);
+  color: var(--par-carta-secundaria-texto);
+}
+
+/* ------------------------------------------------------------------ */
+
+/* Passo de número: o par de botões que evita abrir o teclado do sistema para
+   ajustar repetições em 1. Dois toques de 44 pt ladeando o valor. */
+.passo {
+  display: grid;
+  grid-template-columns: var(--alvo-toque) 1fr var(--alvo-toque);
+  align-items: center;
+  gap: var(--espaco-x2);
+}
+
+.passoBotao {
+  width: var(--alvo-toque);
+  height: var(--alvo-toque);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--par-carta-primaria-fundo);
+  border: 1px solid var(--cor-contorno);
+  border-radius: var(--raio-campo);
+  font-size: var(--texto-subtitulo);
+  font-weight: 600;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.passoBotao:disabled {
+  opacity: 0.4;
+}
+
+.passoValor {
+  text-align: center;
+  border: none;
+  background: transparent;
+  font-size: var(--texto-numeral-medio);
+  font-weight: 700;
+  font-stretch: 118%;
+  padding: 0;
+  min-height: var(--alvo-toque);
+  width: 100%;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.passoValor::-webkit-outer-spin-button,
+.passoValor::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Sem isto o campo vazio some entre os dois botões e o controle parece quebrado. */
+.passoValor::placeholder {
+  color: var(--cor-contorno);
+  opacity: 1;
+}
+
+/* ------------------------------------------------------------------ */
+
+.carta {
+  background: var(--par-carta-primaria-fundo);
+  color: var(--par-carta-primaria-texto);
+  border-radius: var(--raio-carta);
+  border: 1px solid var(--cor-linha);
+  padding: var(--espaco-x5);
+}
+
+.faixa {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--espaco-x3);
+  padding: var(--espaco-x4);
+  border-radius: var(--raio-campo);
+  font-size: var(--texto-apoio);
+}
+
+.faixaAtencao {
+  background: var(--par-faixa-atencao-fundo);
+  color: var(--par-faixa-atencao-texto);
+}
+
+.faixaCritica {
+  background: var(--par-faixa-critica-fundo);
+  color: var(--par-faixa-critica-texto);
+}
+
+.faixaPositiva {
+  background: var(--par-faixa-positiva-fundo);
+  color: var(--par-faixa-positiva-texto);
+}
+
+.faixaAcento {
+  background: var(--par-faixa-acento-fundo);
+  color: var(--par-faixa-acento-texto);
+}
+
+/*
+ * Ação dentro de uma faixa. Fica **abaixo** do texto, não no meio da frase:
+ * um link inline não alcança os 44 pt de altura que SC-009 exige sem estourar
+ * o entrelinhamento do parágrafo em volta.
+ */
+.acaoDaFaixa {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--alvo-toque);
+  padding: 0;
+  background: none;
+  border: none;
+  font: inherit;
+  color: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.conteudoDaFaixa {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-x1);
+}
+
+.pilula {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espaco-x2);
+  min-height: var(--alvo-toque);
+  padding: 0 var(--espaco-x4);
+  border-radius: var(--raio-pilula);
+  border: 1px solid var(--cor-acento);
+  background: var(--par-faixa-acento-fundo);
+  color: var(--par-faixa-acento-texto);
+  font-size: var(--texto-apoio);
+  font-weight: 600;
+  cursor: pointer;
+  touch-action: manipulation;
+}

@@ -1,0 +1,413 @@
+/*
+ * Tela de execução — a tela onde as restrições da constituição mais apertam.
+ *
+ * D9 critério 2: **sem transparência, sem blur de fundo, sem nenhum efeito cujo
+ * custo de renderização dependa do conteúdo sob o elemento.** Não há uma única
+ * declaração de `opacity` sobre conteúdo, `backdrop-filter` ou `box-shadow`
+ * neste arquivo. A elevação é luminância: branco puro sobre papel.
+ *
+ * D9 critério 3: carga e repetições são os elementos de maior hierarquia —
+ * 72 px, peso 800, largura expandida. Nada mais na tela passa de 20 px.
+ */
+
+/*
+ * A tela ocupa a altura da janela e **só o corpo rola**. O cabeçalho e o rodapé
+ * ficam fixos sem sobrepor nada: as ações permanecem no alcance do polegar e o
+ * livro-razão nunca fica escondido atrás delas.
+ */
+.tela {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  overflow: hidden;
+  max-width: 44rem;
+  margin: 0 auto;
+  background: var(--par-pagina-primaria-fundo);
+}
+
+.cabecalho {
+  flex: 0 0 auto;
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: var(--espaco-x3);
+  padding: var(--espaco-x3) var(--espaco-x4);
+  padding-top: calc(var(--espaco-x3) + env(safe-area-inset-top));
+  background: var(--par-carta-primaria-fundo);
+  border-bottom: 1px solid var(--cor-linha);
+}
+
+.nomeDoTreino {
+  font-weight: 700;
+  font-size: var(--texto-corpo);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.progresso {
+  font-size: var(--texto-rotulo);
+  color: var(--par-carta-secundaria-texto);
+  font-weight: 600;
+}
+
+.corpo {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-x4);
+  padding: var(--espaco-x4);
+  padding-bottom: var(--espaco-x6);
+}
+
+/* ------------------------------------------------------------------ */
+/* Cabeçalho do exercício — FR-083, FR-084 */
+
+.exercicio {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-x2);
+}
+
+.nomeDoExercicio {
+  font-size: var(--texto-titulo);
+  font-weight: 700;
+  font-stretch: 108%;
+  letter-spacing: -0.015em;
+  line-height: 1.15;
+}
+
+.linhaAnterior {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--espaco-x3);
+}
+
+.textoAnterior {
+  font-size: var(--texto-apoio);
+  color: var(--par-pagina-secundaria-texto);
+}
+
+/* ------------------------------------------------------------------ */
+/* Cartão da série corrente — o elemento mais claro da tela */
+
+.cartaoSerie {
+  background: var(--par-carta-primaria-fundo);
+  border: 1px solid var(--cor-linha);
+  border-radius: var(--raio-carta);
+  padding: var(--espaco-x5) var(--espaco-x4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-x5);
+}
+
+.identificacaoSerie {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--espaco-x3);
+}
+
+.numeroDaSerie {
+  font-size: var(--texto-subtitulo);
+  font-weight: 700;
+}
+
+.meta {
+  font-size: var(--texto-apoio);
+  color: var(--par-carta-secundaria-texto);
+}
+
+/* Os dois numerais. Esta grade é o centro da tela. */
+.numerais {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--espaco-x4);
+}
+
+.campoNumeral {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--espaco-x1);
+}
+
+.rotuloNumeral {
+  font-size: var(--texto-rotulo);
+  font-weight: 500;
+  color: var(--par-carta-secundaria-texto);
+}
+
+.entradaNumeral {
+  width: 100%;
+  border: none;
+  background: transparent;
+  text-align: center;
+  font-size: var(--texto-numeral);
+  font-weight: 800;
+  font-stretch: 118%;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: var(--par-carta-primaria-texto);
+  padding: 0;
+  min-height: 4.5rem;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.entradaNumeral::-webkit-outer-spin-button,
+.entradaNumeral::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Sem texto de espaço reservado nos numerais: a 72 px qualquer caractere vira
+   uma barra cinza que parece carregamento. A régua abaixo já delimita o campo. */
+.entradaNumeral::placeholder {
+  color: transparent;
+}
+
+.unidade {
+  font-size: var(--texto-rotulo);
+  color: var(--par-carta-secundaria-texto);
+}
+
+/* Régua sob o numeral: delimita o campo sem caixa, que a 72 px pesaria demais. */
+.reguaNumeral {
+  width: 100%;
+  height: 2px;
+  background: var(--cor-contorno);
+  border-radius: 999px;
+}
+
+.atalhos {
+  display: flex;
+  gap: var(--espaco-x2);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.atalho {
+  min-height: var(--alvo-toque);
+  padding: 0 var(--espaco-x4);
+  border-radius: var(--raio-pilula);
+  border: 1px solid var(--cor-acento);
+  background: var(--par-faixa-acento-fundo);
+  color: var(--par-faixa-acento-texto);
+  font-size: var(--texto-apoio);
+  font-weight: 600;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.linhaRir {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: var(--espaco-x4);
+}
+
+/* ------------------------------------------------------------------ */
+/* Livro-razão das séries já registradas */
+
+.razao {
+  display: flex;
+  flex-direction: column;
+}
+
+.linhaRazao {
+  display: grid;
+  grid-template-columns: 1.5rem 1fr auto auto;
+  align-items: center;
+  gap: var(--espaco-x3);
+  padding: var(--espaco-x3) var(--espaco-x1);
+  border-bottom: 1px solid var(--cor-linha);
+  font-size: var(--texto-apoio);
+}
+
+.linhaRazao:last-child {
+  border-bottom: none;
+}
+
+.ordemRazao {
+  font-weight: 700;
+  color: var(--par-pagina-secundaria-texto);
+}
+
+.valoresRazao {
+  font-weight: 600;
+}
+
+.rirRazao {
+  color: var(--par-pagina-secundaria-texto);
+}
+
+/* A comparação com a meta leva marca e texto, nunca só cor. */
+.marcaAcima {
+  color: var(--par-positivo-em-carta-texto);
+  font-weight: 700;
+}
+
+.marcaAbaixo {
+  color: var(--par-pagina-secundaria-texto);
+  font-weight: 700;
+}
+
+.marcaIgual {
+  color: var(--par-pagina-secundaria-texto);
+}
+
+.serieNaoRealizada {
+  color: var(--par-pagina-secundaria-texto);
+  font-style: italic;
+}
+
+.botaoRazao {
+  width: var(--alvo-toque);
+  height: var(--alvo-toque);
+  background: none;
+  border: none;
+  color: var(--par-pagina-secundaria-texto);
+  font-size: var(--texto-corpo);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+/* ------------------------------------------------------------------ */
+/* Navegação entre exercícios */
+
+.tiras {
+  display: flex;
+  gap: var(--espaco-x2);
+  overflow-x: auto;
+  padding-bottom: var(--espaco-x1);
+  scrollbar-width: none;
+}
+
+.tiras::-webkit-scrollbar {
+  display: none;
+}
+
+.tira {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-height: var(--alvo-toque);
+  max-width: 11rem;
+  padding: var(--espaco-x2) var(--espaco-x3);
+  border-radius: var(--raio-campo);
+  border: 1px solid var(--cor-linha);
+  background: var(--par-carta-primaria-fundo);
+  color: var(--par-carta-primaria-texto);
+  text-align: left;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+/* Acrescentar exercício pertence à tira: é onde a lista de exercícios vive. */
+.tiraAcrescentar {
+  flex: 0 0 auto;
+  width: var(--alvo-toque);
+  min-height: var(--alvo-toque);
+  border-radius: var(--raio-campo);
+  border: 1px dashed var(--cor-contorno);
+  background: transparent;
+  color: var(--par-pagina-acento-texto);
+  font-size: var(--texto-subtitulo);
+  font-weight: 600;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.tiraAtiva {
+  border-color: var(--cor-acento);
+  border-width: 2px;
+  background: var(--par-faixa-acento-fundo);
+}
+
+.tiraNome {
+  font-size: var(--texto-rotulo);
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 10rem;
+}
+
+.tiraEstado {
+  font-size: var(--texto-micro);
+  color: var(--par-carta-secundaria-texto);
+}
+
+/* ------------------------------------------------------------------ */
+/* Rodapé de ação */
+
+.rodape {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-x2);
+  padding: var(--espaco-x3) var(--espaco-x4);
+  padding-bottom: calc(var(--espaco-x3) + env(safe-area-inset-bottom));
+  background: var(--par-carta-primaria-fundo);
+  border-top: 1px solid var(--cor-linha);
+}
+
+.acoesSecundarias {
+  display: flex;
+  gap: var(--espaco-x2);
+}
+
+.acoesSecundarias > * {
+  flex: 1;
+}
+
+.avisoInconsistente {
+  font-size: var(--texto-apoio);
+}
+
+.dialogo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-x4);
+  max-width: 28rem;
+}
+
+.tituloDialogo {
+  font-size: var(--texto-subtitulo);
+  font-weight: 700;
+}
+
+.acoesDialogo {
+  display: flex;
+  gap: var(--espaco-x3);
+}
+
+.acoesDialogo > * {
+  flex: 1;
+}
+
+.resumo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-x5);
+}
+
+.grupoResumo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-x2);
+}
+
+.tituloResumo {
+  font-size: var(--texto-titulo);
+  font-weight: 700;
+  font-stretch: 110%;
+}

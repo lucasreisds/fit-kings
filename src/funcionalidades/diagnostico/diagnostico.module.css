@@ -1,0 +1,59 @@
+/* Tela de diagnóstico — FR-123. Livro-razão de estado, não painel decorado. */
+
+.lista {
+  display: flex;
+  flex-direction: column;
+}
+
+.linha {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  gap: var(--espaco-x4);
+  padding: var(--espaco-x4) 0;
+  border-bottom: 1px solid var(--cor-linha);
+}
+
+.linha:last-child {
+  border-bottom: none;
+}
+
+.chave {
+  color: var(--par-carta-secundaria-texto);
+  font-size: var(--texto-apoio);
+}
+
+.valor {
+  font-weight: 600;
+  text-align: right;
+}
+
+.medidor {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--cor-linha);
+  overflow: hidden;
+  margin-top: var(--espaco-x3);
+}
+
+.medidorPreenchido {
+  height: 100%;
+  background: var(--cor-acento);
+}
+
+.secao {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-x3);
+}
+
+.tituloSecao {
+  font-size: var(--texto-subtitulo);
+  font-weight: 700;
+}
+
+.nota {
+  color: var(--par-pagina-secundaria-texto);
+  font-size: var(--texto-apoio);
+  max-width: 60ch;
+}

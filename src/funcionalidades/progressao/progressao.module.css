@@ -1,0 +1,210 @@
+/* Aviso de progressão e evolução — US5, US6. */
+
+.aviso {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-x2);
+  padding: var(--espaco-x4);
+  border-radius: var(--raio-campo);
+  background: var(--par-faixa-positiva-fundo);
+  color: var(--par-faixa-positiva-texto);
+}
+
+.tituloAviso {
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-x2);
+}
+
+.corpoAviso {
+  font-size: var(--texto-apoio);
+}
+
+.acaoAviso {
+  align-self: flex-start;
+  background: none;
+  border: none;
+  padding: 0;
+  min-height: var(--alvo-toque);
+  font: inherit;
+  color: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.detalhe {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-x4);
+  max-width: 32rem;
+}
+
+.gradeDetalhe {
+  display: grid;
+  grid-template-columns: 1.5rem 1fr 1fr auto;
+  align-items: baseline;
+  gap: var(--espaco-x2) var(--espaco-x3);
+}
+
+.cabecalhoColuna {
+  font-size: var(--texto-micro);
+  color: var(--par-carta-secundaria-texto);
+  font-weight: 500;
+}
+
+.ordem {
+  font-weight: 700;
+  color: var(--par-carta-secundaria-texto);
+}
+
+.planejado {
+  color: var(--par-carta-secundaria-texto);
+}
+
+.realizado {
+  font-weight: 700;
+}
+
+.superou {
+  color: var(--par-positivo-em-carta-texto);
+  font-weight: 700;
+  font-size: var(--texto-rotulo);
+}
+
+.naoSuperou {
+  color: var(--par-carta-secundaria-texto);
+  font-size: var(--texto-rotulo);
+}
+
+.acoesDetalhe {
+  display: flex;
+  gap: var(--espaco-x3);
+}
+
+/* ------------------------------------------------------------------ */
+/* Evolução de cargas */
+
+.evolucao {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-x5);
+}
+
+.grafico {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.eixo {
+  stroke: var(--cor-linha);
+  stroke-width: 1;
+}
+
+.linhaCarga {
+  fill: none;
+  stroke: var(--cor-acento);
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.pontoCarga {
+  fill: var(--cor-acento);
+}
+
+.rotuloEixo {
+  font-size: 11px;
+  fill: var(--cor-tinta-secundaria);
+}
+
+.legenda {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--texto-rotulo);
+  color: var(--par-pagina-secundaria-texto);
+}
+
+.resumoEvolucao {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--espaco-x4);
+}
+
+.medida {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.valorMedida {
+  font-size: var(--texto-numeral-medio);
+  font-weight: 800;
+  font-stretch: 118%;
+  line-height: 1;
+}
+
+.rotuloMedida {
+  font-size: var(--texto-rotulo);
+  color: var(--par-pagina-secundaria-texto);
+}
+
+.tabelaPontos {
+  display: flex;
+  flex-direction: column;
+}
+
+.linhaPonto {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: baseline;
+  gap: var(--espaco-x4);
+  width: 100%;
+  padding: var(--espaco-x3) var(--espaco-x1);
+  min-height: var(--alvo-toque);
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--cor-linha);
+  text-align: left;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.linhaPonto:last-child {
+  border-bottom: none;
+}
+
+.dataPonto {
+  font-size: var(--texto-apoio);
+  color: var(--par-pagina-secundaria-texto);
+}
+
+.cargaPonto {
+  font-weight: 700;
+}
+
+.vazio {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--espaco-x4);
+  padding: var(--espaco-x8) 0;
+  max-width: 46ch;
+}
+
+.vazioTitulo {
+  font-size: var(--texto-titulo);
+  font-weight: 700;
+  font-stretch: 112%;
+}
+
+.vazioTexto {
+  color: var(--par-pagina-secundaria-texto);
+}
+
+.lista {
+  display: flex;
+  flex-direction: column;
+}

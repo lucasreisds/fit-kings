@@ -1,0 +1,235 @@
+/*
+ * Telas de histórico — US4, T126.
+ *
+ * A comparação planejado x realizado é densa em número. A direção resolve isso
+ * com colunas alinhadas e figuras tabulares, e **nunca com cor como único
+ * portador de significado**: cada comparação leva marca e palavra.
+ */
+
+.lista {
+  display: flex;
+  flex-direction: column;
+}
+
+.linhaSessao {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: var(--espaco-x4);
+  width: 100%;
+  padding: var(--espaco-x4) var(--espaco-x2);
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--cor-linha);
+  text-align: left;
+  cursor: pointer;
+  touch-action: manipulation;
+  min-height: var(--alvo-toque);
+}
+
+.linhaSessao:last-child {
+  border-bottom: none;
+}
+
+.dataSessao {
+  font-size: var(--texto-rotulo);
+  color: var(--par-pagina-secundaria-texto);
+}
+
+.nomeSessao {
+  font-weight: 600;
+  font-size: var(--texto-corpo);
+}
+
+.metaSessao {
+  display: flex;
+  gap: var(--espaco-x4);
+  font-size: var(--texto-rotulo);
+  color: var(--par-pagina-secundaria-texto);
+}
+
+.volume {
+  font-size: var(--texto-subtitulo);
+  font-weight: 700;
+  font-stretch: 112%;
+  text-align: right;
+}
+
+.unidadeVolume {
+  display: block;
+  font-size: var(--texto-micro);
+  font-weight: 500;
+  color: var(--par-pagina-secundaria-texto);
+}
+
+/* ------------------------------------------------------------------ */
+
+.detalhe {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-x6);
+}
+
+.cabecalhoDetalhe {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-x1);
+}
+
+.tituloDetalhe {
+  font-size: var(--texto-titulo);
+  font-weight: 700;
+  font-stretch: 110%;
+}
+
+.marcaCorrigida {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espaco-x2);
+  align-self: flex-start;
+  padding: var(--espaco-x1) var(--espaco-x3);
+  border-radius: var(--raio-pilula);
+  background: var(--par-faixa-acento-fundo);
+  color: var(--par-faixa-acento-texto);
+  font-size: var(--texto-micro);
+  font-weight: 600;
+}
+
+.exercicio {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-x2);
+}
+
+.nomeExercicio {
+  font-size: var(--texto-subtitulo);
+  font-weight: 700;
+}
+
+.estadoExercicio {
+  font-size: var(--texto-rotulo);
+  color: var(--par-pagina-secundaria-texto);
+}
+
+/*
+ * A grade planejado x realizado. Quatro colunas fixas mantêm os números
+ * alinhados entre exercícios diferentes — ler a coluna de baixo para cima é o
+ * que revela a progressão.
+ */
+.grade {
+  display: grid;
+  grid-template-columns: 1.5rem 1fr 1fr auto;
+  align-items: baseline;
+  gap: var(--espaco-x2) var(--espaco-x3);
+}
+
+.cabecalhoGrade {
+  font-size: var(--texto-micro);
+  color: var(--par-pagina-secundaria-texto);
+  font-weight: 500;
+}
+
+.ordem {
+  font-weight: 700;
+  color: var(--par-pagina-secundaria-texto);
+}
+
+.planejado {
+  color: var(--par-pagina-secundaria-texto);
+}
+
+.realizado {
+  font-weight: 700;
+}
+
+.linhaDivisoria {
+  grid-column: 1 / -1;
+  height: 1px;
+  background: var(--cor-linha);
+}
+
+.marcaAcima {
+  color: var(--par-positivo-em-carta-texto);
+  font-weight: 700;
+  font-size: var(--texto-rotulo);
+  white-space: nowrap;
+}
+
+.marcaAbaixo,
+.marcaIgual {
+  color: var(--par-pagina-secundaria-texto);
+  font-size: var(--texto-rotulo);
+  white-space: nowrap;
+}
+
+.naoRealizada {
+  color: var(--par-pagina-secundaria-texto);
+  font-style: italic;
+}
+
+/* ------------------------------------------------------------------ */
+
+.vazio {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--espaco-x4);
+  padding: var(--espaco-x8) 0;
+  max-width: 46ch;
+}
+
+.vazioTitulo {
+  font-size: var(--texto-titulo);
+  font-weight: 700;
+  font-stretch: 112%;
+}
+
+.vazioTexto {
+  color: var(--par-pagina-secundaria-texto);
+}
+
+.acoes {
+  display: flex;
+  gap: var(--espaco-x3);
+  flex-wrap: wrap;
+}
+
+/* ------------------------------------------------------------------ */
+/* Correção */
+
+.correcao {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-x5);
+}
+
+.gradeCorrecao {
+  display: grid;
+  grid-template-columns: 1.5rem 1fr 1fr 1fr;
+  align-items: center;
+  gap: var(--espaco-x2) var(--espaco-x3);
+}
+
+.entradaCorrecao {
+  min-height: var(--alvo-toque);
+  width: 100%;
+  padding: var(--espaco-x2) var(--espaco-x3);
+  background: var(--par-carta-primaria-fundo);
+  border: 1px solid var(--cor-contorno);
+  border-radius: var(--raio-campo);
+  font-weight: 600;
+  text-align: right;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.entradaCorrecao::-webkit-outer-spin-button,
+.entradaCorrecao::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.entradaAlterada {
+  border-color: var(--cor-acento);
+  border-width: 2px;
+}

@@ -1,0 +1,396 @@
+/*
+ * Telas de treino — US1.
+ * Direção "Caderno de carga": livro-razão, elevação por luminância, sem sombra.
+ */
+
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-x3);
+}
+
+.linhaTreino {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-x4);
+  padding: var(--espaco-x5);
+  background: var(--par-carta-primaria-fundo);
+  border: 1px solid var(--cor-linha);
+  border-radius: var(--raio-carta);
+}
+
+.nomeTreino {
+  font-size: var(--texto-subtitulo);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.metaTreino {
+  display: flex;
+  gap: var(--espaco-x5);
+  font-size: var(--texto-rotulo);
+  color: var(--par-carta-secundaria-texto);
+}
+
+.acoesTreino {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-x3);
+}
+
+.acoesTreino > :first-child {
+  flex: 1;
+}
+
+.vazio {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--espaco-x4);
+  padding: var(--espaco-x8) 0;
+  max-width: 44ch;
+}
+
+.vazioTitulo {
+  font-size: var(--texto-titulo);
+  font-weight: 700;
+  font-stretch: 112%;
+}
+
+.vazioTexto {
+  color: var(--par-pagina-secundaria-texto);
+}
+
+/* ------------------------------------------------------------------ */
+
+.editor {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-x6);
+}
+
+.itemExercicio {
+  background: var(--par-carta-primaria-fundo);
+  border: 1px solid var(--cor-linha);
+  border-radius: var(--raio-carta);
+  overflow: hidden;
+}
+
+.cabecalhoItem {
+  display: grid;
+  grid-template-columns: 2.25rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--espaco-x3);
+  padding: var(--espaco-x3) var(--espaco-x4);
+}
+
+/* Gatilho de abrir/fechar: nome numa linha, contagem de séries na de baixo. */
+.gatilhoItem {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-width: 0;
+  min-height: var(--alvo-toque);
+  padding: 0;
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+/* O número do exercício é sequência real de execução, não ornamento. */
+.posicao {
+  width: 2.25rem;
+  height: 2.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--raio-campo);
+  background: var(--par-faixa-acento-fundo);
+  color: var(--par-faixa-acento-texto);
+  font-weight: 700;
+}
+
+.nomeItem {
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.grupoItem {
+  font-size: var(--texto-rotulo);
+  color: var(--par-carta-secundaria-texto);
+}
+
+.controlesItem {
+  display: flex;
+  gap: var(--espaco-x1);
+}
+
+.botaoIcone {
+  width: var(--alvo-toque);
+  height: var(--alvo-toque);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: var(--raio-campo);
+  color: var(--par-carta-acento-texto);
+  font-size: var(--texto-subtitulo);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.botaoIcone:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* Remover uma linha de planejamento não toca em nada já registrado: o tom
+   crítico fica reservado para o que alcança o histórico. */
+.botaoIconeSecundario {
+  color: var(--par-carta-secundaria-texto);
+}
+
+.botaoIconeDestrutivo {
+  color: var(--par-critico-em-carta-texto);
+}
+
+.corpoItem {
+  border-top: 1px solid var(--cor-linha);
+  padding: var(--espaco-x4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-x4);
+}
+
+/* ------------------------------------------------------------------ */
+/* Livro-razão das séries planejadas: colunas alinhadas, números tabulares. */
+
+.tabelaSeries {
+  display: grid;
+  grid-template-columns: 2rem 1fr 1fr 1fr var(--alvo-toque);
+  align-items: center;
+  gap: var(--espaco-x2) var(--espaco-x3);
+}
+
+.cabecalhoColuna {
+  font-size: var(--texto-micro);
+  color: var(--par-carta-secundaria-texto);
+  font-weight: 500;
+}
+
+.numeroSerie {
+  font-weight: 700;
+  color: var(--par-carta-secundaria-texto);
+}
+
+.entradaSerie {
+  min-height: var(--alvo-toque);
+  width: 100%;
+  padding: var(--espaco-x2) var(--espaco-x3);
+  background: var(--par-carta-primaria-fundo);
+  border: 1px solid var(--cor-contorno);
+  border-radius: var(--raio-campo);
+  font-weight: 600;
+  text-align: right;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.entradaSerie::-webkit-outer-spin-button,
+.entradaSerie::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.acoesSeries {
+  display: flex;
+  gap: var(--espaco-x3);
+  flex-wrap: wrap;
+}
+
+/* ------------------------------------------------------------------ */
+
+.seletorAbordagem {
+  display: flex;
+  gap: var(--espaco-x2);
+}
+
+.opcaoAbordagem {
+  flex: 1;
+  min-height: var(--alvo-toque);
+  white-space: nowrap;
+  padding: 0 var(--espaco-x3);
+  border: 1px solid var(--cor-contorno);
+  border-radius: var(--raio-campo);
+  background: var(--par-carta-primaria-fundo);
+  color: var(--par-carta-primaria-texto);
+  font-weight: 500;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.opcaoAbordagemAtiva {
+  border-color: var(--cor-acento);
+  border-width: 2px;
+  background: var(--par-faixa-acento-fundo);
+  color: var(--par-faixa-acento-texto);
+  font-weight: 700;
+}
+
+/* ------------------------------------------------------------------ */
+/* Degraus de dropset */
+
+.degraus {
+  display: grid;
+  grid-template-columns: auto 1fr 1fr var(--alvo-toque);
+  align-items: center;
+  gap: var(--espaco-x2) var(--espaco-x3);
+}
+
+.setaDegrau {
+  color: var(--par-carta-secundaria-texto);
+  font-weight: 700;
+}
+
+/* ------------------------------------------------------------------ */
+/* Seletor de exercício */
+
+.painel {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  /* Fundo opaco: nada de transparência nem blur (D9 critério 2). */
+  background: var(--par-pagina-primaria-fundo);
+}
+
+.painelCabecalho {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-x3);
+  padding: var(--espaco-x4);
+  padding-top: calc(var(--espaco-x4) + env(safe-area-inset-top));
+  border-bottom: 1px solid var(--cor-linha);
+  background: var(--par-carta-primaria-fundo);
+}
+
+.painelTitulo {
+  flex: 1;
+  font-size: var(--texto-subtitulo);
+  font-weight: 700;
+}
+
+.painelCorpo {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--espaco-x4);
+  padding-bottom: calc(var(--espaco-x8) + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-x4);
+}
+
+.filtros {
+  display: flex;
+  gap: var(--espaco-x2);
+  overflow-x: auto;
+  padding-bottom: var(--espaco-x1);
+  scrollbar-width: none;
+}
+
+.filtros::-webkit-scrollbar {
+  display: none;
+}
+
+.filtro {
+  flex: 0 0 auto;
+  min-height: var(--alvo-toque);
+  padding: 0 var(--espaco-x4);
+  border-radius: var(--raio-pilula);
+  border: 1px solid var(--cor-contorno);
+  background: var(--par-carta-primaria-fundo);
+  color: var(--par-carta-primaria-texto);
+  font-size: var(--texto-apoio);
+  white-space: nowrap;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.filtroAtivo {
+  border-color: var(--cor-acento);
+  border-width: 2px;
+  background: var(--par-faixa-acento-fundo);
+  color: var(--par-faixa-acento-texto);
+  font-weight: 700;
+}
+
+.resultados {
+  display: flex;
+  flex-direction: column;
+}
+
+.resultado {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-x1);
+  align-items: flex-start;
+  width: 100%;
+  min-height: var(--alvo-toque);
+  padding: var(--espaco-x3) var(--espaco-x2);
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--cor-linha);
+  text-align: left;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.resultadoNome {
+  font-weight: 600;
+}
+
+.resultadoMeta {
+  font-size: var(--texto-rotulo);
+  color: var(--par-pagina-secundaria-texto);
+}
+
+/* ------------------------------------------------------------------ */
+
+.confirmacao {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-x4);
+}
+
+.acoesConfirmacao {
+  display: flex;
+  gap: var(--espaco-x3);
+}
+
+.acoesConfirmacao > * {
+  flex: 1;
+}
+
+.rodapeAcoes {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  gap: var(--espaco-x3);
+  padding: var(--espaco-x4) 0;
+  background: var(--par-pagina-primaria-fundo);
+  border-top: 1px solid var(--cor-linha);
+}
+
+.rodapeAcoes > :first-child {
+  flex: 1;
+}
+
+.erro {
+  color: var(--par-critico-em-carta-texto);
+  font-size: var(--texto-apoio);
+}
