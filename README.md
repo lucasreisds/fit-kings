@@ -147,3 +147,4 @@ Outras duas regras de lint valem a pena conhecer antes de mexer no código:
 | [`specs/001-workout-tracking-app/data-model.md`](specs/001-workout-tracking-app/data-model.md) | O modelo de dados, normativo |
 | [`specs/001-workout-tracking-app/contracts/backup-file.md`](specs/001-workout-tracking-app/contracts/backup-file.md) | O contrato do arquivo de backup |
 | [`docs/direcao-visual.md`](docs/direcao-visual.md) | A direção visual e sua avaliação contra os critérios |
+| [`CHANGELOG.md`](CHANGELOG.md) | O que mudou em cada versão |
