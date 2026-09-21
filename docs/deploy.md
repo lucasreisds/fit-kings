@@ -29,34 +29,50 @@ exportar **antes** de a origem mudar. Depois, não há de onde exportar.
 O aplicativo é um site estático: HTML, JS, CSS e alguns arquivos binários. Não há backend, não há
 banco no servidor, não há variável de ambiente nem segredo. Qualquer hospedagem estática serve.
 
-**Recomendado: Cloudflare Pages.** Dá um endereço de subdomínio raiz (`fit-kings.pages.dev`),
-HTTPS por padrão, publicação automática a partir do GitHub e plano gratuito folgado. Netlify e
-Vercel são equivalentes para este caso — escolha por preferência, não por capacidade.
+**Publicado em Cloudflare Workers** (fluxo com static assets). A Cloudflare marcou o Pages como
+legado, e a escolha entre os dois não foi de gosto: como o IndexedDB é preso à origem, migrar de
+plataforma depois custaria um ciclo de exportar e importar. Ficar no caminho que a Cloudflare
+desenvolve ativamente evita essa migração.
 
-**GitHub Pages tem uma desvantagem concreta aqui** e é a razão de não ser a recomendação: sem
-domínio próprio, o endereço é `lucasreisds.github.io/fit-kings/`, um subcaminho. Isso exigiria
-ajustar `base` no `vite.config.ts` e `start_url`/`scope` no manifesto — e, pior, faria o aplicativo
-dividir a origem `lucasreisds.github.io` com todo outro projeto seu publicado lá.
+Netlify e Vercel seriam equivalentes em capacidade. **GitHub Pages não**, sem domínio próprio: daria
+um subcaminho (`lucasreisds.github.io/fit-kings/`), o que exigiria ajustar `base` no
+`vite.config.ts` e `start_url`/`scope` no manifesto — e faria o aplicativo dividir a origem, e
+portanto o armazenamento, com todo outro projeto publicado na mesma conta.
 
-### Primeira publicação, passo a passo
+### Como está configurado
 
-1. `git push origin main` (o repositório já está em `lucasreisds/fit-kings`).
-2. No painel da Cloudflare: **Workers & Pages → Create → Pages → Connect to Git**, escolha o
-   repositório.
-3. Configuração de build:
+O repositório carrega [`wrangler.jsonc`](../wrangler.jsonc): sem código de servidor, apenas
+`assets` apontando para `dist/`, e `not_found_handling: single-page-application`, porque o
+roteamento é por hash e um caminho digitado direto precisa cair no `index.html`.
 
-   | Campo                  | Valor                                      |
-   | ---------------------- | ------------------------------------------ |
-   | Framework preset       | None                                       |
-   | Build command          | `npm run build`                            |
-   | Build output directory | `dist`                                     |
-   | Root directory         | (vazio)                                    |
-   | Node version           | `24` — variável de ambiente `NODE_VERSION` |
+`wrangler` é dependência de desenvolvimento, não busca solta por `npx`: a versão fica travada no
+`package-lock.json`, e uma major nova não muda o comportamento da publicação sem ninguém pedir.
 
-4. **Production branch**: `main`.
-5. Salve. A primeira publicação leva um ou dois minutos.
+Configuração no painel — **Compute → Workers → Create → Continue with GitHub**:
 
-Não há segredo nem token para configurar no repositório: a Cloudflare lê o GitHub por conta dela.
+| Campo                                | Valor                                                     |
+| ------------------------------------ | --------------------------------------------------------- |
+| Project name                         | `fit-kings` — **define a URL, e a URL é parte dos dados** |
+| Build command                        | `npm run build`                                           |
+| Deploy command                       | `npx wrangler deploy`                                     |
+| Non-production branch deploy command | `npx wrangler versions upload`                            |
+| Path                                 | `/`                                                       |
+| Variável de ambiente                 | `NODE_VERSION` = `24`, **sem** criptografar               |
+| Protect with Cloudflare Access       | **desligado** — ver abaixo                                |
+| API token                            | criado automaticamente pela Cloudflare                    |
+
+**O Cloudflare Access fica desligado por decisão de arquitetura, não por descuido.** Um portão de
+autenticação cria dependência de rede para executar, que é o que o Princípio III proíbe, e quebraria
+o funcionamento offline. Ele também não protegeria nada: não há dado no servidor. A proteção aqui é
+não ter o que proteger.
+
+### Preview de branch: nunca instale no aparelho
+
+"Builds for non-production branches" está ligado, o que dá preview de cada PR. Cada preview tem
+endereço próprio, **logo armazenamento próprio**.
+
+> Só a URL de produção vai para a Tela de Início. Instalar um preview significaria registrar treinos
+> num aplicativo que some no deploy seguinte.
 
 ### Instalar no iPhone
 
