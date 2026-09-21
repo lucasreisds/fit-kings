@@ -83,6 +83,10 @@ Com a URL HTTPS aberta no Safari: **Compartilhar → Adicionar à Tela de Iníci
 A validação real acontece pelo ícone da tela inicial, não pela aba do Safari — são contextos de
 armazenamento distintos, e só o primeiro representa o produto.
 
+> **Os dois caminhos acima servem para validar, não para usar.** O IndexedDB é preso à origem, e
+> tanto o IP local quanto a URL do túnel mudam — cada mudança abre um aplicativo vazio. Para uso
+> diário é preciso um endereço fixo: ver [docs/deploy.md](docs/deploy.md).
+
 ---
 
 ## Backup: leia isto antes de confiar no aparelho
@@ -148,3 +152,4 @@ Outras duas regras de lint valem a pena conhecer antes de mexer no código:
 | [`specs/001-workout-tracking-app/contracts/backup-file.md`](specs/001-workout-tracking-app/contracts/backup-file.md) | O contrato do arquivo de backup |
 | [`docs/direcao-visual.md`](docs/direcao-visual.md) | A direção visual e sua avaliação contra os critérios |
 | [`CHANGELOG.md`](CHANGELOG.md) | O que mudou em cada versão |
+| [`docs/deploy.md`](docs/deploy.md) | Publicar, instalar no iPhone e o fluxo de cada melhoria |
