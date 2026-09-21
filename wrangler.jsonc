@@ -1,0 +1,20 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+
+  // Publicação na Cloudflare pelo fluxo Workers (o Pages virou legado).
+  //
+  // Não há código de servidor aqui: o aplicativo é um site estático, e este
+  // arquivo só diz o que servir e de onde. O Princípio III continua intacto —
+  // nada executa fora do aparelho.
+  "name": "fit-kings",
+  "compatibility_date": "2026-09-20",
+
+  "assets": {
+    "directory": "./dist",
+
+    // O roteamento do aplicativo é por hash (#/treinos), então qualquer
+    // caminho digitado direto deve cair no index.html e deixar o roteador
+    // resolver. Sem isto, abrir uma URL profunda daria 404.
+    "not_found_handling": "single-page-application"
+  }
+}
