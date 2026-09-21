@@ -1,0 +1,57 @@
+name: CI
+
+# Roda em todo push e em toda proposta de mudança. O deploy é automático a
+# partir da main, então esta é a última coisa entre uma alteração e o aplicativo
+# instalado no aparelho do usuário — e a atualização do service worker é
+# automática, sem confirmação de ninguém.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verificar:
+    name: Lint, tipos e testes
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Tipos
+        run: npx tsc -b
+
+      - name: Domínio, integração e auditoria de tokens
+        run: npm run test
+
+      - name: Navegador para os portões de ponta a ponta
+        run: npx playwright install --with-deps chromium
+
+      # Portões 1 a 3 da constituição. O portão 4 já rodou em `npm run test`.
+      - name: Portões constitucionais
+        run: npm run test:e2e
+
+      - name: Build
+        run: npm run build
+
+      - name: Guardar o relatório quando algo falhar
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7

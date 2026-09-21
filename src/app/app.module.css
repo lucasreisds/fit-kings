@@ -1,0 +1,131 @@
+/* App shell — T020. Retrato apenas, sem rolagem horizontal (SC-008). */
+
+.aplicacao {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  max-width: 44rem;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.conteudo {
+  flex: 1;
+  padding: var(--espaco-x5) var(--espaco-x4) var(--espaco-x10);
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-x5);
+}
+
+/* Barra de navegação no rodapé: o alcance do polegar em retrato. */
+.navegacao {
+  position: sticky;
+  bottom: 0;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  background: var(--par-carta-primaria-fundo);
+  border-top: 1px solid var(--cor-linha);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.abaLink {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--espaco-x1);
+  min-height: var(--alvo-toque);
+  padding: var(--espaco-x3) var(--espaco-x1);
+  color: var(--par-carta-secundaria-texto);
+  text-decoration: none;
+  font-size: var(--texto-rotulo);
+  font-weight: 500;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.abaAtiva {
+  color: var(--par-carta-acento-texto);
+  font-weight: 700;
+}
+
+/* A aba ativa é marcada por peso e por uma régua, não só por cor. */
+.abaAtiva::before {
+  content: '';
+  position: absolute;
+  /* Sobre a régua do rodapé, não flutuando acima dela. */
+  top: -1px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 1.75rem;
+  height: 3px;
+  border-radius: 0 0 999px 999px;
+  background: var(--cor-acento);
+}
+
+.cabecalho {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--espaco-x4);
+}
+
+.titulo {
+  font-size: var(--texto-titulo);
+  font-weight: 700;
+  font-stretch: 112%;
+  letter-spacing: -0.015em;
+}
+
+.telaDeRecusa {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--espaco-x5);
+  padding: var(--espaco-x6);
+  max-width: 34rem;
+  margin: 0 auto;
+}
+
+.recusaTitulo {
+  font-size: var(--texto-titulo);
+  font-weight: 700;
+}
+
+.recusaDetalhe {
+  color: var(--par-pagina-secundaria-texto);
+  font-size: var(--texto-apoio);
+}
+
+.marcaAplicacao {
+  font-weight: 800;
+  font-stretch: 118%;
+  letter-spacing: -0.03em;
+}
+
+.secaoAjustes {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--espaco-x3);
+  padding-bottom: var(--espaco-x5);
+  border-bottom: 1px solid var(--cor-linha);
+}
+
+.tituloAjustes {
+  font-size: var(--texto-subtitulo);
+  font-weight: 700;
+}
+
+.textoAjustes {
+  color: var(--par-pagina-secundaria-texto);
+  max-width: 60ch;
+}
+
+.versao {
+  color: var(--par-pagina-secundaria-texto);
+  font-size: var(--texto-rotulo);
+}

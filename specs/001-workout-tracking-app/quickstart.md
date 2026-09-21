@@ -11,7 +11,7 @@ implementação.
 
 | Item | Versão | Observação |
 |---|---|---|
-| Node.js | 24 LTS (Krypton) | Instalado no WSL via nvm: `nvm install --lts` |
+| Node.js | 24 LTS (Krypton) | Fixado em `.nvmrc`. No WSL: `nvm install` (sem `--lts`) e `nvm use` |
 | npm | acompanha o Node | — |
 | Projeto | — | `/home/lucas/codes/fit-kings` (ext4 nativo, nunca `/mnt/c`) |
 | iPhone | iOS recente | Para validação no alvo prioritário, no Safari |
@@ -24,9 +24,14 @@ Nada de Xcode, simulador, TestFlight ou conta de desenvolvedor. Não há etapa d
 
 ```bash
 cd ~/codes/fit-kings
+nvm use          # lê o .nvmrc e fixa o Node 24
 npm install
 npm run dev
 ```
+
+O `.nvmrc` existe por uma razão de calendário: o Node 26 entra em LTS em outubro de 2026. A partir
+daí `nvm install --lts` passa a instalar 26, e quem clonar o projeto montaria um toolchain diferente
+sem perceber. Com o arquivo, subir de versão vira decisão registrada em vez de efeito da data.
 
 Abre em `http://localhost:5173`. `localhost` é contexto seguro, então service worker e
 `crypto.randomUUID()` funcionam sem HTTPS.

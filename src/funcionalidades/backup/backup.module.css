@@ -1,0 +1,101 @@
+/* Telas de backup — US7. */
+
+.secao {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-x4);
+}
+
+.tituloSecao {
+  font-size: var(--texto-subtitulo);
+  font-weight: 700;
+}
+
+.explicacao {
+  color: var(--par-pagina-secundaria-texto);
+  max-width: 60ch;
+}
+
+.resumo {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Livro-razão do que vai entrar: rótulo à esquerda, contagem à direita. */
+.linhaResumo {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  gap: var(--espaco-x4);
+  padding: var(--espaco-x3) 0;
+  border-bottom: 1px solid var(--cor-linha);
+}
+
+.linhaResumo:last-child {
+  border-bottom: none;
+}
+
+.chaveResumo {
+  color: var(--par-carta-secundaria-texto);
+  font-size: var(--texto-apoio);
+}
+
+.valorResumo {
+  font-size: var(--texto-subtitulo);
+  font-weight: 700;
+  text-align: right;
+}
+
+.destaqueResumo {
+  font-size: var(--texto-numeral-medio);
+  font-weight: 800;
+  font-stretch: 118%;
+  line-height: 1;
+}
+
+.acoes {
+  display: flex;
+  gap: var(--espaco-x3);
+}
+
+.acoes > * {
+  flex: 1;
+}
+
+.entradaArquivo {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.problemas {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-x2);
+  margin: 0;
+  padding-left: var(--espaco-x5);
+  font-size: var(--texto-apoio);
+}
+
+.caminhoDoProblema {
+  font-size: var(--texto-rotulo);
+  opacity: 0.85;
+}
+
+.dataBackup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-x1);
+}
+
+.rotuloData {
+  font-size: var(--texto-rotulo);
+  color: var(--par-carta-secundaria-texto);
+}
+
+.valorData {
+  font-size: var(--texto-subtitulo);
+  font-weight: 700;
+}
