@@ -161,8 +161,42 @@ O service worker está em `registerType: 'autoUpdate'`. Na prática:
    plano**.
 2. Na abertura seguinte, a versão nova assume.
 
-Ou seja: **fechar e reabrir duas vezes** é o que garante ver a mudança. Se parecer que a atualização
-não chegou, é quase sempre isso — não um deploy que falhou.
+Ou seja: **fechar e reabrir duas vezes** é o que garante ver a mudança.
+
+#### Por que existe o `_headers`
+
+Na primeira publicação isso não funcionou, e o sintoma foi exato: o Safari atualizava com um F5 e a
+PWA da Tela de Início ficava parada na versão antiga.
+
+A causa não era o service worker — era o **cache do `sw.js`**. Servido com o cache padrão, o
+navegador nem chegava a buscá-lo, então o aplicativo instalado nunca descobria que havia versão
+nova. [`public/_headers`](../public/_headers) corrige isso, marcando como não-cacheáveis os três
+arquivos que decidem qual versão roda: `sw.js`, `registerSW.js` e `index.html`. Todo o resto tem
+hash no nome e continua com cache longo.
+
+#### Se a PWA ainda ficar para trás
+
+Nesta ordem, e **nunca pule o primeiro passo**:
+
+1. **Exporte um backup pelo aplicativo.** Tudo abaixo é seguro, mas o custo de estar errado é o seu
+   histórico.
+2. Feche o aplicativo pelo alternador de tarefas — deslizar para cima, não só voltar à tela inicial.
+3. Abra, espere alguns segundos com rede, feche e abra de novo.
+4. Se ainda assim não vier, abra a mesma URL numa **aba do Safari** e recarregue: isso força o
+   navegador a buscar o `sw.js` novo, e a PWA costuma pegar na abertura seguinte.
+
+> **Nunca apague o ícone da Tela de Início para "reinstalar limpo".** No iOS isso apaga o
+> armazenamento junto, e leva o seu histórico com ele. Reinstalar é a única operação desta lista que
+> destrói dados.
+
+#### Uma consequência do `autoUpdate` que vale conhecer
+
+Se uma publicação acontecer **enquanto você treina**, o aplicativo pode recarregar sozinho ao
+assumir a versão nova. Nenhuma série confirmada se perde — cada uma foi gravada de forma durável no
+instante da confirmação, e a sessão é retomada no ponto em que estava. É exatamente o que o portão
+de teste 1 verifica. O que se perde é o que estava digitado e ainda não confirmado.
+
+Na prática: evite publicar no horário em que você costuma treinar.
 
 ---
 

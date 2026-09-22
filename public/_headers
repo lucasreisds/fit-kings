@@ -1,0 +1,22 @@
+# Cabeçalhos de cache — a Cloudflare lê este arquivo e não o serve.
+#
+# Sem isto, o service worker é servido com o cache padrão e o aplicativo
+# **instalado no aparelho nunca descobre que existe versão nova**: o navegador
+# nem chega a buscar o sw.js. O sintoma é exato — o Safari atualiza com um F5
+# e a PWA da Tela de Início fica parada na versão antiga.
+#
+# Os três arquivos abaixo são os que decidem qual versão roda. Eles precisam ser
+# revalidados a cada abertura; todo o resto é imutável por ter o hash no nome, e
+# continua com o cache longo que a Cloudflare aplica por padrão.
+
+/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/registerSW.js
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/index.html
+  Cache-Control: no-cache
+
+/manifest.webmanifest
+  Cache-Control: no-cache
