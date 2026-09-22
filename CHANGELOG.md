@@ -23,6 +23,16 @@ simuláveis. Enquanto não forem feitas, esta versão não está pronta para uso
 - Tempo de registro de uma série abaixo de 5 segundos. A contagem de toques já está verificada:
   2 no caminho comum, 3 no pior caso, contra um piso de 3.
 
+## [0.2.1] — 2026-09-21
+
+### Corrigido
+
+- **O aplicativo instalado não recebia atualizações.** O `sw.js` era servido com o cache padrão da
+  hospedagem, e o aparelho nunca chegava a buscá-lo — então nunca descobria que havia versão nova. O
+  sintoma era o Safari atualizar com um F5 enquanto a PWA da Tela de Início ficava parada. Agora
+  `sw.js`, `registerSW.js` e `index.html` são servidos como não-cacheáveis; todo o resto tem hash no
+  nome e mantém o cache longo.
+
 ## [0.2.0] — 2026-09-21
 
 Ajustes vindos do primeiro uso real na academia, num iPhone 16. Quatro dos cinco não seriam
@@ -199,6 +209,7 @@ exportação e importação de arquivo.
 - 457 testes de unidade e integração, 21 de ponta a ponta, cobrindo os quatro portões de teste da
   constituição.
 
-[Não publicado]: https://github.com/lucasreisds/fit-kings/compare/v0.2.0...HEAD
+[Não publicado]: https://github.com/lucasreisds/fit-kings/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/lucasreisds/fit-kings/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/lucasreisds/fit-kings/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/lucasreisds/fit-kings/releases/tag/v0.1.0
