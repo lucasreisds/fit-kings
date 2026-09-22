@@ -2,7 +2,7 @@
 
 **Tarefa**: T123 | **Data**: 2026-09-20
 
-A seção *Revisão* da constituição exige que toda alteração seja verificada contra ela antes de ser
+A seção _Revisão_ da constituição exige que toda alteração seja verificada contra ela antes de ser
 integrada, e que violação identificada bloqueie a integração. Esta é essa verificação, princípio a
 princípio, com o **mecanismo** que sustenta cada regra — não a intenção de cumpri-la.
 
@@ -13,15 +13,15 @@ quebra sem avisar.
 
 ## I. Integridade do Registro (não negociável)
 
-| Regra | Mecanismo | Estado |
-|---|---|---|
-| Série confirmada gravada de forma durável **antes** de qualquer retorno visual de sucesso | `registrarSerie` grava em transação própria e só então resolve a promessa. A interface não tem estado otimista: o retorno depende do `await` | ✅ |
-| Sessão concluída é imutável quanto a alteração destrutiva | Não existe transição de volta a `em_andamento`. `proximoEstado` lança em qualquer tentativa | ✅ |
-| Correção gera versão nova preservando integralmente a anterior | `corrigir` copia exercícios e séries para uma versão nova e só move o ponteiro `versaoVigenteId`. Nada é sobrescrito nem apagado | ✅ |
-| Operações externas não alteram sessão concluída, **inclusive por versionamento** | Edição de série planejada já executada faz cópia na escrita; o plano da sessão é reconstruído por consulta temporal em `iniciadaEm`. Portão 2 | ✅ |
-| Importação não inventa alteração, mas propaga correção do próprio usuário | `planejarImportacao` só produz `inserir` e `nova_versao` para sessão. Não existe caminho de mesclagem campo a campo nem de remoção | ✅ |
-| Histórico não depende do treino que o originou | `nomeTreino` é cópia no cabeçalho; `treinoId` aceita nulo. Excluir o treino não toca na sessão | ✅ |
-| Falha ao persistir comunicada com alternativa de ação | `FalhaAoPersistir` é modal, não fecha no Esc sem escolha, e oferece tentar de novo ou anotar os valores | ✅ |
+| Regra                                                                                     | Mecanismo                                                                                                                                     | Estado |
+| ----------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| Série confirmada gravada de forma durável **antes** de qualquer retorno visual de sucesso | `registrarSerie` grava em transação própria e só então resolve a promessa. A interface não tem estado otimista: o retorno depende do `await`  | ✅     |
+| Sessão concluída é imutável quanto a alteração destrutiva                                 | Não existe transição de volta a `em_andamento`. `proximoEstado` lança em qualquer tentativa                                                   | ✅     |
+| Correção gera versão nova preservando integralmente a anterior                            | `corrigir` copia exercícios e séries para uma versão nova e só move o ponteiro `versaoVigenteId`. Nada é sobrescrito nem apagado              | ✅     |
+| Operações externas não alteram sessão concluída, **inclusive por versionamento**          | Edição de série planejada já executada faz cópia na escrita; o plano da sessão é reconstruído por consulta temporal em `iniciadaEm`. Portão 2 | ✅     |
+| Importação não inventa alteração, mas propaga correção do próprio usuário                 | `planejarImportacao` só produz `inserir` e `nova_versao` para sessão. Não existe caminho de mesclagem campo a campo nem de remoção            | ✅     |
+| Histórico não depende do treino que o originou                                            | `nomeTreino` é cópia no cabeçalho; `treinoId` aceita nulo. Excluir o treino não toca na sessão                                                | ✅     |
+| Falha ao persistir comunicada com alternativa de ação                                     | `FalhaAoPersistir` é modal, não fecha no Esc sem escolha, e oferece tentar de novo ou anotar os valores                                       | ✅     |
 
 **Risco R1 permanece**, e é condição de plataforma, não violação: o armazenamento é despejável pelo
 sistema operacional. Mitigado por solicitação de persistência, estado degradado declarado, lembrete
@@ -30,77 +30,77 @@ em aparelho real (T113) continua pendente.**
 
 ## II. A Academia é o Ambiente de Projeto (não negociável)
 
-| Regra | Mecanismo | Estado |
-|---|---|---|
-| Série completa em no máximo 3 toques e menos de 5 s, sem sair da tela | 2 toques no caminho comum, 3 no pior caso. Nenhuma navegação | ✅ toques; ⏳ tempo (T117) |
-| Alvo de toque de no mínimo 44×44 pt; contraste de no mínimo 4,5:1 | Verificado por teste em três larguras e por auditoria dos pares de cor. Dois achados reais foram corrigidos | ✅ |
-| Nada bloqueia, interrompe ou exige interação durante a sessão | Avisos de progressão e lembretes de backup são faixas. O lembrete é suprimido durante sessão `em_andamento` por regra de domínio testada | ✅ |
-| Exceção única: falha ao persistir | É o único `showModal()` do fluxo de execução | ✅ |
-| Nenhuma carga pré-preenchida entre sessões | `cargaHerdada` devolve nulo na primeira série, por construção. A execução anterior aparece como referência com aplicação por um toque | ✅ |
-| Carga herdada dentro da sessão, editável e **indistinguível** de valor digitado | Mesmo campo, mesmo tamanho, mesmo peso, mesma cor. Sem marca d'água nem estado provisório | ✅ |
-| Usabilidade prevalece sobre estilo em conflito | Registrado em `docs/direcao-visual.md` | ✅ |
+| Regra                                                                           | Mecanismo                                                                                                                                | Estado                     |
+| ------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- |
+| Série completa em no máximo 3 toques e menos de 5 s, sem sair da tela           | 2 toques no caminho comum, 3 no pior caso. Nenhuma navegação                                                                             | ✅ toques; ⏳ tempo (T117) |
+| Alvo de toque de no mínimo 44×44 pt; contraste de no mínimo 4,5:1               | Verificado por teste em três larguras e por auditoria dos pares de cor. Dois achados reais foram corrigidos                              | ✅                         |
+| Nada bloqueia, interrompe ou exige interação durante a sessão                   | Avisos de progressão e lembretes de backup são faixas. O lembrete é suprimido durante sessão `em_andamento` por regra de domínio testada | ✅                         |
+| Exceção única: falha ao persistir                                               | É o único `showModal()` do fluxo de execução                                                                                             | ✅                         |
+| Nenhuma carga pré-preenchida entre sessões                                      | `cargaHerdada` devolve nulo na primeira série, por construção. A execução anterior aparece como referência com aplicação por um toque    | ✅                         |
+| Carga herdada dentro da sessão, editável e **indistinguível** de valor digitado | Mesmo campo, mesmo tamanho, mesmo peso, mesma cor. Sem marca d'água nem estado provisório                                                | ✅                         |
+| Usabilidade prevalece sobre estilo em conflito                                  | Registrado em `docs/direcao-visual.md`                                                                                                   | ✅                         |
 
 ## III. Autonomia Local
 
-| Regra | Mecanismo | Estado |
-|---|---|---|
-| Nenhuma execução exige rede | Sem cliente HTTP em `src/`. A fonte é servida de `public/fontes/`, não de CDN. Workbox precacheia tudo | ✅ código; ⏳ modo avião no aparelho (T114) |
-| Instalação pode exigir rede uma vez | É o caso da PWA, admitido pela emenda v1.3.0 | ✅ |
-| Nenhum componente depende de ida e volta a servidor | Não há backend, nem diretório para um | ✅ |
-| Continuidade entre aparelhos por arquivo | US7 inteira | ✅ |
-| Conta, nuvem e sincronização fora de escopo | Nada disso existe no código. `navigator.share` entrega o arquivo ao sistema e perde contato com ele | ✅ |
+| Regra                                               | Mecanismo                                                                                              | Estado                                      |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------ | ------------------------------------------- |
+| Nenhuma execução exige rede                         | Sem cliente HTTP em `src/`. A fonte é servida de `public/fontes/`, não de CDN. Workbox precacheia tudo | ✅ código; ⏳ modo avião no aparelho (T114) |
+| Instalação pode exigir rede uma vez                 | É o caso da PWA, admitido pela emenda v1.3.0                                                           | ✅                                          |
+| Nenhum componente depende de ida e volta a servidor | Não há backend, nem diretório para um                                                                  | ✅                                          |
+| Continuidade entre aparelhos por arquivo            | US7 inteira                                                                                            | ✅                                          |
+| Conta, nuvem e sincronização fora de escopo         | Nada disso existe no código. `navigator.share` entrega o arquivo ao sistema e perde contato com ele    | ✅                                          |
 
 ## IV. Modelo de Dados Aditivo
 
-| Regra | Mecanismo | Estado |
-|---|---|---|
-| Identificador único, gerado no cliente, não sequencial, imutável | `crypto.randomUUID()` | ✅ |
-| **Caminho único** de geração, sem contingência, com recusa explícita na inicialização | `novoId()` é o único chamador, garantido por regra de lint. `exigirContextoSeguro()` roda antes de qualquer tela de domínio | ✅ |
-| `criadoEm` e `alteradoEm` em UTC, com deslocamento local | Carimbados pelo repositório base, não pelo chamador | ✅ |
-| Exclusão lógica; remoção física proibida | O repositório base não expõe método de remoção. Verificado por teste | ✅ |
-| Identidade do exercício estável entre renomeações, exportações e importações | Testado para catálogo e personalizado, e no ciclo completo de backup | ✅ |
-| Evolução aditiva do esquema | `verificarAditividade` **recusa** migração que remova tabela ou índice, no momento em que o banco abre | ✅ |
-| Toda versão lê backups de versões anteriores | Política de compatibilidade testada, incluindo campo e coleção desconhecidos e valor novo em campo aberto | ✅ |
+| Regra                                                                                 | Mecanismo                                                                                                                   | Estado |
+| ------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ------ |
+| Identificador único, gerado no cliente, não sequencial, imutável                      | `crypto.randomUUID()`                                                                                                       | ✅     |
+| **Caminho único** de geração, sem contingência, com recusa explícita na inicialização | `novoId()` é o único chamador, garantido por regra de lint. `exigirContextoSeguro()` roda antes de qualquer tela de domínio | ✅     |
+| `criadoEm` e `alteradoEm` em UTC, com deslocamento local                              | Carimbados pelo repositório base, não pelo chamador                                                                         | ✅     |
+| Exclusão lógica; remoção física proibida                                              | O repositório base não expõe método de remoção. Verificado por teste                                                        | ✅     |
+| Identidade do exercício estável entre renomeações, exportações e importações          | Testado para catálogo e personalizado, e no ciclo completo de backup                                                        | ✅     |
+| Evolução aditiva do esquema                                                           | `verificarAditividade` **recusa** migração que remova tabela ou índice, no momento em que o banco abre                      | ✅     |
+| Toda versão lê backups de versões anteriores                                          | Política de compatibilidade testada, incluindo campo e coleção desconhecidos e valor novo em campo aberto                   | ✅     |
 
 ## V. Domínio Determinístico e Verificável
 
-| Regra | Mecanismo | Estado |
-|---|---|---|
-| Regra de domínio é função pura dos dados registrados | `src/domain/` não importa React, Dexie, DOM nem a camada de dados — regra de lint | ✅ |
-| Não depende do relógio do sistema no momento do cálculo | Regra de lint proíbe `Date.now()` e `new Date()` em `src/domain/`. O instante entra por parâmetro | ✅ |
-| Cada regra num único lugar, testável sem interface | `avaliarProgressao`, `estadoExercicioSessao`, `serieEhValida`, `cargaHerdada`, `avaliarLembrete`, `agregarEvolucao` — todas puras, todas testadas sem DOM | ✅ |
-| Estado derivável não persistido como fonte de verdade | Nenhuma tabela tem campo de estado de exercício, de indicação de progressão ou de evolução. Verificado por teste | ✅ |
-| Cache só se descartável, reconstruível e nunca consultado como autoridade | `sessaoVersoes.vigente` é o **único** cache do modelo, e tem rotina de reconstrução. A autoridade é sempre `sessoes.versaoVigenteId` | ✅ |
-| O usuário consegue consultar os dados que fundamentam qualquer indicação | "Ver por quê" abre o detalhe série a série, gerado pela mesma função que decidiu o aviso | ✅ |
-| Regra sem teste de fronteira não é concluída | Portão 4 (10 casos), `estadoExercicioSessao` (18 casos), lembrete (22 casos), herança (9 casos) | ✅ |
+| Regra                                                                     | Mecanismo                                                                                                                                                 | Estado |
+| ------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| Regra de domínio é função pura dos dados registrados                      | `src/domain/` não importa React, Dexie, DOM nem a camada de dados — regra de lint                                                                         | ✅     |
+| Não depende do relógio do sistema no momento do cálculo                   | Regra de lint proíbe `Date.now()` e `new Date()` em `src/domain/`. O instante entra por parâmetro                                                         | ✅     |
+| Cada regra num único lugar, testável sem interface                        | `avaliarProgressao`, `estadoExercicioSessao`, `serieEhValida`, `cargaHerdada`, `avaliarLembrete`, `agregarEvolucao` — todas puras, todas testadas sem DOM | ✅     |
+| Estado derivável não persistido como fonte de verdade                     | Nenhuma tabela tem campo de estado de exercício, de indicação de progressão ou de evolução. Verificado por teste                                          | ✅     |
+| Cache só se descartável, reconstruível e nunca consultado como autoridade | `sessaoVersoes.vigente` é o **único** cache do modelo, e tem rotina de reconstrução. A autoridade é sempre `sessoes.versaoVigenteId`                      | ✅     |
+| O usuário consegue consultar os dados que fundamentam qualquer indicação  | "Ver por quê" abre o detalhe série a série, gerado pela mesma função que decidiu o aviso                                                                  | ✅     |
+| Regra sem teste de fronteira não é concluída                              | Portão 4 (10 casos), `estadoExercicioSessao` (18 casos), lembrete (22 casos), herança (9 casos)                                                           | ✅     |
 
 ## Restrições de Produto e Plataforma
 
-| Regra | Estado |
-|---|---|
-| iPhone prioritário, Android em seguida, tablets adequados | ✅ layout testado em 320, 390 e 834 px |
-| Retrato como única orientação | ✅ `orientation: portrait` no manifesto |
-| Operável integralmente por toque | ✅ |
-| Sem rolagem horizontal nem elementos cortados | ✅ testado nas três larguras |
-| Contraste garantido **por construção** | ✅ pares validados por teste; auditoria impede cor literal |
-| Execução sem transparência, blur ou efeito dependente do conteúdo embaixo | ✅ verificado por ferramenta na folha da execução e em todo `src/` |
-| Carga, repetições e RIR com a maior hierarquia visual | ✅ 72 px contra 24 px do segundo elemento |
-| Legibilidade sob luz forte e brilho reduzido | ⏳ T116 |
-| Efeitos não comprometem rolagem nem a meta de 5 s | ✅ nenhuma animação de entrada; só o corpo rola |
-| Skill `frontend-design` usada na implementação das telas | ✅ todas as fases, registrado em `docs/direcao-visual.md` |
-| Quilogramas com fracionados; RIR inteiro não negativo; repetições como alvo por série | ✅ |
-| Fora de escopo respeitado | ✅ sem conta, nuvem, sincronização, cronômetro, periodização, mídia ou integrações |
+| Regra                                                                                 | Estado                                                                             |
+| ------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| iPhone prioritário, Android em seguida, tablets adequados                             | ✅ layout testado em 320, 390 e 834 px                                             |
+| Retrato como única orientação                                                         | ✅ `orientation: portrait` no manifesto                                            |
+| Operável integralmente por toque                                                      | ✅                                                                                 |
+| Sem rolagem horizontal nem elementos cortados                                         | ✅ testado nas três larguras                                                       |
+| Contraste garantido **por construção**                                                | ✅ pares validados por teste; auditoria impede cor literal                         |
+| Execução sem transparência, blur ou efeito dependente do conteúdo embaixo             | ✅ verificado por ferramenta na folha da execução e em todo `src/`                 |
+| Carga, repetições e RIR com a maior hierarquia visual                                 | ✅ 72 px contra 24 px do segundo elemento                                          |
+| Legibilidade sob luz forte e brilho reduzido                                          | ⏳ T116                                                                            |
+| Efeitos não comprometem rolagem nem a meta de 5 s                                     | ✅ nenhuma animação de entrada; só o corpo rola                                    |
+| Skill `frontend-design` usada na implementação das telas                              | ✅ todas as fases, registrado em `docs/direcao-visual.md`                          |
+| Quilogramas com fracionados; RIR inteiro não negativo; repetições como alvo por série | ✅                                                                                 |
+| Fora de escopo respeitado                                                             | ✅ sem conta, nuvem, sincronização, cronômetro, periodização, mídia ou integrações |
 
 ## Fluxo e Portões de Qualidade
 
-| Regra | Estado |
-|---|---|
-| Nenhuma implementação sem `plan.md` e `tasks.md` | ✅ |
+| Regra                                                               | Estado                                                                  |
+| ------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| Nenhuma implementação sem `plan.md` e `tasks.md`                    | ✅                                                                      |
 | Rastreabilidade: toda tarefa de funcionalidade referencia requisito | ✅ e as referências estão nos comentários do código, não só nas tarefas |
-| Portão 1 — recuperação após encerramento inesperado | ✅ |
-| Portão 2 — imutabilidade do histórico | ✅ |
-| Portão 3 — importação idempotente e recusa de arquivo inválido | ✅ |
-| Portão 4 — determinismo do critério de aumento de carga | ✅ |
+| Portão 1 — recuperação após encerramento inesperado                 | ✅                                                                      |
+| Portão 2 — imutabilidade do histórico                               | ✅                                                                      |
+| Portão 3 — importação idempotente e recusa de arquivo inválido      | ✅                                                                      |
+| Portão 4 — determinismo do critério de aumento de carga             | ✅                                                                      |
 
 ---
 
@@ -132,3 +132,37 @@ de dados.
 3. **Interface clara, sem modo escuro.** Decisão do critério 4 de D9, não de gosto. Sob luz forte
    com brilho reduzido, uma interface escura vira espelho preto. Registrado em
    `docs/direcao-visual.md`.
+
+---
+
+# Revisão da feature 002 — ajustes da execução e intervalo
+
+**Data**: 2026-09-21
+
+Três pontos desta feature chegam perto de regras constitucionais, e cada um é verificado por
+mecanismo, não por intenção.
+
+| Ponto                                   | Risco                                                                      | Mecanismo que o contém                                                                                                                                                                                |
+| --------------------------------------- | -------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Correção de série durante a sessão      | Abrir brecha em FR-113 e FR-114, que protegem a imutabilidade do histórico | A verificação do estado da sessão vive na **camada de dados**, não na tela. `SessaoNaoEstaEmAndamentoError` recusa a operação em sessão concluída ou descartada, e há teste para os dois casos        |
+| Generalização do critério de progressão | Mudar em silêncio o resultado de histórico já registrado                   | Os dez casos de fronteira do portão 4 rodam **inalterados**. O valor único é tratado como intervalo de pontas coincidentes, de modo que a expressão avaliada é idêntica à anterior                    |
+| Descanso planejado                      | Virar o cronômetro que a constituição veda                                 | FR-151 proíbe por escrito contagem, aviso e interrupção. `tests/e2e/descanso.spec.ts` espera 6 s sobre um descanso de 5 s e verifica que nada se moveu, que nada foi anunciado e que nada interrompeu |
+
+**O terceiro merece uma nota.** O teste da fronteira não verifica uma funcionalidade — verifica que
+uma funcionalidade **não** existe. Ele foi escrito porque, com o campo de descanso já no lugar,
+acrescentar a contagem regressiva vai parecer inofensivo numa alteração futura. Não é: seria
+ampliação do escopo que a constituição fecha, e exige emenda, não uma decisão de implementação.
+
+## Princípios
+
+- **I** — correção e remoção alcançam apenas a sessão em andamento, que ainda não é registro
+  histórico. A remoção é lógica; a linha permanece na tabela.
+- **II** — é o princípio que motiva a feature inteira. Nada novo interrompe: o descanso é exibido,
+  nunca cronometrado.
+- **III** — nenhuma dependência nova. O gesto usa eventos de ponteiro do próprio navegador.
+- **IV** — migração v1 → v2 aditiva, recusada pela guarda se não fosse. `formatVersion` permanece 1.
+- **V** — o intervalo é regra única, num lugar só; o modo da evolução é derivado a cada consulta e
+  nunca gravado.
+
+**Nenhuma violação aberta.** As quatro pendências de aparelho da feature 001 seguem abertas, e
+soma-se a elas T063: validar no iPhone o alcance dos cinco exercícios e o gesto com a mão suada.

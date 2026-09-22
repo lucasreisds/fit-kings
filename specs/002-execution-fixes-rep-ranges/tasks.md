@@ -164,16 +164,16 @@ evolução em repetições.
 
 ### Tests for US5
 
-- [ ] T051 [P] [US5] Teste de integração: `descansoSegundos` é persistido e lido; ausente é o estado normal, em `tests/integracao/descanso.test.ts` (FR-148, FR-149)
-- [ ] T052 [P] [US5] Teste ponta a ponta: o descanso planejado aparece na execução sem toque adicional; exercício sem descanso não exibe nada, em `tests/e2e/descanso.spec.ts` (FR-150, SC-043)
-- [ ] T053 [P] [US5] **Teste da fronteira constitucional**: o aplicativo não conta tempo, não emite aviso e não interrompe por causa do descanso — verificado por ausência de temporizador e de contagem regressiva na tela de execução, em `tests/e2e/descanso.spec.ts` (FR-151)
+- [X] T051 [P] [US5] Teste de integração: `descansoSegundos` é persistido e lido; ausente é o estado normal, em `tests/integracao/descanso.test.ts` (FR-148, FR-149)
+- [X] T052 [P] [US5] Teste ponta a ponta: o descanso planejado aparece na execução sem toque adicional; exercício sem descanso não exibe nada, em `tests/e2e/descanso.spec.ts` (FR-150, SC-043)
+- [X] T053 [P] [US5] **Teste da fronteira constitucional**: o aplicativo não conta tempo, não emite aviso e não interrompe por causa do descanso — verificado por ausência de temporizador e de contagem regressiva na tela de execução, em `tests/e2e/descanso.spec.ts` (FR-151)
 
 ### Implementation for US5
 
 - [X] T054 [US5] Persistir `descansoSegundos` em `src/dados/repositorios/treinos.ts` — inteiro não negativo, opcional
-- [ ] T055 [US5] Implementar a entrada de descanso no editor de treino, em `src/funcionalidades/treinos/EditorTreino.tsx` (FR-148)
-- [ ] T056 [US5] Exibir o descanso na tela de execução junto dos demais valores planejados, em `src/funcionalidades/execucao/TelaExecucao.tsx` (FR-150)
-- [ ] T057 [US5] Acrescentar `descansoSegundos` ao arquivo de backup e à validação em `src/domain/backup/` — campo opcional, **sem** incrementar `formatVersion`
+- [X] T055 [US5] Implementar a entrada de descanso no editor de treino, em `src/funcionalidades/treinos/EditorTreino.tsx` (FR-148)
+- [X] T056 [US5] Exibir o descanso na tela de execução junto dos demais valores planejados, em `src/funcionalidades/execucao/TelaExecucao.tsx` (FR-150)
+- [X] T057 [US5] Acrescentar `descansoSegundos` ao arquivo de backup e à validação em `src/domain/backup/` — campo opcional, **sem** incrementar `formatVersion`
 
 **Checkpoint**: todas as histórias entregues.
 
@@ -181,11 +181,11 @@ evolução em repetições.
 
 ## Phase 7: Polish & Cross-Cutting
 
-- [ ] T058 Executar todos os cenários de [quickstart.md](./quickstart.md) e registrar o resultado em `docs/validacao.md`
-- [ ] T059 [P] Rodar a suíte inteira e confirmar que **os quatro portões passam inalterados** — o portão 4 é o mais sensível a esta feature
-- [ ] T060 [P] Confirmar que a auditoria de tokens e o teste de alvos de toque continuam passando nas três larguras, com os controles novos de navegação e de edição de série (SC-009)
-- [ ] T061 [P] Atualizar `CHANGELOG.md` e subir a versão em `package.json` — a versão viaja no cabeçalho de todo backup exportado
-- [ ] T062 Revisar a implementação contra a constituição v1.4.0, com atenção à fronteira de FR-151, e registrar em `docs/revisao-constitucional.md`
+- [X] T058 Executar todos os cenários de [quickstart.md](./quickstart.md) e registrar o resultado em `docs/validacao.md`
+- [X] T059 [P] Rodar a suíte inteira e confirmar que **os quatro portões passam inalterados** — o portão 4 é o mais sensível a esta feature
+- [X] T060 [P] Confirmar que a auditoria de tokens e o teste de alvos de toque continuam passando nas três larguras, com os controles novos de navegação e de edição de série (SC-009)
+- [X] T061 [P] Atualizar `CHANGELOG.md` e subir a versão em `package.json` — a versão viaja no cabeçalho de todo backup exportado
+- [X] T062 Revisar a implementação contra a constituição v1.4.0, com atenção à fronteira de FR-151, e registrar em `docs/revisao-constitucional.md`
 - [ ] T063 ⏳ **APARELHO** — validar no iPhone: alcance dos 5 exercícios, gesto de arrastar com a mão suada, e o descanso legível de relance
 
 ---

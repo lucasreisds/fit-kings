@@ -21,6 +21,7 @@ import { Faixa } from '../../ui/Faixa'
 import { PassoNumerico } from '../../ui/PassoNumerico'
 import { navegar } from '../../app/rotas'
 import { repositorioSessoes } from '../../dados/repositorios/sessoes'
+import { db } from '../../dados/db'
 import { repositorioExercicios } from '../../dados/repositorios/exercicios'
 import { lerPlanoDaSessao, type MetaDaSerie } from './iniciarSessao'
 import { pontoDeRetomada } from './retomar'
@@ -83,6 +84,16 @@ export function TelaExecucao({ sessaoId }: Props) {
       sessao.exercicios.map((item) => item.exercicio.exercicioId),
     )
 
+    // FR-150 — o descanso planejado do item do treino. Não é copiado para a
+    // sessão porque não entra em comparação nenhuma e só faz sentido durante a
+    // execução, onde "agora" é o valor certo (ver D6 no plano).
+    const descansos = new Map<Id, number | null>()
+    for (const item of sessao.exercicios) {
+      if (item.exercicio.itemTreinoId === null) continue
+      const itemTreino = await db.itensTreino.get(item.exercicio.itemTreinoId)
+      descansos.set(item.exercicio.id, itemTreino?.descansoSegundos ?? null)
+    }
+
     const anteriores = new Map(
       await Promise.all(
         sessao.exercicios.map(
@@ -128,6 +139,7 @@ export function TelaExecucao({ sessaoId }: Props) {
       exercicios,
       anteriores,
       indicacoes,
+      descansos,
       ponto: pontoDeRetomada(sessao, plano),
     }
   }, [sessaoId])
@@ -147,7 +159,7 @@ export function TelaExecucao({ sessaoId }: Props) {
     )
   }
 
-  const { sessao, plano, exercicios, anteriores, indicacoes, ponto } = dados
+  const { sessao, plano, exercicios, anteriores, indicacoes, descansos, ponto } = dados
 
   if (sessao.sessao.estado !== 'em_andamento') {
     return (
@@ -490,6 +502,14 @@ export function TelaExecucao({ sessaoId }: Props) {
               )}
             </span>
           </div>
+
+          {descansos.get(emFoco.exercicio.id) !== null &&
+          descansos.get(emFoco.exercicio.id) !== undefined ? (
+            <p className={estilos.descanso} data-descanso>
+              descanso{' '}
+              <span className="numerico">{descansos.get(emFoco.exercicio.id)} s</span>
+            </p>
+          ) : null}
 
           {ehDropset ? (
             <RegistroDropset degraus={degraus} aoMudar={definirDegraus} />

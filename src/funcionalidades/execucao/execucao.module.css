@@ -580,3 +580,17 @@
   font-size: var(--texto-micro);
   color: var(--par-pagina-secundaria-texto);
 }
+
+/*
+ * Descanso planejado — FR-150, FR-151.
+ *
+ * Valor escrito ao lado da meta, e nada mais. **Não é cronômetro**: não conta,
+ * não avisa, não interrompe. A constituição veda o cronômetro de descanso, e a
+ * distinção está fixada em FR-151 — transformar isto numa contagem regressiva
+ * exigiria emenda, não uma decisão de implementação.
+ */
+.descanso {
+  font-size: var(--texto-apoio);
+  color: var(--par-carta-secundaria-texto);
+  text-align: center;
+}
