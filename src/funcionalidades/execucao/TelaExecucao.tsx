@@ -34,6 +34,7 @@ import { formatarCarga } from '../../plataforma/formato'
 import { rascunhoDe, useExecucao } from './store'
 import { CabecalhoExercicio } from './CabecalhoExercicio'
 import { NavegacaoExercicios } from './NavegacaoExercicios'
+import { EditorSerieRegistrada } from './EditorSerieRegistrada'
 import { useGestoLateral } from './useGestoLateral'
 import { AvisoProgressao } from '../progressao/AvisoProgressao'
 import { repositorioProgressao } from '../../dados/repositorios/progressao'
@@ -63,6 +64,7 @@ export function TelaExecucao({ sessaoId }: Props) {
     { ordem: 1, cargaKg: 0, repeticoes: 0 },
   ])
   const [limiteAtingido, definirLimiteAtingido] = useState<'inicio' | 'fim' | null>(null)
+  const [serieEmEdicao, definirSerieEmEdicao] = useState<Id | null>(null)
   const [registrandoExtra, definirRegistrandoExtra] = useState(false)
 
   const montarGesto = useGestoLateral()
@@ -221,6 +223,10 @@ export function TelaExecucao({ sessaoId }: Props) {
 
   const agora = agoraUtc()
   const indiceAtual = itens.findIndex((item) => item.exercicio.id === emFoco.exercicio.id)
+  const serieDeEdicao =
+    serieEmEdicao === null
+      ? undefined
+      : seriesRegistradas.find((serie) => serie.id === serieEmEdicao)
 
   // O cabeçalho mostrava a posição do exercício, que o paginador agora anuncia
   // melhor. No lugar dela vai o total de séries da sessão — informação que não
@@ -238,6 +244,8 @@ export function TelaExecucao({ sessaoId }: Props) {
       return
     }
     definirLimiteAtingido(null)
+    definirRegistrandoExtra(false)
+    definirSerieEmEdicao(null)
     focar(destino.exercicio.id)
   }
 
@@ -245,7 +253,8 @@ export function TelaExecucao({ sessaoId }: Props) {
     aoAvancar: () => irPara(1),
     aoRecuar: () => irPara(-1),
     // O gesto não compete com um diálogo aberto.
-    desabilitado: acrescentando || confirmandoDescarte || falha !== null,
+    desabilitado:
+      acrescentando || confirmandoDescarte || falha !== null || serieEmEdicao !== null,
   })
 
   const estado = estadoExercicioSessao({
@@ -387,6 +396,7 @@ export function TelaExecucao({ sessaoId }: Props) {
           aoFocar={(id) => {
             definirLimiteAtingido(null)
             definirRegistrandoExtra(false)
+            definirSerieEmEdicao(null)
             focar(id)
           }}
           aoAcrescentar={() => definirAcrescentando(true)}
@@ -573,6 +583,7 @@ export function TelaExecucao({ sessaoId }: Props) {
 
         {seriesRegistradas.length > 0 ? (
           <div className={estilos.razao}>
+            <p className={estilos.dicaEditar}>Toque numa série para corrigir ou remover.</p>
             {seriesRegistradas.map((serie) => {
               const meta = metas[serie.ordem - 1]
               const comparacao = compararSerie(
@@ -582,7 +593,14 @@ export function TelaExecucao({ sessaoId }: Props) {
                 serie,
               )
               return (
-                <div key={serie.id} className={estilos.linhaRazao} data-serie-registrada={serie.ordem}>
+                <button
+                  key={serie.id}
+                  type="button"
+                  className={estilos.linhaRazaoEditavel}
+                  data-serie-registrada={serie.ordem}
+                  onClick={() => definirSerieEmEdicao(serie.id)}
+                  aria-label={`Corrigir ou remover a série ${serie.ordem}`}
+                >
                   <span className={`${estilos.ordemRazao} numerico`}>{serie.ordem}</span>
                   {serie.naoRealizada ? (
                     <span className={estilos.serieNaoRealizada}>não realizada</span>
@@ -598,7 +616,7 @@ export function TelaExecucao({ sessaoId }: Props) {
                   <span className={`${estilos.rirRazao} numerico`}>
                     {serie.rir !== null ? `RIR ${serie.rir}` : ''}
                   </span>
-                </div>
+                </button>
               )
             })}
           </div>
@@ -658,6 +676,15 @@ export function TelaExecucao({ sessaoId }: Props) {
           aoConfirmar={() => void encerrar('descartar')}
           aoCancelar={() => definirConfirmandoDescarte(false)}
         />
+      ) : null}
+
+      {/*
+        A série some da lista assim que é removida, e o `useLiveQuery` reflete
+        isso antes de o painel fechar. Procurar sem verificar deixaria um
+        instante em que o painel tenta renderizar uma série que não existe mais.
+      */}
+      {serieDeEdicao ? (
+        <EditorSerieRegistrada serie={serieDeEdicao} aoFechar={() => definirSerieEmEdicao(null)} />
       ) : null}
 
       {falha !== null ? (

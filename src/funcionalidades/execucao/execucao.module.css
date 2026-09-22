@@ -525,3 +525,58 @@
   gap: var(--espaco-x2);
   margin-top: var(--espaco-x2);
 }
+
+/* ------------------------------------------------------------------ */
+/* Editor de série registrada — FR-133, FR-134                         */
+
+/*
+ * Painel opaco, não sobreposição translúcida: a restrição de D9 critério 2
+ * vale para tudo o que aparece na tela de execução. `data-sem-gesto` no
+ * elemento impede que arrastar dentro dele troque de exercício (FR-130).
+ */
+.painelSerie {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-x4);
+  padding: var(--espaco-x4);
+  padding-top: calc(var(--espaco-x4) + env(safe-area-inset-top));
+  background: var(--par-pagina-primaria-fundo);
+  overflow-y: auto;
+}
+
+.cabecalhoPainel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaco-x3);
+}
+
+/* A linha do livro-razão vira alvo de toque quando é editável. */
+.linhaRazaoEditavel {
+  display: grid;
+  grid-template-columns: 1.5rem 1fr auto auto;
+  align-items: center;
+  gap: var(--espaco-x3);
+  width: 100%;
+  padding: var(--espaco-x3) var(--espaco-x1);
+  min-height: var(--alvo-toque);
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--cor-linha);
+  text-align: left;
+  font-size: var(--texto-apoio);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.linhaRazaoEditavel:last-child {
+  border-bottom: none;
+}
+
+.dicaEditar {
+  font-size: var(--texto-micro);
+  color: var(--par-pagina-secundaria-texto);
+}

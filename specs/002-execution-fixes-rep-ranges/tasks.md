@@ -73,22 +73,22 @@ removê-la — tudo sem concluir a sessão.
 
 ### Tests for US2
 
-- [ ] T013 [P] [US2] Teste de unidade das regras de rascunho em `tests/unidade/domain/rascunhoSessao.test.ts` — renumeração contígua após remoção e re-vínculo de cada série restante à meta da nova posição (FR-135)
-- [ ] T014 [P] [US2] Teste de integração: corrigir e remover série em sessão `em_andamento` **não** cria versão nova, em `tests/integracao/correcaoEmSessaoAberta.test.ts` (FR-136)
-- [ ] T015 [P] [US2] Teste de integração: a mesma operação é **recusada** em sessão `concluida`, onde FR-113 e FR-114 continuam valendo, em `tests/integracao/correcaoEmSessaoAberta.test.ts`
-- [ ] T016 [P] [US2] Teste de integração: a remoção é lógica — a linha permanece na tabela com `excluidoEm` carimbado, em `tests/integracao/correcaoEmSessaoAberta.test.ts`
-- [ ] T017 [P] [US2] Teste de integração: remover todas as séries devolve o exercício a `nao_alcancado`, **não** a `nao_realizado` — a distinção de FR-125 continua valendo, em `tests/integracao/correcaoEmSessaoAberta.test.ts`
-- [ ] T018 [P] [US2] Teste ponta a ponta: série removida não aparece no histórico da sessão concluída, e os valores corrigidos aparecem, em `tests/e2e/correcaoEmSessao.spec.ts` (SC-038)
+- [X] T013 [P] [US2] Teste de unidade das regras de rascunho em `tests/unidade/domain/rascunhoSessao.test.ts` — renumeração contígua após remoção e re-vínculo de cada série restante à meta da nova posição (FR-135)
+- [X] T014 [P] [US2] Teste de integração: corrigir e remover série em sessão `em_andamento` **não** cria versão nova, em `tests/integracao/correcaoEmSessaoAberta.test.ts` (FR-136)
+- [X] T015 [P] [US2] Teste de integração: a mesma operação é **recusada** em sessão `concluida`, onde FR-113 e FR-114 continuam valendo, em `tests/integracao/correcaoEmSessaoAberta.test.ts`
+- [X] T016 [P] [US2] Teste de integração: a remoção é lógica — a linha permanece na tabela com `excluidoEm` carimbado, em `tests/integracao/correcaoEmSessaoAberta.test.ts`
+- [X] T017 [P] [US2] Teste de integração: remover todas as séries devolve o exercício a `nao_alcancado`, **não** a `nao_realizado` — a distinção de FR-125 continua valendo, em `tests/integracao/correcaoEmSessaoAberta.test.ts`
+- [X] T018 [P] [US2] Teste ponta a ponta: série removida não aparece no histórico da sessão concluída, e os valores corrigidos aparecem, em `tests/e2e/correcaoEmSessao.spec.ts` (SC-038)
 
 ### Implementation for US2
 
-- [ ] T019 [US2] Implementar as regras de rascunho como funções puras em `src/domain/sessao/rascunho.ts` — renumeração e re-vínculo à meta por posição (D2, FR-135)
-- [ ] T020 [US2] Acrescentar `corrigirSerieEmAndamento` e `removerSerieEmAndamento` a `src/dados/repositorios/sessoes.ts`, recusando quando `estado !== 'em_andamento'` — a fronteira é verificada na camada de dados, não na tela (FR-133, FR-134, FR-136)
-- [ ] T021 [US2] Implementar a edição de série registrada em `src/funcionalidades/execucao/EditorSerieRegistrada.tsx` — carga, repetições e RIR, alcançável a partir do livro-razão (FR-133, SC-037)
-- [ ] T022 [US2] Implementar a remoção com confirmação explícita no mesmo componente (FR-134)
+- [X] T019 [US2] Implementar as regras de rascunho como funções puras em `src/domain/sessao/rascunho.ts` — renumeração e re-vínculo à meta por posição (D2, FR-135)
+- [X] T020 [US2] Acrescentar `corrigirSerieEmAndamento` e `removerSerieEmAndamento` a `src/dados/repositorios/sessoes.ts`, recusando quando `estado !== 'em_andamento'` — a fronteira é verificada na camada de dados, não na tela (FR-133, FR-134, FR-136)
+- [X] T021 [US2] Implementar a edição de série registrada em `src/funcionalidades/execucao/EditorSerieRegistrada.tsx` — carga, repetições e RIR, alcançável a partir do livro-razão (FR-133, SC-037)
+- [X] T022 [US2] Implementar a remoção com confirmação explícita no mesmo componente (FR-134)
 - [X] T023 [US2] Implementar o estado de **exercício completo** na `TelaExecucao.tsx` — quando todas as planejadas estão registradas, sinalizar a conclusão e oferecer o próximo exercício, em vez de apresentar a série extra como o passo natural (FR-137)
 - [X] T024 [US2] Tornar o registro de série além das planejadas uma ação explícita e distinta de confirmar a série seguinte (FR-138)
-- [ ] T025 [US2] Aplicar a skill `frontend-design` às telas de US2
+- [X] T025 [US2] Aplicar a skill `frontend-design` às telas de US2
 
 **Checkpoint**: a armadilha que produziu a série indevida está fechada nas duas pontas.
 
