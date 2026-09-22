@@ -296,9 +296,9 @@
 .tira {
   flex: 0 0 auto;
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 2px;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--espaco-x2);
   min-height: var(--alvo-toque);
   max-width: 11rem;
   padding: var(--espaco-x2) var(--espaco-x3);
@@ -410,4 +410,187 @@
   font-size: var(--texto-titulo);
   font-weight: 700;
   font-stretch: 110%;
+}
+
+/* ------------------------------------------------------------------ */
+/* Navegação entre exercícios — FR-127, FR-128, D4                     */
+
+.navegacao {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-x2);
+}
+
+/*
+ * Paginação explícita. Existe porque a faixa sozinha não anunciava que era
+ * navegação, e o alcance de um exercício não pode depender de descoberta.
+ */
+.paginador {
+  display: grid;
+  grid-template-columns: var(--alvo-toque) 1fr var(--alvo-toque);
+  align-items: center;
+  gap: var(--espaco-x2);
+}
+
+.setaExercicio {
+  width: var(--alvo-toque);
+  height: var(--alvo-toque);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--cor-contorno);
+  border-radius: var(--raio-campo);
+  background: var(--par-carta-primaria-fundo);
+  color: var(--par-carta-acento-texto);
+  font-size: var(--texto-titulo);
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Cor explícita, não opacidade: opacidade derrubaria o contraste abaixo do
+   piso de 4,5:1, que D9 critério 1 exige garantido por construção. */
+.setaExercicio:disabled {
+  background: var(--par-controle-desabilitado-fundo);
+  color: var(--par-controle-desabilitado-texto);
+  border-color: var(--cor-linha);
+  cursor: not-allowed;
+}
+
+.posicaoExercicio {
+  text-align: center;
+  font-size: var(--texto-apoio);
+  font-weight: 600;
+  color: var(--par-pagina-secundaria-texto);
+}
+
+.avisoLimite {
+  text-align: center;
+  font-size: var(--texto-rotulo);
+  color: var(--par-pagina-secundaria-texto);
+}
+
+/* O número da ordem deixa claro que a faixa é uma sequência, não cartões soltos. */
+.tiraOrdem {
+  flex: 0 0 auto;
+  width: 1.25rem;
+  font-size: var(--texto-rotulo);
+  font-weight: 700;
+  color: var(--par-carta-secundaria-texto);
+}
+
+.tiraTexto {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+/* ------------------------------------------------------------------ */
+/* Exercício completo — FR-137, FR-138                                 */
+
+/*
+ * Substitui o cartão de série quando todas as planejadas foram registradas.
+ * Antes disto a tela oferecia "série extra" como o passo natural, com o botão
+ * primário ativo — e foi assim que uma série que não existia no plano entrou
+ * no histórico de um treino real.
+ */
+.cartaoConcluido {
+  background: var(--par-faixa-positiva-fundo);
+  color: var(--par-faixa-positiva-texto);
+  border-radius: var(--raio-carta);
+  padding: var(--espaco-x5) var(--espaco-x4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-x3);
+}
+
+.tituloConcluido {
+  font-size: var(--texto-subtitulo);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-x2);
+}
+
+.textoConcluido {
+  font-size: var(--texto-apoio);
+}
+
+.acoesConcluido {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-x2);
+  margin-top: var(--espaco-x2);
+}
+
+/* ------------------------------------------------------------------ */
+/* Editor de série registrada — FR-133, FR-134                         */
+
+/*
+ * Painel opaco, não sobreposição translúcida: a restrição de D9 critério 2
+ * vale para tudo o que aparece na tela de execução. `data-sem-gesto` no
+ * elemento impede que arrastar dentro dele troque de exercício (FR-130).
+ */
+.painelSerie {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-x4);
+  padding: var(--espaco-x4);
+  padding-top: calc(var(--espaco-x4) + env(safe-area-inset-top));
+  background: var(--par-pagina-primaria-fundo);
+  overflow-y: auto;
+}
+
+.cabecalhoPainel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaco-x3);
+}
+
+/* A linha do livro-razão vira alvo de toque quando é editável. */
+.linhaRazaoEditavel {
+  display: grid;
+  grid-template-columns: 1.5rem 1fr auto auto;
+  align-items: center;
+  gap: var(--espaco-x3);
+  width: 100%;
+  padding: var(--espaco-x3) var(--espaco-x1);
+  min-height: var(--alvo-toque);
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--cor-linha);
+  text-align: left;
+  font-size: var(--texto-apoio);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.linhaRazaoEditavel:last-child {
+  border-bottom: none;
+}
+
+.dicaEditar {
+  font-size: var(--texto-micro);
+  color: var(--par-pagina-secundaria-texto);
+}
+
+/*
+ * Descanso planejado — FR-150, FR-151.
+ *
+ * Valor escrito ao lado da meta, e nada mais. **Não é cronômetro**: não conta,
+ * não avisa, não interrompe. A constituição veda o cronômetro de descanso, e a
+ * distinção está fixada em FR-151 — transformar isto numa contagem regressiva
+ * exigiria emenda, não uma decisão de implementação.
+ */
+.descanso {
+  font-size: var(--texto-apoio);
+  color: var(--par-carta-secundaria-texto);
+  text-align: center;
 }

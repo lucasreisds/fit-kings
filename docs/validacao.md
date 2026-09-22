@@ -17,13 +17,13 @@ Execução: `npm run test` (457 testes, 27 arquivos) e `npm run test:e2e` (21 te
 
 `tests/e2e/retomada.spec.ts` — cobre FR-033, FR-034, SC-003.
 
-| Passo do quickstart | Resultado |
-|---|---|
-| Iniciar treino e confirmar séries | ✅ |
-| Recarregar a página à força no meio da sessão | ✅ |
-| As séries voltam íntegras | ✅ 3 de 3, com carga, repetições e comparação |
-| A sessão continua `em_andamento` | ✅ |
-| O aplicativo oferece retomá-la no ponto em que parou | ✅ cai no exercício e na série seguintes |
+| Passo do quickstart                                  | Resultado                                     |
+| ---------------------------------------------------- | --------------------------------------------- |
+| Iniciar treino e confirmar séries                    | ✅                                            |
+| Recarregar a página à força no meio da sessão        | ✅                                            |
+| As séries voltam íntegras                            | ✅ 3 de 3, com carga, repetições e comparação |
+| A sessão continua `em_andamento`                     | ✅                                            |
+| O aplicativo oferece retomá-la no ponto em que parou | ✅ cai no exercício e na série seguintes      |
 
 Verificado também: navegar para outras telas e voltar não perde valor preenchido (FR-030, SC-002),
 e duas sessões simultâneas são impedidas (FR-028).
@@ -32,12 +32,12 @@ e duas sessões simultâneas são impedidas (FR-028).
 
 `tests/e2e/imutabilidade.spec.ts` — cobre FR-017, FR-040, SC-013.
 
-| Passo do quickstart | Resultado |
-|---|---|
-| Concluir uma sessão | ✅ |
-| Editar o treino de origem — trocar cargas e metas | ✅ o treino muda |
-| Excluir o treino de origem | ✅ some da lista |
-| A sessão permanece como foi registrada, com os valores planejados daquele dia | ✅ |
+| Passo do quickstart                                                           | Resultado        |
+| ----------------------------------------------------------------------------- | ---------------- |
+| Concluir uma sessão                                                           | ✅               |
+| Editar o treino de origem — trocar cargas e metas                             | ✅ o treino muda |
+| Excluir o treino de origem                                                    | ✅ some da lista |
+| A sessão permanece como foi registrada, com os valores planejados daquele dia | ✅               |
 
 **O mecanismo**: `seriesPlanejadas` é aditiva e a exclusão é lógica. Uma série planejada **já
 executada** nunca é alterada no lugar — editá-la cria uma sucessora e marca a anterior. O plano da
@@ -51,15 +51,15 @@ Verificado também: a correção cria versão nova sem mudar a data nem a posiç
 
 `tests/e2e/backup.spec.ts` — cobre FR-102, FR-104, FR-106, SC-017, SC-018.
 
-| Passo do quickstart | Resultado |
-|---|---|
-| Exportar o backup | ✅ |
-| Importar o mesmo arquivo: nenhum registro duplicado | ✅ |
-| Importar de novo: operação nula, tudo ignorado | ✅ |
-| Arquivo truncado | ✅ recusado — "não é um JSON válido… truncado" |
-| JSON de outro aplicativo | ✅ recusado — "não declara a versão do formato" |
-| `formatVersion` maior que o suportado | ✅ recusado — "gerado por uma versão mais nova" |
-| Nenhum dado existente alterado em qualquer recusa | ✅ |
+| Passo do quickstart                                 | Resultado                                       |
+| --------------------------------------------------- | ----------------------------------------------- |
+| Exportar o backup                                   | ✅                                              |
+| Importar o mesmo arquivo: nenhum registro duplicado | ✅                                              |
+| Importar de novo: operação nula, tudo ignorado      | ✅                                              |
+| Arquivo truncado                                    | ✅ recusado — "não é um JSON válido… truncado"  |
+| JSON de outro aplicativo                            | ✅ recusado — "não declara a versão do formato" |
+| `formatVersion` maior que o suportado               | ✅ recusado — "gerado por uma versão mais nova" |
+| Nenhum dado existente alterado em qualquer recusa   | ✅                                              |
 
 ### Portão 4 — Determinismo do critério de aumento de carga ✅
 
@@ -67,18 +67,18 @@ Verificado também: a correção cria versão nova sem mudar a data nem a posiç
 
 Os dez casos de fronteira do quickstart, na mesma ordem:
 
-| # | Cenário | Esperado | Resultado |
-|---|---|---|---|
-| 1 | Planejado 3×8, realizado 9/9/9 | Indica | ✅ |
-| 2 | Planejado 3×8, realizado 8/8/8 | Não indica (FR-081) | ✅ |
-| 3 | Planejado 3×8, realizado 10/8/6 | Não indica | ✅ |
-| 4 | Uma série planejada sem registro | Não indica (FR-078) | ✅ |
-| 5 | Série extra além das planejadas | Ignorada (FR-079) | ✅ |
-| 6 | RIR não informado em nenhuma série | Só repetições (FR-044) | ✅ |
-| 7 | RIR realizado abaixo do planejado | Não indica | ✅ |
-| 8 | Exercício sem execução anterior | Não indica (FR-048) | ✅ |
-| 9 | Exercício planejado totalmente pulado | Indicação anterior permanece (FR-093) | ✅ |
-| 10 | Exercício adicionado fora do plano | Não indica naquela sessão (FR-089) | ✅ |
+| #   | Cenário                               | Esperado                              | Resultado |
+| --- | ------------------------------------- | ------------------------------------- | --------- |
+| 1   | Planejado 3×8, realizado 9/9/9        | Indica                                | ✅        |
+| 2   | Planejado 3×8, realizado 8/8/8        | Não indica (FR-081)                   | ✅        |
+| 3   | Planejado 3×8, realizado 10/8/6       | Não indica                            | ✅        |
+| 4   | Uma série planejada sem registro      | Não indica (FR-078)                   | ✅        |
+| 5   | Série extra além das planejadas       | Ignorada (FR-079)                     | ✅        |
+| 6   | RIR não informado em nenhuma série    | Só repetições (FR-044)                | ✅        |
+| 7   | RIR realizado abaixo do planejado     | Não indica                            | ✅        |
+| 8   | Exercício sem execução anterior       | Não indica (FR-048)                   | ✅        |
+| 9   | Exercício planejado totalmente pulado | Indicação anterior permanece (FR-093) | ✅        |
+| 10  | Exercício adicionado fora do plano    | Não indica naquela sessão (FR-089)    | ✅        |
 
 ---
 
@@ -107,17 +107,17 @@ Um exercício renomeado **depois** da exportação continua sendo o mesmo regist
 
 `tests/unidade/funcionalidades/lembreteBackup.test.ts`, com relógio controlado.
 
-| Situação | Esperado | Resultado |
-|---|---|---|
-| 6 dias, persistência concedida | Não apresenta | ✅ |
-| 8 dias, persistência concedida | Apresenta | ✅ |
-| 1 dia, persistência **não** concedida | Não apresenta | ✅ |
-| 3 dias, persistência **não** concedida | Apresenta | ✅ |
-| Nunca exportou | Conta do primeiro registro do usuário | ✅ |
-| Exportação **falhou** | Âncora não se move | ✅ |
-| Lembrete já exibido | Âncora não se move | ✅ |
-| Vence durante sessão `em_andamento` | Não apresenta | ✅ |
-| A sessão é concluída ou descartada | Apresenta no encerramento | ✅ |
+| Situação                               | Esperado                              | Resultado |
+| -------------------------------------- | ------------------------------------- | --------- |
+| 6 dias, persistência concedida         | Não apresenta                         | ✅        |
+| 8 dias, persistência concedida         | Apresenta                             | ✅        |
+| 1 dia, persistência **não** concedida  | Não apresenta                         | ✅        |
+| 3 dias, persistência **não** concedida | Apresenta                             | ✅        |
+| Nunca exportou                         | Conta do primeiro registro do usuário | ✅        |
+| Exportação **falhou**                  | Âncora não se move                    | ✅        |
+| Lembrete já exibido                    | Âncora não se move                    | ✅        |
+| Vence durante sessão `em_andamento`    | Não apresenta                         | ✅        |
+| A sessão é concluída ou descartada     | Apresenta no encerramento             | ✅        |
 
 ---
 
@@ -125,15 +125,15 @@ Um exercício renomeado **depois** da exportação continua sendo o mesmo regist
 
 `tests/e2e/layout.spec.ts` e `tests/unidade/ui/`.
 
-| Verificação | Larguras | Resultado |
-|---|---|---|
-| Sem rolagem horizontal em nenhuma tela (SC-008) | 320, 390, 834 px | ✅ |
-| Numerais da execução inteiros, sem corte | 320, 390, 834 px | ✅ |
-| Todo alvo interativo com no mínimo 44 pt (SC-009) | 320, 390, 834 px | ✅ |
-| Todo par de cor com no mínimo 4,5:1 (D9 critério 1) | — | ✅ 16 pares |
-| Contorno de controle com no mínimo 3:1 | — | ✅ |
-| Nenhuma cor literal fora dos tokens | todo `src/` | ✅ |
-| Execução sem transparência, blur ou sombra (D9 critério 2) | — | ✅ verificado por ferramenta |
+| Verificação                                                | Larguras         | Resultado                    |
+| ---------------------------------------------------------- | ---------------- | ---------------------------- |
+| Sem rolagem horizontal em nenhuma tela (SC-008)            | 320, 390, 834 px | ✅                           |
+| Numerais da execução inteiros, sem corte                   | 320, 390, 834 px | ✅                           |
+| Todo alvo interativo com no mínimo 44 pt (SC-009)          | 320, 390, 834 px | ✅                           |
+| Todo par de cor com no mínimo 4,5:1 (D9 critério 1)        | —                | ✅ 16 pares                  |
+| Contorno de controle com no mínimo 3:1                     | —                | ✅                           |
+| Nenhuma cor literal fora dos tokens                        | todo `src/`      | ✅                           |
+| Execução sem transparência, blur ou sombra (D9 critério 2) | —                | ✅ verificado por ferramenta |
 
 **Achados corrigidos durante a auditoria**, ambos violações reais:
 
@@ -144,17 +144,49 @@ Um exercício renomeado **depois** da exportação continua sendo o mesmo regist
 
 ---
 
+## Feature 002 — ajustes do primeiro uso real
+
+**Data**: 2026-09-21. `npm run test` (554 testes) e `npm run test:e2e` (35) — todos passam.
+
+| Cenário do quickstart                                           | Resultado                                                              |
+| --------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| **C1** — alcançar o quinto exercício em 430 px                  | ✅ 1 toque por exercício, faixa numerada para salto direto             |
+| **C2** — o gesto não dispara dentro de campo nem sobre a faixa  | ✅                                                                     |
+| **C3** — corrigir e remover série na sessão aberta              | ✅ sem criar versão; a série removida não chega ao histórico           |
+| **C4** — exercício completo não oferece série extra em silêncio | ✅ oferece o próximo; a série a mais exige ação explícita              |
+| **C5** — intervalo de repetições                                | ✅ 3x 6-8 indica com 9/9/9; não indica com 8/8/8, 9/9/8, 7/7/7 e 5/5/5 |
+| **C6** — intervalo inválido                                     | ✅ mínimo maior que máximo é recusado; pontas iguais aceitas           |
+| **C7** — exercício de peso corporal                             | ✅ duas execuções contadas, evolução em repetições                     |
+| **C8** — descanso exibido, nunca cronometrado                   | ✅ verificado por espera de 6 s sobre descanso de 5 s                  |
+| **C9** — compatibilidade                                        | ✅ backup antigo importado sem perda; migração v1→v2 preserva tudo     |
+
+### A regressão que mais importa
+
+**Os dez casos de fronteira do portão 4 rodam inalterados.** O arquivo de teste passou de 23 para
+33 casos: os 23 originais intactos, mais 10 de intervalo. Isso é SC-040 verificado, não declarado —
+se a generalização do intervalo tivesse mudado o resultado de um único caso antigo, o portão
+acusaria antes de qualquer histórico ser afetado.
+
+### Achados da auditoria, corrigidos
+
+A auditoria de tokens pegou uma violação **introduzida nesta feature** — `opacity: 0.35` numa seta
+de navegação desabilitada — e ampliá-la de uma folha para todas revelou mais três pré-existentes.
+Controle indisponível continua precisando ser legível: o piso de 4,5:1 vale para todos os estados,
+e opacidade o derruba em silêncio. Nenhuma folha usa opacidade fracionária agora.
+
+---
+
 ## Pendente: validação em aparelho real
 
 Quatro verificações não são automatizáveis e **exigem um iPhone**, instalado pela Tela de Início.
 Elas permanecem abertas.
 
-| Tarefa | O que verificar | Por que só no aparelho |
-|---|---|---|
-| **T113** | Persistência do armazenamento: registrar dados, reiniciar o aparelho, deixar dias sem uso | É o risco R1 inteiro. O iOS é a plataforma mais restritiva, e nenhum emulador reproduz sua política de despejo |
-| **T114** | Modo avião de ponta a ponta: treino completo, histórico e exportação sem erro de rede (FR-057, SC-011) | Exige o service worker instalado de verdade, pelo ícone da tela inicial |
-| **T116** | Direção visual sob luz forte e com brilho reduzido (D9 critérios 4 e 5) | É uma condição física de leitura. Nenhum teste a simula |
-| **T117** | Registro de série em 3 toques e menos de 5 s (SC-001) | O tempo real inclui o teclado do sistema e a resposta ao toque |
+| Tarefa   | O que verificar                                                                                        | Por que só no aparelho                                                                                         |
+| -------- | ------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------- |
+| **T113** | Persistência do armazenamento: registrar dados, reiniciar o aparelho, deixar dias sem uso              | É o risco R1 inteiro. O iOS é a plataforma mais restritiva, e nenhum emulador reproduz sua política de despejo |
+| **T114** | Modo avião de ponta a ponta: treino completo, histórico e exportação sem erro de rede (FR-057, SC-011) | Exige o service worker instalado de verdade, pelo ícone da tela inicial                                        |
+| **T116** | Direção visual sob luz forte e com brilho reduzido (D9 critérios 4 e 5)                                | É uma condição física de leitura. Nenhum teste a simula                                                        |
+| **T117** | Registro de série em 3 toques e menos de 5 s (SC-001)                                                  | O tempo real inclui o teclado do sistema e a resposta ao toque                                                 |
 
 Sobre T117, o que já se pode afirmar do código: no caminho comum — carga herdada da série anterior —
 registrar uma série custa **2 toques** (aplicar as repetições num dos dois atalhos, confirmar), e

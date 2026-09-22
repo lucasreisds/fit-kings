@@ -109,6 +109,10 @@ export function EditorTreino({ treinoId }: Props) {
     await repositorioTreinos.definirAbordagem(itemId, abordagem)
   }
 
+  async function definirDescanso(itemId: Id, descansoSegundos: number | null) {
+    await repositorioTreinos.definirDescanso(itemId, descansoSegundos)
+  }
+
   const itens = completo?.itens ?? []
 
   return (
@@ -141,6 +145,7 @@ export function EditorTreino({ treinoId }: Props) {
             aoDescer={() => void reordenar(indice, indice + 1)}
             aoDefinirSeries={(series) => void definirSeries(item.item.id, series)}
             aoDefinirAbordagem={(abordagem) => void definirAbordagem(item.item.id, abordagem)}
+            aoDefinirDescanso={(segundos) => void definirDescanso(item.item.id, segundos)}
           />
         ))
       )}
@@ -180,6 +185,7 @@ type PropsItem = {
   aoDescer: () => void
   aoDefinirSeries: (series: readonly ValoresPlanejados[]) => void
   aoDefinirAbordagem: (abordagem: Abordagem) => void
+  aoDefinirDescanso: (descansoSegundos: number | null) => void
 }
 
 function ItemDoEditor({
@@ -192,6 +198,7 @@ function ItemDoEditor({
   aoDescer,
   aoDefinirSeries,
   aoDefinirAbordagem,
+  aoDefinirDescanso,
 }: PropsItem) {
   const [aberto, definirAberto] = useState(false)
 
@@ -276,6 +283,24 @@ function ItemDoEditor({
           ) : (
             <EditorSeries series={series} aoMudar={aoDefinirSeries} />
           )}
+
+          {/*
+            FR-148 — descanso planejado. É valor de referência, exibido na
+            execução: o aplicativo não conta o tempo nem avisa (FR-151).
+          */}
+          <Campo
+            rotulo="Descanso entre séries (segundos)"
+            dica="Opcional. Aparece durante o treino, como referência — o aplicativo não cronometra."
+            type="number"
+            inputMode="numeric"
+            min={0}
+            step={15}
+            defaultValue={item.item.descansoSegundos ?? ''}
+            onBlur={(evento) => {
+              const bruto = evento.target.value.trim()
+              aoDefinirDescanso(bruto === '' ? null : Number(bruto))
+            }}
+          />
         </div>
       ) : null}
     </section>

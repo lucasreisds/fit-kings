@@ -37,7 +37,7 @@ test.describe('Portão 2 — imutabilidade do histórico', () => {
     // --- Editar o treino de origem: troca as metas ---
     await abrirEditor(page, 'Treino A')
     await page.getByRole('button', { name: /Supino reto com barra/ }).first().click()
-    await page.getByLabel('Repetições da série 1').fill('20')
+    await page.getByLabel('Repetições da série 1', { exact: true }).fill('20')
     await page.getByLabel('Carga da série 1 em quilos').fill('99')
     await page.getByLabel('Carga da série 1 em quilos').blur()
     await page.waitForTimeout(400)

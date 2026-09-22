@@ -15,20 +15,22 @@ type Props = {
   aoMudar: (series: readonly ValoresPlanejados[]) => void
 }
 
-const SERIE_PADRAO: ValoresPlanejados = { repeticoes: 10, cargaKg: 0, rir: null }
+const SERIE_PADRAO: ValoresPlanejados = {
+  repeticoes: 10,
+  repeticoesMax: null,
+  cargaKg: 0,
+  rir: null,
+}
 
 export function EditorSeries({ series, aoMudar }: Props) {
   function alterar(indice: number, campo: keyof ValoresPlanejados, bruto: string) {
     const valor = bruto === '' ? null : Number(bruto)
+    // `rir` e `repeticoesMax` aceitam nulo; `repeticoes` e `cargaKg` não, e um
+    // campo esvaziado durante a digitação vira 0, que a validação recusa.
+    const aceitaNulo = campo === 'rir' || campo === 'repeticoesMax'
+
     const proximas = series.map((serie, i) =>
-      i === indice
-        ? {
-            ...serie,
-            // `repeticoes` e `cargaKg` não aceitam nulo no modelo; um campo
-            // esvaziado durante a digitação vira 0 e a validação o recusa.
-            [campo]: campo === 'rir' ? valor : (valor ?? 0),
-          }
-        : serie,
+      i === indice ? { ...serie, [campo]: aceitaNulo ? valor : (valor ?? 0) } : serie,
     )
     aoMudar(proximas as readonly ValoresPlanejados[])
   }
@@ -47,6 +49,7 @@ export function EditorSeries({ series, aoMudar }: Props) {
       <div className={estilos.tabelaSeries}>
         <span className={estilos.cabecalhoColuna} aria-hidden="true" />
         <span className={estilos.cabecalhoColuna}>Repetições</span>
+        <span className={estilos.cabecalhoColuna}>até</span>
         <span className={estilos.cabecalhoColuna}>Carga (kg)</span>
         <span className={estilos.cabecalhoColuna}>RIR</span>
         <span className={estilos.cabecalhoColuna} aria-hidden="true" />
@@ -109,6 +112,23 @@ function FragmentoDeSerie({
         aria-label={`Repetições da série ${numero}`}
         aria-invalid={invalida || undefined}
         onChange={(evento) => aoAlterar(indice, 'repeticoes', evento.target.value)}
+      />
+      {/*
+        FR-139 — o máximo do intervalo. Deixá-lo vazio mantém o valor único, que
+        é como o campo se comportava antes desta feature: quem não usa intervalo
+        não precisa saber que ele existe.
+      */}
+      <input
+        className={`${estilos.entradaSerie} numerico`}
+        type="number"
+        inputMode="numeric"
+        min={1}
+        step={1}
+        value={serie.repeticoesMax ?? ''}
+        placeholder="—"
+        aria-label={`Máximo de repetições da série ${numero}, opcional`}
+        aria-invalid={invalida || undefined}
+        onChange={(evento) => aoAlterar(indice, 'repeticoesMax', evento.target.value)}
       />
       <input
         className={`${estilos.entradaSerie} numerico`}

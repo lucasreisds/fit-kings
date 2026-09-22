@@ -21,18 +21,23 @@ import { Faixa } from '../../ui/Faixa'
 import { PassoNumerico } from '../../ui/PassoNumerico'
 import { navegar } from '../../app/rotas'
 import { repositorioSessoes } from '../../dados/repositorios/sessoes'
+import { db } from '../../dados/db'
 import { repositorioExercicios } from '../../dados/repositorios/exercicios'
 import { lerPlanoDaSessao, type MetaDaSerie } from './iniciarSessao'
 import { pontoDeRetomada } from './retomar'
 import { execucaoAnterior } from './consultas'
 import { cargaHerdada } from '../../domain/serie/heranca'
 import { compararSerie } from '../../domain/serie/validade'
+import { formatarIntervalo, intervaloDe } from '../../domain/serie/intervalo'
 import { estadoExercicioSessao, textoDoEstado } from '../../domain/sessao/estadoExercicio'
 import type { Degrau, Id } from '../../domain/tipos'
 import { agoraUtc } from '../../plataforma/tempo'
 import { formatarCarga } from '../../plataforma/formato'
 import { rascunhoDe, useExecucao } from './store'
 import { CabecalhoExercicio } from './CabecalhoExercicio'
+import { NavegacaoExercicios } from './NavegacaoExercicios'
+import { EditorSerieRegistrada } from './EditorSerieRegistrada'
+import { useGestoLateral } from './useGestoLateral'
 import { AvisoProgressao } from '../progressao/AvisoProgressao'
 import { repositorioProgressao } from '../../dados/repositorios/progressao'
 import { RegistroDropset } from './RegistroDropset'
@@ -60,6 +65,11 @@ export function TelaExecucao({ sessaoId }: Props) {
   const [degraus, definirDegraus] = useState<readonly Degrau[]>([
     { ordem: 1, cargaKg: 0, repeticoes: 0 },
   ])
+  const [limiteAtingido, definirLimiteAtingido] = useState<'inicio' | 'fim' | null>(null)
+  const [serieEmEdicao, definirSerieEmEdicao] = useState<Id | null>(null)
+  const [registrandoExtra, definirRegistrandoExtra] = useState(false)
+
+  const montarGesto = useGestoLateral()
 
   useEffect(() => {
     abrir(sessaoId)
@@ -73,6 +83,16 @@ export function TelaExecucao({ sessaoId }: Props) {
     const exercicios = await repositorioExercicios.obterVarios(
       sessao.exercicios.map((item) => item.exercicio.exercicioId),
     )
+
+    // FR-150 — o descanso planejado do item do treino. Não é copiado para a
+    // sessão porque não entra em comparação nenhuma e só faz sentido durante a
+    // execução, onde "agora" é o valor certo (ver D6 no plano).
+    const descansos = new Map<Id, number | null>()
+    for (const item of sessao.exercicios) {
+      if (item.exercicio.itemTreinoId === null) continue
+      const itemTreino = await db.itensTreino.get(item.exercicio.itemTreinoId)
+      descansos.set(item.exercicio.id, itemTreino?.descansoSegundos ?? null)
+    }
 
     const anteriores = new Map(
       await Promise.all(
@@ -119,6 +139,7 @@ export function TelaExecucao({ sessaoId }: Props) {
       exercicios,
       anteriores,
       indicacoes,
+      descansos,
       ponto: pontoDeRetomada(sessao, plano),
     }
   }, [sessaoId])
@@ -138,7 +159,7 @@ export function TelaExecucao({ sessaoId }: Props) {
     )
   }
 
-  const { sessao, plano, exercicios, anteriores, indicacoes, ponto } = dados
+  const { sessao, plano, exercicios, anteriores, indicacoes, descansos, ponto } = dados
 
   if (sessao.sessao.estado !== 'em_andamento') {
     return (
@@ -196,6 +217,17 @@ export function TelaExecucao({ sessaoId }: Props) {
   const rascunho = rascunhoDe(rascunhos, emFoco.exercicio.id)
   const ehDropset = emFoco.exercicio.abordagem === 'dropset'
 
+  /**
+   * FR-137 — todas as séries planejadas registradas.
+   *
+   * Antes desta verificação, a tela oferecia "Série 4 de 4 — série extra" como
+   * o passo natural assim que a terceira era confirmada, com o botão primário
+   * ativo. Foi o que levou o usuário a registrar uma série que não existia no
+   * plano: o aplicativo conduziu para lá.
+   */
+  const exercicioCompleto =
+    metas.length > 0 && seriesRegistradas.filter((s) => !s.naoRealizada).length >= metas.length
+
   // FR-085: a carga vem da série anterior **do mesmo exercício**, e nunca na
   // primeira série. O valor herdado é dado efetivo, não sugestão (FR-119) — e
   // por isso é exibido igual a um digitado, sem marca d'água nem tom próprio.
@@ -203,6 +235,40 @@ export function TelaExecucao({ sessaoId }: Props) {
     rascunho.cargaKg ?? cargaHerdada(seriesRegistradas, proximaOrdem)
 
   const agora = agoraUtc()
+  const indiceAtual = itens.findIndex((item) => item.exercicio.id === emFoco.exercicio.id)
+  const serieDeEdicao =
+    serieEmEdicao === null
+      ? undefined
+      : seriesRegistradas.find((serie) => serie.id === serieEmEdicao)
+
+  // O cabeçalho mostrava a posição do exercício, que o paginador agora anuncia
+  // melhor. No lugar dela vai o total de séries da sessão — informação que não
+  // estava em lugar nenhum e que é o que o usuário quer saber de relance.
+  const seriesConcluidasNaSessao = itens.reduce(
+    (total, item) => total + item.series.filter((serie) => !serie.naoRealizada).length,
+    0,
+  )
+
+  /** FR-131: na ponta, sinaliza o limite sem encerrar nem interromper a sessão. */
+  function irPara(passo: 1 | -1) {
+    const destino = itens[indiceAtual + passo]
+    if (!destino) {
+      definirLimiteAtingido(passo === 1 ? 'fim' : 'inicio')
+      return
+    }
+    definirLimiteAtingido(null)
+    definirRegistrandoExtra(false)
+    definirSerieEmEdicao(null)
+    focar(destino.exercicio.id)
+  }
+
+  const gesto = montarGesto({
+    aoAvancar: () => irPara(1),
+    aoRecuar: () => irPara(-1),
+    // O gesto não compete com um diálogo aberto.
+    desabilitado:
+      acrescentando || confirmandoDescarte || falha !== null || serieEmEdicao !== null,
+  })
 
   const estado = estadoExercicioSessao({
     series: seriesRegistradas,
@@ -228,6 +294,7 @@ export function TelaExecucao({ sessaoId }: Props) {
       // Só aqui, depois do commit. O rascunho mantém a carga para a série
       // seguinte herdar; repetições e RIR voltam a vazio.
       definirRascunho(emFoco.exercicio.id, { repeticoes: null, rir: null })
+      definirRegistrandoExtra(false)
 
       // Fixa o foco no exercício corrente. Sem isto, completar a última série
       // planejada faria a derivação de retomada saltar para o exercício
@@ -308,7 +375,6 @@ export function TelaExecucao({ sessaoId }: Props) {
     }
   }
 
-  const indiceEmFoco = itens.findIndex((item) => item.exercicio.id === emFoco.exercicio.id)
   const podeConfirmar = ehDropset
     ? degraus.some((degrau) => degrau.repeticoes > 0)
     : rascunho.repeticoes !== null
@@ -318,49 +384,37 @@ export function TelaExecucao({ sessaoId }: Props) {
       <header className={estilos.cabecalho}>
         <span className={estilos.nomeDoTreino}>{sessao.sessao.nomeTreino}</span>
         <span className={`${estilos.progresso} numerico`}>
-          {indiceEmFoco + 1} de {itens.length}
+          {seriesConcluidasNaSessao} {seriesConcluidasNaSessao === 1 ? 'série' : 'séries'}
         </span>
         <Botao variante="discreto" onClick={() => navegar({ nome: 'treinos' })}>
           Sair
         </Botao>
       </header>
 
-      <div className={estilos.corpo}>
-        <div className={estilos.tiras} role="tablist" aria-label="Exercícios do treino">
-          {itens.map((item) => {
+      <div className={estilos.corpo} {...gesto}>
+        <NavegacaoExercicios
+          exercicios={itens.map((item) => {
             const metasDele = plano.porExercicioSessao.get(item.exercicio.id) ?? []
-            const estadoDele = estadoExercicioSessao({
-              series: item.series,
-              naoRealizado: item.exercicio.naoRealizado,
-              seriesPlanejadas: metasDele.length,
-            })
-            const ativa = item.exercicio.id === emFoco.exercicio.id
-            return (
-              <button
-                key={item.exercicio.id}
-                type="button"
-                role="tab"
-                aria-selected={ativa}
-                className={`${estilos.tira} ${ativa ? estilos.tiraAtiva : ''}`}
-                onClick={() => focar(item.exercicio.id)}
-              >
-                <span className={estilos.tiraNome}>
-                  {exercicios.get(item.exercicio.exercicioId)?.nome ?? 'Exercício'}
-                </span>
-                <span className={estilos.tiraEstado}>{textoDoEstado(estadoDele)}</span>
-              </button>
-            )
+            return {
+              id: item.exercicio.id,
+              nome: exercicios.get(item.exercicio.exercicioId)?.nome ?? 'Exercício',
+              estado: estadoExercicioSessao({
+                series: item.series,
+                naoRealizado: item.exercicio.naoRealizado,
+                seriesPlanejadas: metasDele.length,
+              }),
+            }
           })}
-
-          <button
-            type="button"
-            className={estilos.tiraAcrescentar}
-            onClick={() => definirAcrescentando(true)}
-            aria-label="Acrescentar exercício fora do plano"
-          >
-            <span aria-hidden="true">+</span>
-          </button>
-        </div>
+          emFocoId={emFoco.exercicio.id}
+          aoFocar={(id) => {
+            definirLimiteAtingido(null)
+            definirRegistrandoExtra(false)
+            definirSerieEmEdicao(null)
+            focar(id)
+          }}
+          aoAcrescentar={() => definirAcrescentando(true)}
+          limiteAtingido={limiteAtingido}
+        />
 
         {estado === 'inconsistente' ? (
           <Faixa tom="critica" papel="alert">
@@ -393,6 +447,38 @@ export function TelaExecucao({ sessaoId }: Props) {
           />
         ) : null}
 
+        {exercicioCompleto && !registrandoExtra ? (
+          <section className={estilos.cartaoConcluido}>
+            <p className={estilos.tituloConcluido}>
+              <span aria-hidden="true">✓</span> Exercício completo
+            </p>
+            <p className={estilos.textoConcluido}>
+              As <span className="numerico">{metas.length}</span>{' '}
+              {metas.length === 1 ? 'série planejada foi registrada' : 'séries planejadas foram registradas'}.
+            </p>
+
+            <div className={estilos.acoesConcluido}>
+              {indiceAtual < itens.length - 1 ? (
+                <Botao principal onClick={() => irPara(1)}>
+                  Próximo exercício
+                </Botao>
+              ) : (
+                <Botao principal onClick={() => void encerrar('concluir')}>
+                  Concluir treino
+                </Botao>
+              )}
+
+              {/*
+                FR-138 — a série além das planejadas exige ação explícita e
+                distinta de confirmar a seguinte. É deliberadamente discreta:
+                ela é a exceção, não o passo natural.
+              */}
+              <Botao variante="discreto" onClick={() => definirRegistrandoExtra(true)}>
+                Registrar série a mais
+              </Botao>
+            </div>
+          </section>
+        ) : (
         <section className={estilos.cartaoSerie}>
           <div className={estilos.identificacaoSerie}>
             <span className={estilos.numeroDaSerie}>
@@ -406,7 +492,8 @@ export function TelaExecucao({ sessaoId }: Props) {
                 <>
                   meta{' '}
                   <span className="numerico">
-                    {metaDaVez.repeticoes} reps, {formatarCarga(metaDaVez.cargaKg)} kg
+                    {formatarIntervalo(intervaloDe(metaDaVez))} reps,{' '}
+                    {formatarCarga(metaDaVez.cargaKg)} kg
                     {metaDaVez.rir !== null ? `, RIR ${metaDaVez.rir}` : ''}
                   </span>
                 </>
@@ -415,6 +502,14 @@ export function TelaExecucao({ sessaoId }: Props) {
               )}
             </span>
           </div>
+
+          {descansos.get(emFoco.exercicio.id) !== null &&
+          descansos.get(emFoco.exercicio.id) !== undefined ? (
+            <p className={estilos.descanso} data-descanso>
+              descanso{' '}
+              <span className="numerico">{descansos.get(emFoco.exercicio.id)} s</span>
+            </p>
+          ) : null}
 
           {ehDropset ? (
             <RegistroDropset degraus={degraus} aoMudar={definirDegraus} />
@@ -469,25 +564,32 @@ export function TelaExecucao({ sessaoId }: Props) {
 
               {metaDaVez ? (
                 <div className={estilos.atalhos}>
+                  {/*
+                    Com intervalo, os atalhos que importam são o topo da faixa —
+                    o alvo cumprido — e um a mais, que é o que indica progressão
+                    (FR-142). Com ponta única, os dois são os de sempre.
+                  */}
                   <button
                     type="button"
                     className={estilos.atalho}
                     onClick={() =>
-                      definirRascunho(emFoco.exercicio.id, { repeticoes: metaDaVez.repeticoes })
+                      definirRascunho(emFoco.exercicio.id, {
+                        repeticoes: intervaloDe(metaDaVez).maximo,
+                      })
                     }
                   >
-                    Fiz as {metaDaVez.repeticoes}
+                    Fiz {intervaloDe(metaDaVez).maximo}
                   </button>
                   <button
                     type="button"
                     className={estilos.atalho}
                     onClick={() =>
                       definirRascunho(emFoco.exercicio.id, {
-                        repeticoes: metaDaVez.repeticoes + 1,
+                        repeticoes: intervaloDe(metaDaVez).maximo + 1,
                       })
                     }
                   >
-                    Fiz {metaDaVez.repeticoes + 1}
+                    Fiz {intervaloDe(metaDaVez).maximo + 1}
                   </button>
                 </div>
               ) : null}
@@ -506,9 +608,11 @@ export function TelaExecucao({ sessaoId }: Props) {
             </>
           )}
         </section>
+        )}
 
         {seriesRegistradas.length > 0 ? (
           <div className={estilos.razao}>
+            <p className={estilos.dicaEditar}>Toque numa série para corrigir ou remover.</p>
             {seriesRegistradas.map((serie) => {
               const meta = metas[serie.ordem - 1]
               const comparacao = compararSerie(
@@ -518,7 +622,14 @@ export function TelaExecucao({ sessaoId }: Props) {
                 serie,
               )
               return (
-                <div key={serie.id} className={estilos.linhaRazao} data-serie-registrada={serie.ordem}>
+                <button
+                  key={serie.id}
+                  type="button"
+                  className={estilos.linhaRazaoEditavel}
+                  data-serie-registrada={serie.ordem}
+                  onClick={() => definirSerieEmEdicao(serie.id)}
+                  aria-label={`Corrigir ou remover a série ${serie.ordem}`}
+                >
                   <span className={`${estilos.ordemRazao} numerico`}>{serie.ordem}</span>
                   {serie.naoRealizada ? (
                     <span className={estilos.serieNaoRealizada}>não realizada</span>
@@ -534,7 +645,7 @@ export function TelaExecucao({ sessaoId }: Props) {
                   <span className={`${estilos.rirRazao} numerico`}>
                     {serie.rir !== null ? `RIR ${serie.rir}` : ''}
                   </span>
-                </div>
+                </button>
               )
             })}
           </div>
@@ -542,12 +653,22 @@ export function TelaExecucao({ sessaoId }: Props) {
       </div>
 
       <footer className={estilos.rodape}>
-        <Botao principal onClick={() => void confirmarSerie()} disabled={!podeConfirmar || gravando}>
-          {gravando ? 'Salvando…' : 'Confirmar série'}
-        </Botao>
+        {exercicioCompleto && !registrandoExtra ? null : (
+          <Botao
+            principal
+            onClick={() => void confirmarSerie()}
+            disabled={!podeConfirmar || gravando}
+          >
+            {gravando ? 'Salvando…' : 'Confirmar série'}
+          </Botao>
+        )}
 
         <div className={estilos.acoesSecundarias}>
-          <Botao variante="secundario" onClick={() => void marcarSerieNaoRealizada()}>
+          <Botao
+            variante="secundario"
+            onClick={() => void marcarSerieNaoRealizada()}
+            disabled={exercicioCompleto && !registrandoExtra}
+          >
             Não fiz esta série
           </Botao>
           <Botao variante="secundario" onClick={() => void alternarExercicioNaoRealizado()}>
@@ -559,9 +680,16 @@ export function TelaExecucao({ sessaoId }: Props) {
           <Botao variante="discreto" onClick={() => definirConfirmandoDescarte(true)}>
             Descartar treino
           </Botao>
-          <Botao variante="discreto" onClick={() => void encerrar('concluir')}>
-            Concluir treino
-          </Botao>
+          {/*
+            Enquanto o cartão de exercício completo já oferece "Concluir
+            treino", o rodapé não repete: a mesma ação em dois lugares da mesma
+            tela faz o usuário hesitar sobre se são a mesma coisa.
+          */}
+          {exercicioCompleto && !registrandoExtra && indiceAtual === itens.length - 1 ? null : (
+            <Botao variante="discreto" onClick={() => void encerrar('concluir')}>
+              Concluir treino
+            </Botao>
+          )}
         </div>
       </footer>
 
@@ -577,6 +705,15 @@ export function TelaExecucao({ sessaoId }: Props) {
           aoConfirmar={() => void encerrar('descartar')}
           aoCancelar={() => definirConfirmandoDescarte(false)}
         />
+      ) : null}
+
+      {/*
+        A série some da lista assim que é removida, e o `useLiveQuery` reflete
+        isso antes de o painel fechar. Procurar sem verificar deixaria um
+        instante em que o painel tenta renderizar uma série que não existe mais.
+      */}
+      {serieDeEdicao ? (
+        <EditorSerieRegistrada serie={serieDeEdicao} aoFechar={() => definirSerieEmEdicao(null)} />
       ) : null}
 
       {falha !== null ? (

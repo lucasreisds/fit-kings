@@ -54,6 +54,7 @@ export function umItemTreino(parcial: Partial<ItemTreino> = {}): ItemTreino {
     exercicioId: novoId(),
     ordem: 1,
     abordagem: 'tradicional',
+    descansoSegundos: null,
     ...parcial,
   }
 }
@@ -64,6 +65,7 @@ export function umaSeriePlanejada(parcial: Partial<SeriePlanejada> = {}): SerieP
     itemTreinoId: novoId(),
     ordem: 1,
     repeticoes: 8,
+    repeticoesMax: null,
     cargaKg: 40,
     rir: 2,
     ...parcial,

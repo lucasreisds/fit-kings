@@ -143,8 +143,9 @@
   touch-action: manipulation;
 }
 
+/* Cor explícita, não opacidade — o controle indisponível continua legível. */
 .botaoIcone:disabled {
-  opacity: 0.3;
+  color: var(--par-controle-desabilitado-texto);
   cursor: not-allowed;
 }
 
@@ -171,7 +172,7 @@
 
 .tabelaSeries {
   display: grid;
-  grid-template-columns: 2rem 1fr 1fr 1fr var(--alvo-toque);
+  grid-template-columns: 1.5rem 1fr 1fr 1fr 1fr var(--alvo-toque);
   align-items: center;
   gap: var(--espaco-x2) var(--espaco-x3);
 }

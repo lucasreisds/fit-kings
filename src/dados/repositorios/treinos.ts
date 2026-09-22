@@ -40,6 +40,8 @@ export type EntradaDeItem = {
   readonly exercicioId: Id
   readonly abordagem: Abordagem
   readonly series: readonly ValoresPlanejados[]
+  /** Descanso planejado, em segundos (FR-148). Exibido, nunca cronometrado. */
+  readonly descansoSegundos?: number | null
 }
 
 export class NomeDeTreinoInvalidoError extends Error {
@@ -63,6 +65,8 @@ export type RepositorioTreinos = {
   reordenarItens(treinoId: Id, de: number, para: number): Promise<void>
   definirSeries(itemTreinoId: Id, series: readonly ValoresPlanejados[]): Promise<SeriePlanejada[]>
   definirAbordagem(itemTreinoId: Id, abordagem: Abordagem): Promise<ItemTreino>
+  /** FR-148 — descanso planejado do item. Valor exibido, não temporizador. */
+  definirDescanso(itemTreinoId: Id, descansoSegundos: number | null): Promise<ItemTreino>
   excluir(treinoId: Id): Promise<void>
 }
 
@@ -161,6 +165,7 @@ export function criarRepositorioTreinos(
           exercicioId: entrada.exercicioId,
           abordagem: entrada.abordagem,
           ordem: existentes.length + 1,
+          descansoSegundos: entrada.descansoSegundos ?? null,
         } as never)
 
         const series = await baseSeries.criarVarios(
@@ -168,6 +173,7 @@ export function criarRepositorioTreinos(
             itemTreinoId: item.id,
             ordem: indice + 1,
             repeticoes: valores.repeticoes,
+            repeticoesMax: valores.repeticoesMax ?? null,
             cargaKg: valores.cargaKg,
             rir: valores.rir,
           })) as never,
@@ -233,6 +239,7 @@ export function criarRepositorioTreinos(
           const alteracao = {
             ordem: indice + 1,
             repeticoes: valores.repeticoes,
+            repeticoesMax: valores.repeticoesMax ?? null,
             cargaKg: valores.cargaKg,
             rir: valores.rir,
           }
@@ -244,6 +251,7 @@ export function criarRepositorioTreinos(
 
           const mudou =
             atual.repeticoes !== valores.repeticoes ||
+            atual.repeticoesMax !== (valores.repeticoesMax ?? null) ||
             atual.cargaKg !== valores.cargaKg ||
             atual.rir !== valores.rir ||
             atual.ordem !== indice + 1
@@ -268,6 +276,10 @@ export function criarRepositorioTreinos(
 
     async definirAbordagem(itemTreinoId, abordagem) {
       return baseItens.atualizar(itemTreinoId, { abordagem } as never)
+    },
+
+    async definirDescanso(itemTreinoId, descansoSegundos) {
+      return baseItens.atualizar(itemTreinoId, { descansoSegundos } as never)
     },
 
     async excluir(treinoId) {

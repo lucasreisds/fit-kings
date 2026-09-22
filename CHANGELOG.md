@@ -23,6 +23,51 @@ simuláveis. Enquanto não forem feitas, esta versão não está pronta para uso
 - Tempo de registro de uma série abaixo de 5 segundos. A contagem de toques já está verificada:
   2 no caminho comum, 3 no pior caso, contra um piso de 3.
 
+## [0.2.0] — 2026-09-21
+
+Ajustes vindos do primeiro uso real na academia, num iPhone 16. Quatro dos cinco não seriam
+encontrados por teste automatizado: são problemas de uso em tela de 430 px, com as mãos ocupadas.
+
+### Adicionado
+
+- **Intervalo de repetições no planejamento.** Além do valor único, uma série pode ser planejada
+  como faixa — "3x 6-8". O critério de aumento de carga passa a considerar superada a série cujas
+  repetições passam do **máximo** do intervalo; ficar no topo é cumprir a meta, não superá-la.
+- **Navegação explícita entre exercícios** durante a execução, com anterior e próximo sempre
+  visíveis, e a posição anunciada.
+- **Trocar de exercício arrastando para o lado.** O gesto não dispara quando começa dentro de um
+  campo ou sobre a faixa de exercícios.
+- **Corrigir e remover séries durante o treino.** Carga, repetições e RIR de uma série já
+  registrada podem ser alterados, e uma série registrada por engano pode ser removida — tudo antes
+  de a sessão terminar.
+- **Sinalização de exercício completo.** Registradas todas as séries planejadas, o aplicativo avisa
+  e oferece o próximo exercício. Registrar uma série a mais passou a exigir ação explícita.
+- **Descanso planejado por exercício**, exibido durante a execução. É um valor escrito: o
+  aplicativo não conta o tempo, não avisa e não interrompe.
+
+### Corrigido
+
+- **Exercício de peso corporal aparecia com zero execuções.** Barra fixa registrada sem carga era
+  descartada da agregação de progresso, embora as séries tivessem repetições registradas e fossem
+  válidas. A agregação aplicava critério mais estrito que a própria regra de série válida.
+- **A evolução de um exercício sem carga** passa a ser apresentada em repetições, não em carga —
+  uma curva de cargas de barra fixa não diz nada.
+- **Contraste de controles indisponíveis.** Botões desabilitados usavam opacidade, que derrubava o
+  contraste abaixo do piso de 4,5:1. Todos passaram a usar cor explícita e validada.
+- **Duplicações na tela de execução**: a posição do exercício aparecia duas vezes, e "Concluir
+  treino" aparecia em dois lugares ao mesmo tempo.
+
+### Notas de compatibilidade
+
+- **`formatVersion` permanece `1`.** Os dois campos novos — `repeticoesMax` e `descansoSegundos` —
+  são opcionais, e campo opcional não incrementa a versão do formato.
+- **Backups gerados na 0.1.0 continuam sendo importados sem perda.** Os campos ausentes viram
+  `null`, que é o valor correto.
+- **Treinos planejados antes desta versão produzem exatamente a mesma avaliação de progressão.** O
+  valor único é tratado como intervalo de pontas coincidentes, de modo que a regra não mudou para
+  eles — e os dez casos de fronteira do portão 4 rodam inalterados como prova disso.
+- Migração de esquema v1 → v2, aditiva.
+
 ## [0.1.0] — 2026-09-20
 
 Primeira versão completa. PWA instalável, offline depois da instalação, sem conta, sem servidor e
@@ -154,5 +199,6 @@ exportação e importação de arquivo.
 - 457 testes de unidade e integração, 21 de ponta a ponta, cobrindo os quatro portões de teste da
   constituição.
 
-[Não publicado]: https://github.com/lucasreisds/fit-kings/compare/v0.1.0...HEAD
+[Não publicado]: https://github.com/lucasreisds/fit-kings/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/lucasreisds/fit-kings/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/lucasreisds/fit-kings/releases/tag/v0.1.0

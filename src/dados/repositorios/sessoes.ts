@@ -30,6 +30,12 @@ import {
   validarCorrecao,
   type CorrecaoDeSerie,
 } from '../../domain/sessao/versionar'
+import {
+  renumerarAposRemocao,
+  validarCorrecaoDeRascunho,
+  type CorrecaoDeRascunho,
+  type MetaPorPosicao,
+} from '../../domain/sessao/rascunho'
 
 /** Uma sessão com seu conteúdo resolvido na versão vigente. */
 export type SessaoCompleta = {
@@ -68,6 +74,22 @@ export class SessaoJaEmAndamentoError extends Error {
     super('Já existe um treino em andamento. Retome, conclua ou descarte antes de iniciar outro.')
     this.name = 'SessaoJaEmAndamentoError'
     this.sessaoId = sessaoId
+  }
+}
+
+/**
+ * A operação pedida só vale com a sessão em andamento.
+ *
+ * A verificação vive na camada de dados, não na tela: uma tela pode esquecer de
+ * checar, e o que está em jogo é a imutabilidade do histórico (FR-113, FR-114).
+ */
+export class SessaoNaoEstaEmAndamentoError extends Error {
+  constructor(estado: string) {
+    super(
+      `Esta operação só vale durante o treino. A sessão está "${estado}" — ` +
+        'para alterar valores de uma sessão concluída, use a correção, que cria uma versão nova.',
+    )
+    this.name = 'SessaoNaoEstaEmAndamentoError'
   }
 }
 
@@ -117,6 +139,10 @@ export type RepositorioSessoes = {
   encerrar(sessaoId: Id, transicao: Transicao): Promise<Sessao>
   /** Correção de sessão concluída: cria versão nova, preserva a anterior. */
   corrigir(sessaoId: Id, correcoes: readonly CorrecaoDeSerie[]): Promise<SessaoCompleta>
+  /** Correção em sessão **em andamento**: escrita direta, sem versionar (FR-133, FR-136). */
+  corrigirSerieEmAndamento(serieId: Id, correcao: CorrecaoDeRascunho): Promise<SerieRealizada>
+  /** Remoção em sessão **em andamento**: exclusão lógica e renumeração (FR-134, FR-135). */
+  removerSerieEmAndamento(serieId: Id): Promise<void>
   /** Todas as versões de uma sessão, da mais antiga para a mais nova. */
   versoesDe(sessaoId: Id): Promise<SessaoVersao[]>
   /** Reconstrói o índice `vigente` a partir de `sessoes.versaoVigenteId` (T088). */
@@ -135,6 +161,40 @@ export function criarRepositorioSessoes(
   async function versaoVigenteDe(sessao: Sessao): Promise<SessaoVersao | undefined> {
     // A autoridade é `sessoes.versaoVigenteId`, nunca o índice `vigente`.
     return db.sessaoVersoes.get(sessao.versaoVigenteId)
+  }
+
+  /**
+   * Localiza a série e **exige** que ela pertença a uma sessão em andamento.
+   * O caminho é série → exercício da sessão → versão → sessão.
+   */
+  async function exigirSerieDeSessaoAberta(serieId: Id) {
+    const serie = await db.seriesRealizadas.get(serieId)
+    if (!serie || serie.excluidoEm !== null) throw new RegistroNaoEncontradoError(serieId)
+
+    const exercicio = await db.exerciciosSessao.get(serie.exercicioSessaoId)
+    if (!exercicio) throw new RegistroNaoEncontradoError(serie.exercicioSessaoId)
+
+    const versao = await db.sessaoVersoes.get(exercicio.sessaoVersaoId)
+    if (!versao) throw new RegistroNaoEncontradoError(exercicio.sessaoVersaoId)
+
+    const sessao = await db.sessoes.get(versao.sessaoId)
+    if (!sessao) throw new RegistroNaoEncontradoError(versao.sessaoId)
+    if (sessao.estado !== 'em_andamento') {
+      throw new SessaoNaoEstaEmAndamentoError(sessao.estado)
+    }
+
+    return { serie, exercicio, sessao }
+  }
+
+  /** Metas planejadas do item, por posição, para a re-vinculação de FR-135. */
+  async function metasDoExercicioSessao(itemTreinoId: Id | null): Promise<MetaPorPosicao[]> {
+    if (itemTreinoId === null) return []
+
+    const planejadas = await db.seriesPlanejadas.where('itemTreinoId').equals(itemTreinoId).toArray()
+    return planejadas
+      .filter((serie) => serie.excluidoEm === null)
+      .sort((a, b) => a.ordem - b.ordem)
+      .map((serie) => ({ ordem: serie.ordem, seriePlanejadaId: serie.id }))
   }
 
   async function montar(sessao: Sessao): Promise<SessaoCompleta | undefined> {
@@ -441,6 +501,79 @@ export function criarRepositorioSessoes(
       const completa = await this.obter(resultado)
       if (!completa) throw new RegistroNaoEncontradoError(resultado)
       return completa
+    },
+
+    /**
+     * FR-133, FR-136 — correção durante a sessão, **sem** criar versão.
+     *
+     * Ver D2: a sessão em andamento é rascunho, não registro histórico. O
+     * versionamento de FR-114 alcança apenas a concluída.
+     */
+    async corrigirSerieEmAndamento(serieId, correcao) {
+      return db.transaction(
+        'rw',
+        [db.seriesRealizadas, db.exerciciosSessao, db.sessaoVersoes, db.sessoes],
+        async () => {
+          const { serie } = await exigirSerieDeSessaoAberta(serieId)
+
+          const problemas = validarCorrecaoDeRascunho(correcao)
+          if (problemas.length > 0) throw new CorrecaoInvalidaError(problemas)
+
+          const atualizada = await baseSeries.atualizar(serie.id, correcao as never)
+
+          // FR-126 continua valendo: registrar repetições limpa a marcação de
+          // não realizado do exercício, e corrigir é registrar.
+          if (atualizada.repeticoes !== null && !atualizada.naoRealizada) {
+            const exercicio = await db.exerciciosSessao.get(atualizada.exercicioSessaoId)
+            if (exercicio?.naoRealizado === true) {
+              await baseExercicios.atualizar(exercicio.id, { naoRealizado: false } as never)
+            }
+          }
+
+          return atualizada
+        },
+      )
+    },
+
+    /**
+     * FR-134, FR-135 — remoção durante a sessão.
+     *
+     * A remoção é lógica, como toda remoção no projeto: a linha permanece na
+     * tabela com `excluidoEm` carimbado. As restantes são renumeradas e
+     * re-vinculadas à meta da nova posição.
+     */
+    async removerSerieEmAndamento(serieId) {
+      await db.transaction(
+        'rw',
+        [db.seriesRealizadas, db.exerciciosSessao, db.sessaoVersoes, db.sessoes, db.seriesPlanejadas, db.itensTreino],
+        async () => {
+          const { serie, exercicio } = await exigirSerieDeSessaoAberta(serieId)
+
+          await baseSeries.excluir(serie.id)
+
+          const restantes = (
+            await db.seriesRealizadas.where('exercicioSessaoId').equals(exercicio.id).toArray()
+          )
+            .filter((candidata) => candidata.excluidoEm === null)
+            .sort((a, b) => a.ordem - b.ordem)
+
+          const metas = await metasDoExercicioSessao(exercicio.itemTreinoId)
+
+          for (const renumerada of renumerarAposRemocao(restantes, metas)) {
+            const original = restantes.find((candidata) => candidata.id === renumerada.id)
+            if (
+              original &&
+              (original.ordem !== renumerada.ordem ||
+                original.seriePlanejadaId !== renumerada.seriePlanejadaId)
+            ) {
+              await baseSeries.atualizar(renumerada.id, {
+                ordem: renumerada.ordem,
+                seriePlanejadaId: renumerada.seriePlanejadaId,
+              } as never)
+            }
+          }
+        },
+      )
     },
 
     /**

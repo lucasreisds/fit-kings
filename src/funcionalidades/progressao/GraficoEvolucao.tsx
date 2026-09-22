@@ -11,12 +11,19 @@
  * valor exato de todos eles — ela é, ao mesmo tempo, a visão acessível e o
  * caminho para a sessão de cada ponto (US6, cenário 2).
  */
-import type { PontoDeEvolucao } from '../../domain/evolucao/agregar'
+import {
+  unidadeDoModo,
+  valorDoPonto,
+  type ModoDaEvolucao,
+  type PontoDeEvolucao,
+} from '../../domain/evolucao/agregar'
 import { formatarCarga, formatarData } from '../../plataforma/formato'
 import estilos from './progressao.module.css'
 
 type Props = {
   pontos: readonly PontoDeEvolucao[]
+  /** Carga ou repetições — num exercício sem carga, a curva mede reps (FR-146). */
+  modo: ModoDaEvolucao
   nomeDoExercicio: string
 }
 
@@ -24,10 +31,11 @@ const LARGURA = 320
 const ALTURA = 160
 const MARGEM = { topo: 18, direita: 16, baixo: 24, esquerda: 34 }
 
-export function GraficoEvolucao({ pontos, nomeDoExercicio }: Props) {
+export function GraficoEvolucao({ pontos, modo, nomeDoExercicio }: Props) {
   if (pontos.length < 2) return null
 
-  const cargas = pontos.map((ponto) => ponto.cargaMaximaKg)
+  const unidade = unidadeDoModo(modo)
+  const cargas = pontos.map((ponto) => valorDoPonto(ponto, modo))
   const minimo = Math.min(...cargas)
   const maximo = Math.max(...cargas)
   // Faixa mínima evita que uma carga constante vire uma linha colada no eixo.
@@ -43,7 +51,10 @@ export function GraficoEvolucao({ pontos, nomeDoExercicio }: Props) {
     MARGEM.topo + areaAltura - ((carga - base) / faixa) * areaAltura
 
   const caminho = pontos
-    .map((ponto, indice) => `${indice === 0 ? 'M' : 'L'} ${x(indice)} ${y(ponto.cargaMaximaKg)}`)
+    .map(
+      (ponto, indice) =>
+        `${indice === 0 ? 'M' : 'L'} ${x(indice)} ${y(valorDoPonto(ponto, modo))}`,
+    )
     .join(' ')
 
   const primeiro = pontos[0]!
@@ -54,11 +65,11 @@ export function GraficoEvolucao({ pontos, nomeDoExercicio }: Props) {
       className={estilos.grafico}
       viewBox={`0 0 ${LARGURA} ${ALTURA}`}
       role="img"
-      aria-label={`Evolução da carga de ${nomeDoExercicio}: de ${formatarCarga(
-        primeiro.cargaMaximaKg,
-      )} kg em ${formatarData(primeiro.quando)} a ${formatarCarga(
-        ultimo.cargaMaximaKg,
-      )} kg em ${formatarData(ultimo.quando)}, em ${pontos.length} execuções.`}
+      aria-label={`Evolução de ${nomeDoExercicio}: de ${formatarCarga(
+        valorDoPonto(primeiro, modo),
+      )} ${unidade} em ${formatarData(primeiro.quando)} a ${formatarCarga(
+        valorDoPonto(ultimo, modo),
+      )} ${unidade} em ${formatarData(ultimo.quando)}, em ${pontos.length} execuções.`}
     >
       {/* Eixo recessivo: uma régua de base, sem grade. */}
       <line
@@ -83,7 +94,7 @@ export function GraficoEvolucao({ pontos, nomeDoExercicio }: Props) {
           key={ponto.sessaoId}
           className={estilos.pontoCarga}
           cx={x(indice)}
-          cy={y(ponto.cargaMaximaKg)}
+          cy={y(valorDoPonto(ponto, modo))}
           r={indice === 0 || indice === pontos.length - 1 ? 4.5 : 3.5}
         />
       ))}
@@ -92,10 +103,10 @@ export function GraficoEvolucao({ pontos, nomeDoExercicio }: Props) {
       <text
         className={estilos.rotuloEixo}
         x={x(pontos.length - 1)}
-        y={y(ultimo.cargaMaximaKg) - 8}
+        y={y(valorDoPonto(ultimo, modo)) - 8}
         textAnchor="end"
       >
-        {formatarCarga(ultimo.cargaMaximaKg)} kg
+        {formatarCarga(valorDoPonto(ultimo, modo))} {unidade}
       </text>
     </svg>
   )

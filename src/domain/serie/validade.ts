@@ -1,3 +1,4 @@
+import { intervaloDe, posicaoNoIntervalo } from './intervalo'
 /**
  * Validade de série e comparação planejado x realizado — FR-092, FR-020, FR-019.
  *
@@ -31,7 +32,10 @@ export function temAlgumaSerieValida(series: readonly SerieAvaliavel[]): boolean
  * ------------------------------------------------------------------ */
 
 export type Planejado = {
+  /** Mínimo do intervalo de repetições (FR-140). */
   readonly repeticoes: number
+  /** Máximo. `null` = ponta única, o comportamento de sempre. */
+  readonly repeticoesMax?: number | null
   readonly cargaKg: number
   readonly rir: number | null
 }
@@ -72,11 +76,32 @@ export function compararSerie(
   }
 
   return {
-    repeticoes: comparar(realizado.repeticoes, planejado.repeticoes),
+    // FR-141: com ponta única, "dentro" é o antigo "igual", e as outras duas
+    // classificações não mudam.
+    repeticoes: compararComIntervalo(realizado.repeticoes, planejado),
     carga: comparar(realizado.cargaKg, planejado.cargaKg),
     // RIR menor significa esforço maior. A comparação aqui é numérica pura —
     // quem interpreta a direção é a avaliação de progressão (FR-044).
     rir: comparar(realizado.rir, planejado.rir),
+  }
+}
+
+/** FR-141 — abaixo, dentro ou acima do intervalo planejado. */
+function compararComIntervalo(realizado: number | null, planejado: Planejado): Comparacao {
+  if (realizado === null) return 'sem_registro'
+
+  const intervalo = intervaloDe({
+    repeticoes: planejado.repeticoes,
+    repeticoesMax: planejado.repeticoesMax ?? null,
+  })
+
+  switch (posicaoNoIntervalo(realizado, intervalo)) {
+    case 'acima':
+      return 'acima'
+    case 'abaixo':
+      return 'abaixo'
+    case 'dentro':
+      return 'igual'
   }
 }
 

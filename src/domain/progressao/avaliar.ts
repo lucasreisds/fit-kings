@@ -8,8 +8,13 @@
  *
  * **O critério**, exatamente:
  *
- * 1. As repetições realizadas superam as planejadas em **todas** as séries
- *    planejadas — estritamente maiores, empate não conta (FR-043, FR-081).
+ * 1. As repetições realizadas superam **o máximo do intervalo planejado** em
+ *    todas as séries planejadas — estritamente maiores, empate não conta
+ *    (FR-043, FR-081, FR-142).
+ *
+ *    Para uma série de valor único o máximo é o próprio valor, e a regra é
+ *    literalmente a que sempre foi. É o que faz os dez casos de fronteira do
+ *    portão 4 continuarem valendo sem alteração (SC-040).
  * 2. **E** o RIR realizado é maior ou igual ao planejado nas séries em que os
  *    dois foram informados (FR-044). Se o RIR não foi informado em nenhuma
  *    série, aplica-se só o critério de repetições.
@@ -23,6 +28,7 @@
  */
 import type { Planejado } from '../serie/validade'
 import { serieEhValida, type SerieAvaliavel } from '../serie/validade'
+import { intervaloDe, superouIntervalo } from '../serie/intervalo'
 
 export type SerieRealizadaParaAvaliar = SerieAvaliavel & {
   readonly ordem: number
@@ -59,7 +65,10 @@ export type AvaliacaoDeProgressao = {
 
 export type DetalheDaSerie = {
   readonly ordem: number
+  /** Mínimo do intervalo. Mantém o nome por compatibilidade de leitura. */
   readonly repeticoesPlanejadas: number
+  /** Máximo do intervalo. Igual ao mínimo quando a ponta é única. */
+  readonly repeticoesMaximas: number
   readonly repeticoesRealizadas: number | null
   readonly rirPlanejado: number | null
   readonly rirRealizado: number | null
@@ -89,9 +98,15 @@ export function avaliarProgressao(entrada: EntradaDaAvaliacao): AvaliacaoDeProgr
   for (const planejada of entrada.planejadas) {
     const realizada = porOrdem.get(planejada.ordem)
 
+    const intervalo = intervaloDe({
+      repeticoes: planejada.repeticoes,
+      repeticoesMax: planejada.repeticoesMax ?? null,
+    })
+
     const detalhe: DetalheDaSerie = {
       ordem: planejada.ordem,
-      repeticoesPlanejadas: planejada.repeticoes,
+      repeticoesPlanejadas: intervalo.minimo,
+      repeticoesMaximas: intervalo.maximo,
       repeticoesRealizadas: realizada?.repeticoes ?? null,
       rirPlanejado: planejada.rir,
       rirRealizado: realizada?.rir ?? null,
@@ -118,8 +133,9 @@ export function avaliarProgressao(entrada: EntradaDaAvaliacao): AvaliacaoDeProgr
       continue
     }
 
-    // FR-043, FR-081: estritamente maior. Empate não indica.
-    const superouRepeticoes = realizada.repeticoes > planejada.repeticoes
+    // FR-142: estritamente maior que o **máximo** do intervalo. Ficar no topo
+    // é cumprir a meta, não superá-la. Com ponta única, é FR-043 sem mudança.
+    const superouRepeticoes = superouIntervalo(realizada.repeticoes, intervalo)
 
     // FR-044: o RIR só é critério nas séries em que os dois foram informados.
     let rirOk = true

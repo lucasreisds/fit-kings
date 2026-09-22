@@ -23,8 +23,12 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Cor explícita em vez de opacidade, pelo mesmo motivo da seta de navegação:
+   um controle indisponível continua precisando ser legível (D9 critério 1). */
 .botao:disabled {
-  opacity: 0.45;
+  background: var(--par-controle-desabilitado-fundo);
+  color: var(--par-controle-desabilitado-texto);
+  border-color: var(--cor-linha);
   cursor: not-allowed;
 }
 
@@ -138,7 +142,10 @@
 }
 
 .passoBotao:disabled {
-  opacity: 0.4;
+  background: var(--par-controle-desabilitado-fundo);
+  color: var(--par-controle-desabilitado-texto);
+  border-color: var(--cor-linha);
+  cursor: not-allowed;
 }
 
 .passoValor {

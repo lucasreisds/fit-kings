@@ -41,7 +41,10 @@ export type PlanoDaSessao = {
 export type MetaDaSerie = {
   readonly seriePlanejadaId: Id
   readonly ordem: number
+  /** Mínimo do intervalo (FR-140). */
   readonly repeticoes: number
+  /** Máximo. `null` = ponta única. */
+  readonly repeticoesMax: number | null
   readonly cargaKg: number
   readonly rir: number | null
 }
@@ -103,6 +106,7 @@ export async function lerPlanoDaSessao(
         seriePlanejadaId: serie.id,
         ordem: serie.ordem,
         repeticoes: serie.repeticoes,
+        repeticoesMax: serie.repeticoesMax,
         cargaKg: serie.cargaKg,
         rir: serie.rir,
       })),

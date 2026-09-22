@@ -5,6 +5,7 @@
  * T005 garante isso por ferramenta, e não por disciplina (Princípio V).
  */
 import type { Abordagem } from '../tipos/treino'
+import { validarIntervalo } from '../serie/intervalo'
 
 export type ProblemaDeValidacao = {
   readonly campo: string
@@ -107,7 +108,10 @@ export function mover<T extends ComOrdem>(itens: readonly T[], de: number, para:
  * ------------------------------------------------------------------ */
 
 export type ValoresPlanejados = {
+  /** Mínimo do intervalo de repetições (FR-139, FR-140). */
   readonly repeticoes: number
+  /** Máximo. `null` = ponta única. */
+  readonly repeticoesMax?: number | null
   readonly cargaKg: number
   readonly rir: number | null
 }
@@ -118,11 +122,13 @@ export const INCREMENTO_DE_CARGA = 0.5
 export function validarSeriePlanejada(valores: ValoresPlanejados): Resultado<ValoresPlanejados> {
   const problemas: ProblemaDeValidacao[] = []
 
-  if (!Number.isInteger(valores.repeticoes) || valores.repeticoes < 1) {
-    problemas.push({
-      campo: 'repeticoes',
-      mensagem: 'As repetições planejadas são um número inteiro maior que zero.',
-    })
+  // FR-143: a regra do intervalo vive num lugar só, e é a mesma que a
+  // importação usa. Duplicá-la aqui abriria espaço para as duas divergirem.
+  for (const problema of validarIntervalo({
+    repeticoes: valores.repeticoes,
+    repeticoesMax: valores.repeticoesMax ?? null,
+  })) {
+    problemas.push(problema)
   }
 
   // Zero é carga válida: peso corporal.
