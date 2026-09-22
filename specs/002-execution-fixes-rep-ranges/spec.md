@@ -145,6 +145,36 @@ Progresso mostra duas execuções, com evolução legível.
 
 ---
 
+### User Story 5 - Descanso planejado visível durante a execução (Priority: P3)
+
+O treino escrito no papel traz o descanso junto das séries: "3x 6-8, 90s". Hoje esse número não
+cabe em lugar nenhum do aplicativo, e o usuário precisa lembrá-lo de cabeça ou consultar outra
+fonte no meio do treino.
+
+O que se pede é o **valor escrito**, visível na hora de executar. Não é cronômetro: o aplicativo
+não conta, não avisa e não interrompe nada.
+
+**Why this priority**: é conveniência, não correção. As quatro histórias anteriores consertam coisas
+que impedem ou corrompem o uso; esta acrescenta uma informação que hoje falta.
+
+**Independent Test**: planejar um exercício com 90 segundos de descanso, iniciar a sessão e conferir
+que o valor aparece junto da meta.
+
+**Acceptance Scenarios**:
+
+1. **Given** um exercício sendo planejado, **When** o usuário define o descanso, **Then** o valor é
+   guardado com o exercício do treino.
+2. **Given** um exercício com descanso planejado, **When** o usuário o executa, **Then** o valor
+   aparece na tela de execução junto da meta.
+3. **Given** um exercício sem descanso planejado, **When** o usuário o executa, **Then** nada é
+   exibido a respeito de descanso, e nenhum valor é inventado.
+4. **Given** qualquer exercício com descanso planejado, **When** a sessão corre, **Then** o
+   aplicativo **não** conta o tempo, **não** emite aviso e **não** interrompe nada.
+5. **Given** treinos criados antes desta mudança, **When** o usuário os abre, **Then** eles
+   continuam válidos, com o descanso vazio.
+
+---
+
 ### Edge Cases
 
 - **Arrastar durante a digitação**: o gesto de trocar de exercício não pode disparar enquanto o
@@ -211,6 +241,18 @@ Progresso mostra duas execuções, com evolução legível.
 - **FR-144**: Treinos, sessões e arquivos de backup criados antes desta mudança DEVEM continuar
   válidos, e a avaliação de progressão sobre eles NÃO DEVE mudar de resultado.
 
+### Descanso planejado
+
+- **FR-148**: O sistema DEVE permitir registrar, por exercício do treino, um tempo de descanso
+  planejado, em segundos.
+- **FR-149**: O tempo de descanso DEVE ser opcional; a ausência dele é o estado normal de um
+  exercício que nunca o teve.
+- **FR-150**: O sistema DEVE exibir o descanso planejado na tela de execução do exercício, quando
+  houver, junto dos demais valores planejados.
+- **FR-151**: O sistema **NÃO DEVE** contar o tempo, exibir contagem regressiva, emitir aviso sonoro
+  ou visual ao fim do descanso, nem interromper a sessão por causa dele. O valor é informação
+  escrita, não temporizador.
+
 ### Exercício sem carga
 
 - **FR-145**: O sistema DEVE contar como execução, para fins de histórico e de progresso, a série
@@ -246,6 +288,8 @@ Progresso mostra duas execuções, com evolução legível.
   correta de execuções em 100% dos casos.
 - **SC-042**: 100% dos arquivos de backup gerados antes desta mudança continuam sendo importados sem
   perda de dado.
+- **SC-043**: O descanso planejado de um exercício é visível na tela de execução sem nenhum toque
+  adicional, e em 0% dos casos o aplicativo conta tempo ou emite aviso por causa dele.
 
 ---
 
@@ -262,6 +306,14 @@ Progresso mostra duas execuções, com evolução legível.
 - **O intervalo vale por série.** Séries diferentes do mesmo exercício podem ter intervalos
   diferentes, como já ocorre com o valor único (FR-009).
 - **RIR continua como está.** Não ganha intervalo nesta feature.
+- **O descanso exibido não é o cronômetro proibido pela constituição.** A lista de fora de escopo
+  da constituição v1.4.0 veda o _cronômetro de descanso_: um mecanismo que conta o tempo e avisa.
+  O que esta feature acrescenta é um **valor planejado, estático, exibido** — da mesma natureza que
+  repetições, carga e RIR, que já são planejados e exibidos. FR-151 fixa a fronteira por escrito.
+  Transformar isso numa contagem regressiva depois **exigiria emenda constitucional**, e a distinção
+  está registrada aqui exatamente para que essa passagem não aconteça por descuido.
+- **O descanso é por exercício, não por série.** É como o treino é escrito no papel, e foi o que o
+  proprietário pediu.
 - **A migração do modelo é aditiva.** O Princípio IV proíbe migração destrutiva, então o intervalo
   entra sem invalidar o que já foi gravado.
 
@@ -273,4 +325,6 @@ Progresso mostra duas execuções, com evolução legível.
 - Intervalo aberto em qualquer das pontas.
 - Reordenar exercícios durante a sessão em andamento.
 - Remover ou acrescentar séries e exercícios em sessão **concluída** — FR-113 permanece.
-- Cronômetro de descanso, periodização e qualquer item já fora do escopo da constituição.
+- **Contagem regressiva do descanso**, aviso ao fim dele, ou qualquer comportamento temporal — é o
+  cronômetro que a constituição veda. Só o valor escrito entra.
+- Periodização e demais itens fora do escopo da constituição.
