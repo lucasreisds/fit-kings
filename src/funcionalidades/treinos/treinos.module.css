@@ -172,7 +172,7 @@
 
 .tabelaSeries {
   display: grid;
-  grid-template-columns: 2rem 1fr 1fr 1fr var(--alvo-toque);
+  grid-template-columns: 1.5rem 1fr 1fr 1fr 1fr var(--alvo-toque);
   align-items: center;
   gap: var(--espaco-x2) var(--espaco-x3);
 }

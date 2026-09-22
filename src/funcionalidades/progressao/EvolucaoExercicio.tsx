@@ -15,6 +15,8 @@ import {
   agregarEvolucao,
   PONTOS_MINIMOS_PARA_CURVA,
   temHistoricoSuficiente,
+  unidadeDoModo,
+  valorDoPonto,
 } from '../../domain/evolucao/agregar'
 import { formatarCarga, formatarData } from '../../plataforma/formato'
 import type { Id } from '../../domain/tipos'
@@ -30,7 +32,7 @@ export function EvolucaoExercicio({ exercicioId }: Props) {
       repositorioHistorico.execucoesDoExercicio(exercicioId),
     ])
 
-    const pontos = agregarEvolucao(
+    const evolucao = agregarEvolucao(
       execucoes.map((execucao) => ({
         sessaoId: execucao.sessaoId,
         concluidaEm: execucao.concluidaEm,
@@ -38,12 +40,14 @@ export function EvolucaoExercicio({ exercicioId }: Props) {
       })),
     )
 
-    return { exercicio, pontos }
+    return { exercicio, evolucao }
   }, [exercicioId])
 
   if (dados === undefined) return null
 
-  const { exercicio, pontos } = dados
+  const { exercicio, evolucao } = dados
+  const { pontos, modo } = evolucao
+  const unidade = unidadeDoModo(modo)
   const nome = exercicio?.nome ?? 'Exercício'
 
   if (!temHistoricoSuficiente(pontos)) {
@@ -68,13 +72,15 @@ export function EvolucaoExercicio({ exercicioId }: Props) {
 
   const primeiro = pontos[0]!
   const ultimo = pontos[pontos.length - 1]!
-  const diferenca = ultimo.cargaMaximaKg - primeiro.cargaMaximaKg
+  const valorInicial = valorDoPonto(primeiro, modo)
+  const valorFinal = valorDoPonto(ultimo, modo)
+  const diferenca = valorFinal - valorInicial
 
   return (
     <div className={estilos.evolucao}>
       <h2 className={estilos.vazioTitulo}>{nome}</h2>
 
-      <GraficoEvolucao pontos={pontos} nomeDoExercicio={nome} />
+      <GraficoEvolucao pontos={pontos} modo={modo} nomeDoExercicio={nome} />
 
       <div className={estilos.legenda}>
         <span className="numerico">{formatarData(primeiro.quando)}</span>
@@ -83,17 +89,15 @@ export function EvolucaoExercicio({ exercicioId }: Props) {
 
       <div className={estilos.resumoEvolucao}>
         <div className={estilos.medida}>
-          <span className={`${estilos.valorMedida} numerico`}>
-            {formatarCarga(ultimo.cargaMaximaKg)}
-          </span>
-          <span className={estilos.rotuloMedida}>kg na última</span>
+          <span className={`${estilos.valorMedida} numerico`}>{formatarCarga(valorFinal)}</span>
+          <span className={estilos.rotuloMedida}>{unidade} na última</span>
         </div>
         <div className={estilos.medida}>
           <span className={`${estilos.valorMedida} numerico`}>
             {diferenca > 0 ? '+' : ''}
             {formatarCarga(diferenca)}
           </span>
-          <span className={estilos.rotuloMedida}>kg desde a primeira</span>
+          <span className={estilos.rotuloMedida}>{unidade} desde a primeira</span>
         </div>
         <div className={estilos.medida}>
           <span className={`${estilos.valorMedida} numerico`}>{pontos.length}</span>
@@ -115,7 +119,7 @@ export function EvolucaoExercicio({ exercicioId }: Props) {
           >
             <span className={`${estilos.dataPonto} numerico`}>{formatarData(ponto.quando)}</span>
             <span className={`${estilos.cargaPonto} numerico`}>
-              {formatarCarga(ponto.cargaMaximaKg)} kg
+              {formatarCarga(valorDoPonto(ponto, modo))} {unidade}
             </span>
             <span className={`${estilos.dataPonto} numerico`}>
               {ponto.seriesValidas} {ponto.seriesValidas === 1 ? 'série' : 'séries'}

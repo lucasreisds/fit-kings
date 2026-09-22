@@ -21,6 +21,18 @@ function planejadas(quantidade: number, repeticoes = 8, rir: number | null = nul
   return Array.from({ length: quantidade }, (_, i) => ({
     ordem: i + 1,
     repeticoes,
+    repeticoesMax: null,
+    cargaKg: 40,
+    rir,
+  })) satisfies SeriePlanejadaParaAvaliar[]
+}
+
+/** Planejamento em faixa, como "3x 6-8" (FR-139). */
+function faixa(quantidade: number, minimo: number, maximo: number, rir: number | null = null) {
+  return Array.from({ length: quantidade }, (_, i) => ({
+    ordem: i + 1,
+    repeticoes: minimo,
+    repeticoesMax: maximo,
     cargaKg: 40,
     rir,
   })) satisfies SeriePlanejadaParaAvaliar[]
@@ -276,5 +288,124 @@ describe('determinismo (Princípio V)', () => {
       rirRealizado: 2,
       superou: true,
     })
+  })
+})
+
+/**
+ * T028 — SC-039, FR-142. Os casos de intervalo entram como **acréscimo**: os
+ * dez de fronteira acima continuam rodando inalterados, e é isso que prova
+ * SC-040. Se algum deles mudar de resultado, a generalização do intervalo
+ * quebrou o que já funcionava.
+ */
+describe('intervalo de repetições no critério (FR-142, SC-039)', () => {
+  it('3x 6-8 com 9/9/9 indica aumento', () => {
+    const resultado = avaliarProgressao({
+      planejadas: faixa(3, 6, 8),
+      realizadas: realizadas([9, 9, 9]),
+    })
+    expect(resultado.indica).toBe(true)
+    expect(resultado.motivo).toBe('superou_em_todas')
+  })
+
+  it('3x 6-8 com 8/8/8 não indica — no topo é cumprir, não superar', () => {
+    const resultado = avaliarProgressao({
+      planejadas: faixa(3, 6, 8),
+      realizadas: realizadas([8, 8, 8]),
+    })
+    expect(resultado.indica).toBe(false)
+    expect(resultado.motivo).toBe('repeticoes_nao_superadas')
+  })
+
+  it('3x 6-8 com 9/9/8 não indica — a terceira não superou', () => {
+    expect(
+      avaliarProgressao({ planejadas: faixa(3, 6, 8), realizadas: realizadas([9, 9, 8]) }).indica,
+    ).toBe(false)
+  })
+
+  it('3x 6-8 com 7/7/7 não indica — dentro do intervalo', () => {
+    expect(
+      avaliarProgressao({ planejadas: faixa(3, 6, 8), realizadas: realizadas([7, 7, 7]) }).indica,
+    ).toBe(false)
+  })
+
+  it('3x 6-8 com 5/5/5 não indica — abaixo', () => {
+    expect(
+      avaliarProgressao({ planejadas: faixa(3, 6, 8), realizadas: realizadas([5, 5, 5]) }).indica,
+    ).toBe(false)
+  })
+
+  it('o detalhe expõe as duas pontas do intervalo (FR-047)', () => {
+    const resultado = avaliarProgressao({
+      planejadas: faixa(3, 6, 8),
+      realizadas: realizadas([9, 9, 9]),
+    })
+    expect(resultado.detalhePorSerie[0]).toMatchObject({
+      repeticoesPlanejadas: 6,
+      repeticoesMaximas: 8,
+      repeticoesRealizadas: 9,
+      superou: true,
+    })
+  })
+
+  it('séries com faixas diferentes são avaliadas uma a uma (FR-009)', () => {
+    const resultado = avaliarProgressao({
+      planejadas: [
+        { ordem: 1, repeticoes: 8, repeticoesMax: 10, cargaKg: 40, rir: null },
+        { ordem: 2, repeticoes: 6, repeticoesMax: 8, cargaKg: 42.5, rir: null },
+      ],
+      realizadas: realizadas([11, 9]),
+    })
+    expect(resultado.indica).toBe(true)
+
+    // Uma que fica no topo da própria faixa derruba o conjunto.
+    expect(
+      avaliarProgressao({
+        planejadas: [
+          { ordem: 1, repeticoes: 8, repeticoesMax: 10, cargaKg: 40, rir: null },
+          { ordem: 2, repeticoes: 6, repeticoesMax: 8, cargaKg: 42.5, rir: null },
+        ],
+        realizadas: realizadas([11, 8]),
+      }).indica,
+    ).toBe(false)
+  })
+
+  it('o critério de RIR continua se sobrepondo ao de repetições (FR-044)', () => {
+    // Superou a faixa, mas o RIR caiu abaixo do planejado.
+    const resultado = avaliarProgressao({
+      planejadas: faixa(3, 6, 8, 2),
+      realizadas: realizadas([9, 9, 9], { rir: [2, 2, 1] }),
+    })
+    expect(resultado.indica).toBe(false)
+    expect(resultado.motivo).toBe('rir_abaixo_do_planejado')
+
+    // Com o RIR mantido, indica.
+    expect(
+      avaliarProgressao({
+        planejadas: faixa(3, 6, 8, 2),
+        realizadas: realizadas([9, 9, 9], { rir: [2, 2, 2] }),
+      }).indica,
+    ).toBe(true)
+  })
+
+  it('faixa de pontas iguais se comporta como valor único (SC-040)', () => {
+    const comFaixa = avaliarProgressao({
+      planejadas: faixa(3, 8, 8),
+      realizadas: realizadas([9, 9, 9]),
+    })
+    const comValorUnico = avaliarProgressao({
+      planejadas: planejadas(3, 8),
+      realizadas: realizadas([9, 9, 9]),
+    })
+    expect(comFaixa.indica).toBe(comValorUnico.indica)
+    expect(comFaixa.motivo).toBe(comValorUnico.motivo)
+  })
+
+  it('série extra continua ignorada, com ou sem faixa (FR-079)', () => {
+    const resultado = avaliarProgressao({
+      planejadas: faixa(3, 6, 8),
+      realizadas: realizadas([9, 9, 9, 4]),
+    })
+    expect(resultado.indica).toBe(true)
+    expect(resultado.detalhePorSerie).toHaveLength(3)
   })
 })

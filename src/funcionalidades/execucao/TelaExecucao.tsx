@@ -27,6 +27,7 @@ import { pontoDeRetomada } from './retomar'
 import { execucaoAnterior } from './consultas'
 import { cargaHerdada } from '../../domain/serie/heranca'
 import { compararSerie } from '../../domain/serie/validade'
+import { formatarIntervalo, intervaloDe } from '../../domain/serie/intervalo'
 import { estadoExercicioSessao, textoDoEstado } from '../../domain/sessao/estadoExercicio'
 import type { Degrau, Id } from '../../domain/tipos'
 import { agoraUtc } from '../../plataforma/tempo'
@@ -479,7 +480,8 @@ export function TelaExecucao({ sessaoId }: Props) {
                 <>
                   meta{' '}
                   <span className="numerico">
-                    {metaDaVez.repeticoes} reps, {formatarCarga(metaDaVez.cargaKg)} kg
+                    {formatarIntervalo(intervaloDe(metaDaVez))} reps,{' '}
+                    {formatarCarga(metaDaVez.cargaKg)} kg
                     {metaDaVez.rir !== null ? `, RIR ${metaDaVez.rir}` : ''}
                   </span>
                 </>
@@ -542,25 +544,32 @@ export function TelaExecucao({ sessaoId }: Props) {
 
               {metaDaVez ? (
                 <div className={estilos.atalhos}>
+                  {/*
+                    Com intervalo, os atalhos que importam são o topo da faixa —
+                    o alvo cumprido — e um a mais, que é o que indica progressão
+                    (FR-142). Com ponta única, os dois são os de sempre.
+                  */}
                   <button
                     type="button"
                     className={estilos.atalho}
                     onClick={() =>
-                      definirRascunho(emFoco.exercicio.id, { repeticoes: metaDaVez.repeticoes })
+                      definirRascunho(emFoco.exercicio.id, {
+                        repeticoes: intervaloDe(metaDaVez).maximo,
+                      })
                     }
                   >
-                    Fiz as {metaDaVez.repeticoes}
+                    Fiz {intervaloDe(metaDaVez).maximo}
                   </button>
                   <button
                     type="button"
                     className={estilos.atalho}
                     onClick={() =>
                       definirRascunho(emFoco.exercicio.id, {
-                        repeticoes: metaDaVez.repeticoes + 1,
+                        repeticoes: intervaloDe(metaDaVez).maximo + 1,
                       })
                     }
                   >
-                    Fiz {metaDaVez.repeticoes + 1}
+                    Fiz {intervaloDe(metaDaVez).maximo + 1}
                   </button>
                 </div>
               ) : null}

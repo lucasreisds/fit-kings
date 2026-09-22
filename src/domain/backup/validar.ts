@@ -298,6 +298,21 @@ function validarCamposProprios(
   })
   ;(colecoes.get('itensTreino') ?? []).forEach((registro, indice) => {
     exigirNumero('itensTreino', 'ordem', registro, indice)
+    // Campo da feature 002. **Ausente é aceito** — é o caso de todo arquivo
+    // gerado antes dela, e recusá-lo quebraria a garantia de que toda versão lê
+    // os backups das anteriores (FR-097).
+    if (registro.descansoSegundos !== undefined && registro.descansoSegundos !== null) {
+      const valor = registro.descansoSegundos
+      if (typeof valor !== 'number' || !Number.isInteger(valor) || valor < 0) {
+        problemas.push(
+          problema(
+            'valor_fora_do_dominio',
+            `itensTreino[${indice}].descansoSegundos`,
+            'O descanso planejado é um número inteiro de 0 para cima.',
+          ),
+        )
+      }
+    }
     // `abordagem` é campo aberto por FR-014: qualquer texto é aceito, inclusive
     // um valor que esta versão não conhece. Recusá-lo quebraria a política de
     // compatibilidade do contrato.
@@ -306,6 +321,29 @@ function validarCamposProprios(
   ;(colecoes.get('seriesPlanejadas') ?? []).forEach((registro, indice) => {
     exigirNumero('seriesPlanejadas', 'ordem', registro, indice)
     exigirNumero('seriesPlanejadas', 'repeticoes', registro, indice)
+    // Idem: ausente é o arquivo antigo, e ele vale. Presente, o intervalo
+    // precisa fazer sentido — invertido é dado corrompido, não versão velha.
+    if (registro.repeticoesMax !== undefined && registro.repeticoesMax !== null) {
+      const maximo = registro.repeticoesMax
+      const minimo = registro.repeticoes
+      if (typeof maximo !== 'number' || !Number.isInteger(maximo) || maximo < 1) {
+        problemas.push(
+          problema(
+            'valor_fora_do_dominio',
+            `seriesPlanejadas[${indice}].repeticoesMax`,
+            'O máximo do intervalo é um número inteiro maior que zero.',
+          ),
+        )
+      } else if (typeof minimo === 'number' && maximo < minimo) {
+        problemas.push(
+          problema(
+            'valor_fora_do_dominio',
+            `seriesPlanejadas[${indice}].repeticoesMax`,
+            'O máximo do intervalo não pode ser menor que o mínimo.',
+          ),
+        )
+      }
+    }
     exigirNumero('seriesPlanejadas', 'cargaKg', registro, indice)
     exigirNumero('seriesPlanejadas', 'rir', registro, indice, true)
   })

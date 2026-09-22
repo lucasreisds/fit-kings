@@ -7,6 +7,7 @@
  */
 import type { SerieRealizada } from '../../domain/tipos'
 import { compararSerie } from '../../domain/serie/validade'
+import { formatarIntervalo, intervaloDe } from '../../domain/serie/intervalo'
 import type { MetaDaSerie } from '../execucao/iniciarSessao'
 import { formatarCarga } from '../../plataforma/formato'
 import estilos from './historico.module.css'
@@ -31,7 +32,14 @@ export function ComparacaoSeries({ series, metas }: Props) {
       {series.map((serie) => {
         const meta = metas[serie.ordem - 1]
         const comparacao = compararSerie(
-          meta ? { repeticoes: meta.repeticoes, cargaKg: meta.cargaKg, rir: meta.rir } : null,
+          meta
+            ? {
+                repeticoes: meta.repeticoes,
+                repeticoesMax: meta.repeticoesMax,
+                cargaKg: meta.cargaKg,
+                rir: meta.rir,
+              }
+            : null,
           serie,
         )
 
@@ -41,7 +49,7 @@ export function ComparacaoSeries({ series, metas }: Props) {
 
             <span className={`${estilos.planejado} numerico`}>
               {meta
-                ? `${meta.repeticoes} × ${formatarCarga(meta.cargaKg)} kg${
+                ? `${formatarIntervalo(intervaloDe(meta))} × ${formatarCarga(meta.cargaKg)} kg${
                     meta.rir !== null ? `, RIR ${meta.rir}` : ''
                   }`
                 : 'série extra'}

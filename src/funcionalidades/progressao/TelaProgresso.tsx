@@ -8,7 +8,7 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { navegar } from '../../app/rotas'
 import { repositorioHistorico } from '../../dados/repositorios/historico'
-import { agregarEvolucao } from '../../domain/evolucao/agregar'
+import { agregarEvolucao, unidadeDoModo, valorDoPonto } from '../../domain/evolucao/agregar'
 import { formatarCarga, formatarData } from '../../plataforma/formato'
 import estilos from './progressao.module.css'
 
@@ -19,14 +19,14 @@ export function TelaProgresso() {
     return Promise.all(
       exercicios.map(async (exercicio) => {
         const execucoes = await repositorioHistorico.execucoesDoExercicio(exercicio.id)
-        const pontos = agregarEvolucao(
+        const evolucao = agregarEvolucao(
           execucoes.map((execucao) => ({
             sessaoId: execucao.sessaoId,
             concluidaEm: execucao.concluidaEm,
             series: execucao.series,
           })),
         )
-        return { exercicio, pontos }
+        return { exercicio, pontos: evolucao.pontos, modo: evolucao.modo }
       }),
     )
   }, [])
@@ -47,11 +47,12 @@ export function TelaProgresso() {
 
   return (
     <div className={estilos.lista}>
-      {linhas.map(({ exercicio, pontos }) => {
+      {linhas.map(({ exercicio, pontos, modo }) => {
         const ultimo = pontos[pontos.length - 1]
         const primeiro = pontos[0]
+        const unidade = unidadeDoModo(modo)
         const diferenca =
-          ultimo && primeiro ? ultimo.cargaMaximaKg - primeiro.cargaMaximaKg : 0
+          ultimo && primeiro ? valorDoPonto(ultimo, modo) - valorDoPonto(primeiro, modo) : 0
 
         return (
           <button
@@ -71,11 +72,13 @@ export function TelaProgresso() {
             </span>
 
             <span className={`${estilos.cargaPonto} numerico`}>
-              {ultimo ? `${formatarCarga(ultimo.cargaMaximaKg)} kg` : '—'}
+              {ultimo ? `${formatarCarga(valorDoPonto(ultimo, modo))} ${unidade}` : '—'}
             </span>
 
             <span className={`${estilos.dataPonto} numerico`}>
-              {diferenca !== 0 ? `${diferenca > 0 ? '+' : ''}${formatarCarga(diferenca)} kg` : '—'}
+              {diferenca !== 0
+                ? `${diferenca > 0 ? '+' : ''}${formatarCarga(diferenca)} ${unidade}`
+                : '—'}
             </span>
           </button>
         )

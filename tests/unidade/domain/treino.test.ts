@@ -191,3 +191,66 @@ describe('treino completo', () => {
     if (!resultado.valido) expect(resultado.problemas.length).toBeGreaterThanOrEqual(3)
   })
 })
+
+/**
+ * T029 — FR-143. A validação do intervalo no planejamento é a mesma regra que
+ * a importação aplica: `validarIntervalo` vive num lugar só, e duplicá-la
+ * abriria espaço para as duas divergirem.
+ */
+describe('intervalo de repetições no planejamento (FR-143)', () => {
+  it('aceita série sem máximo — o valor único de sempre', () => {
+    expect(validarSeriePlanejada({ repeticoes: 8, cargaKg: 40, rir: 2 }).valido).toBe(true)
+  })
+
+  it('aceita intervalo bem formado', () => {
+    expect(
+      validarSeriePlanejada({ repeticoes: 6, repeticoesMax: 8, cargaKg: 40, rir: 2 }).valido,
+    ).toBe(true)
+  })
+
+  it('aceita pontas iguais', () => {
+    expect(
+      validarSeriePlanejada({ repeticoes: 8, repeticoesMax: 8, cargaKg: 40, rir: null }).valido,
+    ).toBe(true)
+  })
+
+  it('recusa mínimo maior que o máximo', () => {
+    const resultado = validarSeriePlanejada({
+      repeticoes: 8,
+      repeticoesMax: 6,
+      cargaKg: 40,
+      rir: null,
+    })
+    expect(resultado.valido).toBe(false)
+    if (!resultado.valido) {
+      expect(resultado.problemas[0]!.campo).toBe('repeticoesMax')
+    }
+  })
+
+  it('recusa máximo fracionado ou zero', () => {
+    expect(
+      validarSeriePlanejada({ repeticoes: 6, repeticoesMax: 8.5, cargaKg: 40, rir: null }).valido,
+    ).toBe(false)
+    expect(
+      validarSeriePlanejada({ repeticoes: 6, repeticoesMax: 0, cargaKg: 40, rir: null }).valido,
+    ).toBe(false)
+  })
+
+  it('o treino inteiro aponta o campo exato do intervalo inválido', () => {
+    const resultado = validarTreino({
+      nome: 'Treino A',
+      itens: [
+        {
+          ordem: 1,
+          exercicioId: 'ex-1',
+          abordagem: 'tradicional',
+          series: [{ repeticoes: 10, repeticoesMax: 6, cargaKg: 40, rir: null }],
+        },
+      ],
+    })
+    expect(resultado.valido).toBe(false)
+    if (!resultado.valido) {
+      expect(resultado.problemas.map((p) => p.campo)).toContain('itens[0].series[0].repeticoesMax')
+    }
+  })
+})

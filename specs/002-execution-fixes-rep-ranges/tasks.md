@@ -104,26 +104,26 @@ removê-la — tudo sem concluir a sessão.
 
 ### Tests for US3
 
-- [ ] T026 [P] [US3] Teste de unidade da regra de intervalo em `tests/unidade/domain/intervaloRepeticoes.test.ts` — `maximo = repeticoesMax ?? repeticoes`; abaixo, dentro e acima; ponta única como caso particular (FR-140, FR-141)
-- [ ] T027 [P] [US3] **Regressão do portão 4**: os dez casos de fronteira existentes em `tests/unidade/domain/progressao.test.ts` rodam **inalterados** e produzem os mesmos resultados (SC-040)
-- [ ] T028 [P] [US3] Teste de unidade dos casos de intervalo no portão 4, em `tests/unidade/domain/progressao.test.ts` — 3x 6-8 com 9/9/9 indica; 8/8/8, 9/9/8, 7/7/7 e 5/5/5 não indicam (SC-039, FR-142)
-- [ ] T029 [P] [US3] Teste de unidade: intervalo com mínimo maior que o máximo é recusado; pontas iguais são aceitas, em `tests/unidade/domain/treino.test.ts` (FR-143)
-- [ ] T030 [P] [US3] Teste de unidade: intervalo combinado com o critério de RIR, que não muda, em `tests/unidade/domain/progressao.test.ts` (FR-044)
-- [ ] T031 [P] [US3] Teste de integração: treino planejado com valor único antes da mudança continua válido e produz a mesma avaliação, em `tests/integracao/compatibilidadeIntervalo.test.ts` (FR-144, SC-040)
-- [ ] T032 [P] [US3] Teste de unidade: backup **sem** `repeticoesMax` é aceito e o campo vira `null`; backup com intervalo invertido é recusado, em `tests/unidade/domain/backup/validacao.test.ts` (SC-042)
+- [X] T026 [P] [US3] Teste de unidade da regra de intervalo em `tests/unidade/domain/intervaloRepeticoes.test.ts` — `maximo = repeticoesMax ?? repeticoes`; abaixo, dentro e acima; ponta única como caso particular (FR-140, FR-141)
+- [X] T027 [P] [US3] **Regressão do portão 4**: os dez casos de fronteira existentes em `tests/unidade/domain/progressao.test.ts` rodam **inalterados** e produzem os mesmos resultados (SC-040)
+- [X] T028 [P] [US3] Teste de unidade dos casos de intervalo no portão 4, em `tests/unidade/domain/progressao.test.ts` — 3x 6-8 com 9/9/9 indica; 8/8/8, 9/9/8, 7/7/7 e 5/5/5 não indicam (SC-039, FR-142)
+- [X] T029 [P] [US3] Teste de unidade: intervalo com mínimo maior que o máximo é recusado; pontas iguais são aceitas, em `tests/unidade/domain/treino.test.ts` (FR-143)
+- [X] T030 [P] [US3] Teste de unidade: intervalo combinado com o critério de RIR, que não muda, em `tests/unidade/domain/progressao.test.ts` (FR-044)
+- [X] T031 [P] [US3] Teste de integração: treino planejado com valor único antes da mudança continua válido e produz a mesma avaliação, em `tests/integracao/compatibilidadeIntervalo.test.ts` (FR-144, SC-040)
+- [X] T032 [P] [US3] Teste de unidade: backup **sem** `repeticoesMax` é aceito e o campo vira `null`; backup com intervalo invertido é recusado, em `tests/unidade/domain/backup/validacao.test.ts` (SC-042)
 
 ### Implementation for US3
 
-- [ ] T033 [US3] Implementar a regra única de intervalo em `src/domain/serie/intervalo.ts` — `minimo`, `maximo` e a classificação abaixo/dentro/acima, com ponta única como caso particular (D1, FR-140, FR-141)
-- [ ] T034 [US3] Passar `compararSerie` em `src/domain/serie/validade.ts` a usar a regra de intervalo (FR-141)
-- [ ] T035 [US3] Passar `avaliarProgressao` em `src/domain/progressao/avaliar.ts` a usar `realizado > maximo` — para ponta única a expressão é idêntica à atual, que é o que preserva o portão 4 (FR-142)
-- [ ] T036 [US3] Acrescentar a validação do intervalo em `src/domain/treino/validar.ts` — `repeticoesMax`, quando presente, é inteiro e **não menor que** `repeticoes` (FR-143)
-- [ ] T037 [US3] Persistir `repeticoesMax` em `src/dados/repositorios/treinos.ts`, respeitando a cópia na escrita de série já executada que FR-017 exige
-- [ ] T038 [US3] Acrescentar `repeticoesMax` ao arquivo de backup em `src/domain/backup/` — campo opcional, **sem** incrementar `formatVersion`
-- [ ] T039 [US3] Validar `repeticoesMax` na importação em `src/domain/backup/validar.ts` — ausente é aceito, invertido é recusado (contrato § Validação)
-- [ ] T040 [US3] Implementar a entrada de intervalo em `src/funcionalidades/treinos/EditorSeries.tsx` — mínimo e máximo, com o valor único continuando simples de informar (FR-139)
-- [ ] T041 [US3] Exibir o intervalo na meta da tela de execução e na comparação do histórico, em `src/funcionalidades/execucao/` e `src/funcionalidades/historico/ComparacaoSeries.tsx` (FR-141)
-- [ ] T042 [US3] Aplicar a skill `frontend-design` à entrada e à exibição do intervalo
+- [X] T033 [US3] Implementar a regra única de intervalo em `src/domain/serie/intervalo.ts` — `minimo`, `maximo` e a classificação abaixo/dentro/acima, com ponta única como caso particular (D1, FR-140, FR-141)
+- [X] T034 [US3] Passar `compararSerie` em `src/domain/serie/validade.ts` a usar a regra de intervalo (FR-141)
+- [X] T035 [US3] Passar `avaliarProgressao` em `src/domain/progressao/avaliar.ts` a usar `realizado > maximo` — para ponta única a expressão é idêntica à atual, que é o que preserva o portão 4 (FR-142)
+- [X] T036 [US3] Acrescentar a validação do intervalo em `src/domain/treino/validar.ts` — `repeticoesMax`, quando presente, é inteiro e **não menor que** `repeticoes` (FR-143)
+- [X] T037 [US3] Persistir `repeticoesMax` em `src/dados/repositorios/treinos.ts`, respeitando a cópia na escrita de série já executada que FR-017 exige
+- [X] T038 [US3] Acrescentar `repeticoesMax` ao arquivo de backup em `src/domain/backup/` — campo opcional, **sem** incrementar `formatVersion`
+- [X] T039 [US3] Validar `repeticoesMax` na importação em `src/domain/backup/validar.ts` — ausente é aceito, invertido é recusado (contrato § Validação)
+- [X] T040 [US3] Implementar a entrada de intervalo em `src/funcionalidades/treinos/EditorSeries.tsx` — mínimo e máximo, com o valor único continuando simples de informar (FR-139)
+- [X] T041 [US3] Exibir o intervalo na meta da tela de execução e na comparação do histórico, em `src/funcionalidades/execucao/` e `src/funcionalidades/historico/ComparacaoSeries.tsx` (FR-141)
+- [X] T042 [US3] Aplicar a skill `frontend-design` à entrada e à exibição do intervalo
 
 **Checkpoint**: o critério de aumento de carga passa a responder certo para o treino real.
 
@@ -138,17 +138,17 @@ evolução em repetições.
 
 ### Tests for US4
 
-- [ ] T043 [P] [US4] Teste de unidade: `agregarEvolucao` **não** descarta série válida sem carga, em `tests/unidade/domain/evolucao.test.ts` (FR-145)
-- [ ] T044 [P] [US4] Teste de unidade: o modo é `repeticoes` quando nenhuma execução teve carga, e `carga` quando alguma teve, em `tests/unidade/domain/evolucao.test.ts` (FR-146)
-- [ ] T045 [P] [US4] Teste de unidade: carga nula e carga zero produzem o mesmo resultado, em `tests/unidade/domain/evolucao.test.ts` (FR-147)
-- [ ] T046 [P] [US4] Teste de integração: exercício sem carga aparece no Progresso com a contagem correta, em `tests/integracao/pesoCorporal.test.ts` (SC-041)
+- [X] T043 [P] [US4] Teste de unidade: `agregarEvolucao` **não** descarta série válida sem carga, em `tests/unidade/domain/evolucao.test.ts` (FR-145)
+- [X] T044 [P] [US4] Teste de unidade: o modo é `repeticoes` quando nenhuma execução teve carga, e `carga` quando alguma teve, em `tests/unidade/domain/evolucao.test.ts` (FR-146)
+- [X] T045 [P] [US4] Teste de unidade: carga nula e carga zero produzem o mesmo resultado, em `tests/unidade/domain/evolucao.test.ts` (FR-147)
+- [X] T046 [P] [US4] Teste de integração: exercício sem carga aparece no Progresso com a contagem correta, em `tests/integracao/pesoCorporal.test.ts` (SC-041)
 
 ### Implementation for US4
 
-- [ ] T047 [US4] Corrigir o filtro em `src/domain/evolucao/agregar.ts` — parar de descartar série sem carga, alinhando a agregação à definição de série válida de FR-092 (FR-145, FR-147)
-- [ ] T048 [US4] Devolver o modo da série histórica em `agregarEvolucao` — `carga` ou `repeticoes`, derivado a cada consulta e nunca gravado (D5, FR-146)
-- [ ] T049 [US4] Apresentar a evolução em repetições quando o modo for `repeticoes`, em `src/funcionalidades/progressao/GraficoEvolucao.tsx` e `EvolucaoExercicio.tsx` (FR-146)
-- [ ] T050 [US4] Ajustar os rótulos da `TelaProgresso.tsx` para o modo em repetições — "kg na última" não cabe num exercício sem carga
+- [X] T047 [US4] Corrigir o filtro em `src/domain/evolucao/agregar.ts` — parar de descartar série sem carga, alinhando a agregação à definição de série válida de FR-092 (FR-145, FR-147)
+- [X] T048 [US4] Devolver o modo da série histórica em `agregarEvolucao` — `carga` ou `repeticoes`, derivado a cada consulta e nunca gravado (D5, FR-146)
+- [X] T049 [US4] Apresentar a evolução em repetições quando o modo for `repeticoes`, em `src/funcionalidades/progressao/GraficoEvolucao.tsx` e `EvolucaoExercicio.tsx` (FR-146)
+- [X] T050 [US4] Ajustar os rótulos da `TelaProgresso.tsx` para o modo em repetições — "kg na última" não cabe num exercício sem carga
 
 **Checkpoint**: o dado que já existia passa a ser apresentado.
 
@@ -170,7 +170,7 @@ evolução em repetições.
 
 ### Implementation for US5
 
-- [ ] T054 [US5] Persistir `descansoSegundos` em `src/dados/repositorios/treinos.ts` — inteiro não negativo, opcional
+- [X] T054 [US5] Persistir `descansoSegundos` em `src/dados/repositorios/treinos.ts` — inteiro não negativo, opcional
 - [ ] T055 [US5] Implementar a entrada de descanso no editor de treino, em `src/funcionalidades/treinos/EditorTreino.tsx` (FR-148)
 - [ ] T056 [US5] Exibir o descanso na tela de execução junto dos demais valores planejados, em `src/funcionalidades/execucao/TelaExecucao.tsx` (FR-150)
 - [ ] T057 [US5] Acrescentar `descansoSegundos` ao arquivo de backup e à validação em `src/domain/backup/` — campo opcional, **sem** incrementar `formatVersion`

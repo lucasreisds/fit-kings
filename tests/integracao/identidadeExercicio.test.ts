@@ -91,7 +91,7 @@ describe.each<OrigemExercicio>(['catalogo', 'personalizado'])(
           concluidaEm: execucao.concluidaEm,
           series: execucao.series,
         })),
-      )
+      ).pontos
       const planejadas = [
         { ordem: 1, repeticoes: 8, cargaKg: 45, rir: 2 },
         { ordem: 2, repeticoes: 8, cargaKg: 45, rir: 2 },
@@ -131,7 +131,7 @@ describe.each<OrigemExercicio>(['catalogo', 'personalizado'])(
           concluidaEm: execucao.concluidaEm,
           series: execucao.series,
         })),
-      )
+      ).pontos
       expect(evolucaoDepois).toEqual(evolucaoAntes)
       expect(evolucaoDepois.map((ponto) => ponto.cargaMaximaKg)).toEqual([40, 42.5, 45])
 
