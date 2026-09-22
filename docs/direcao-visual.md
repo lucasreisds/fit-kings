@@ -219,6 +219,30 @@ escrita à parte: um aviso que não se explica corrói a confiança no produto i
 Histórico insuficiente recebe uma mensagem que diz **quantas execuções faltam**, em vez de uma tela
 vazia ou de um gráfico de um ponto só (US6, cenário 3).
 
+### Navegação entre exercícios (feature 002, T012)
+
+O primeiro uso real revelou que a faixa de cartões **funcionava e ninguém percebia**. Ela ficava
+visível, era tocável, e lia como informação. Em 430 px cabiam 2,5 itens, o terceiro aparecia cortado
+e nada indicava que havia mais — num treino de cinco, o quarto e o quinto eram inalcançáveis na
+prática.
+
+A correção não foi melhorar a pista de rolagem. Isso deixaria o alcance dependendo de o usuário
+**descobrir** um gesto não anunciado, e é justamente o que falhou. A tela ganhou paginação
+explícita — `‹ 1 de 5 ›`, com alvos de 44 pt —, e a faixa passou a numerar os itens, o que a faz ler
+como sequência em vez de cartões soltos. O gesto de arrastar é o caminho rápido, nunca o único.
+
+Duas duplicações apareceram no caminho e foram removidas, porque a mesma informação em dois lugares
+faz o usuário hesitar sobre se são a mesma coisa:
+
+- a posição saiu do cabeçalho, onde competia com o paginador; no lugar dela entrou a contagem de
+  séries da sessão, que não estava em lugar nenhum;
+- `Concluir treino` deixa de aparecer no rodapé enquanto o cartão de exercício completo já o oferece.
+
+**Opacidade em estado indisponível foi eliminada do projeto inteiro.** A auditoria de tokens pegou
+uma que eu havia acabado de introduzir na seta de navegação, e ampliá-la revelou mais três que já
+existiam. Controle indisponível continua precisando ser legível: o piso de 4,5:1 vale para todos os
+estados, e opacidade o derruba em silêncio. Todos usam par validado agora.
+
 ---
 
 ## O que foi recusado

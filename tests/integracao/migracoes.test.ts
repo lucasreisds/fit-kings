@@ -140,7 +140,8 @@ describe('esquema versão 1', () => {
         'treinos',
       ].sort(),
     )
-    expect(VERSAO_ESQUEMA).toBe(1)
+    // A versão corrente avança a cada migração; o esquema v1 é que tem 9 tabelas.
+    expect(VERSAO_ESQUEMA).toBeGreaterThanOrEqual(1)
   })
 
   it('declara os índices compostos que sustentam SC-010', () => {

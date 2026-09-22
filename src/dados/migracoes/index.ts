@@ -49,11 +49,46 @@ export const ESQUEMA_V1: Record<string, string> = {
   metaAplicacao: 'id',
 }
 
+/**
+ * Versão 2 — feature 002.
+ *
+ * Dois campos opcionais: `repeticoesMax` em `seriesPlanejadas` e
+ * `descansoSegundos` em `itensTreino`. Nenhum é indexado, então `stores` não
+ * muda: Dexie só declara índices, e campo não indexado entra sem migração
+ * estrutural. A entrada existe mesmo assim para que a versão do esquema
+ * registre a mudança, e para que `preencher` deixe explícito o valor inicial.
+ *
+ * `null` **é** o valor correto para o que já existe: uma série planejada antiga
+ * de fato tem ponta única, e um item antigo de fato não tem descanso planejado.
+ * Não há retroação a fazer, e inventar um padrão diferente de `null` seria
+ * escrever um dado que o usuário nunca informou.
+ */
+export const ESQUEMA_V2: Record<string, string> = { ...ESQUEMA_V1 }
+
 export const MIGRACOES: readonly Migracao[] = [
   {
     versao: 1,
     stores: ESQUEMA_V1,
     nota: 'Esquema inicial: 9 tabelas de data-model.md.',
+  },
+  {
+    versao: 2,
+    stores: ESQUEMA_V2,
+    nota: 'Feature 002: repeticoesMax em seriesPlanejadas, descansoSegundos em itensTreino.',
+    async preencher(tx) {
+      await tx
+        .table('seriesPlanejadas')
+        .toCollection()
+        .modify((registro: Record<string, unknown>) => {
+          registro.repeticoesMax = registro.repeticoesMax ?? null
+        })
+      await tx
+        .table('itensTreino')
+        .toCollection()
+        .modify((registro: Record<string, unknown>) => {
+          registro.descansoSegundos = registro.descansoSegundos ?? null
+        })
+    },
   },
 ]
 

@@ -31,9 +31,9 @@ vem **US1**, que é o que inviabilizou o treino real — quanto antes ela chegar
 **Purpose**: a migração aditiva que US3 e US5 exigem. **Bloqueia essas duas**; US1, US2 e US4 não
 dependem dela.
 
-- [ ] T001 Acrescentar `repeticoesMax: number | null` a `SeriePlanejada` e `descansoSegundos: number | null` a `ItemTreino` em `src/domain/tipos/treino.ts` — ambos opcionais, `null` como valor de todo registro existente
-- [ ] T002 Criar a migração v2 em `src/dados/migracoes/index.ts` com os dois campos novos, sem remover tabela nem índice — a guarda `verificarAditividade` recusaria
-- [ ] T003 [P] Teste de integração: migração v1 → v2 sobre banco com dados preserva todos os registros e preenche os campos novos com `null`, em `tests/integracao/migracaoV2.test.ts` (SC-042)
+- [X] T001 Acrescentar `repeticoesMax: number | null` a `SeriePlanejada` e `descansoSegundos: number | null` a `ItemTreino` em `src/domain/tipos/treino.ts` — ambos opcionais, `null` como valor de todo registro existente
+- [X] T002 Criar a migração v2 em `src/dados/migracoes/index.ts` com os dois campos novos, sem remover tabela nem índice — a guarda `verificarAditividade` recusaria
+- [X] T003 [P] Teste de integração: migração v1 → v2 sobre banco com dados preserva todos os registros e preenche os campos novos com `null`, em `tests/integracao/migracaoV2.test.ts` (SC-042)
 
 **Checkpoint**: esquema pronto. US3 e US5 liberadas.
 
@@ -47,18 +47,18 @@ dependem dela.
 
 ### Tests for US1
 
-- [ ] T004 [P] [US1] Teste ponta a ponta: com 5 exercícios em 430 px, todos são alcançáveis e nenhum fica inatingível, em `tests/e2e/navegacaoExercicios.spec.ts` (SC-035, SC-036, FR-128)
-- [ ] T005 [P] [US1] Teste ponta a ponta: arrastar horizontalmente troca de exercício; no primeiro e no último sinaliza o limite sem sair da sessão, em `tests/e2e/navegacaoExercicios.spec.ts` (FR-129, FR-131)
-- [ ] T006 [P] [US1] Teste ponta a ponta de FR-130: arrastar começando **dentro do campo de carga** não troca de exercício, e arrastar sobre a faixa de exercícios rola a faixa sem trocar, em `tests/e2e/navegacaoExercicios.spec.ts`
-- [ ] T007 [P] [US1] Teste ponta a ponta: trocar de exercício preserva todo valor já registrado, em `tests/e2e/navegacaoExercicios.spec.ts` (FR-132)
+- [X] T004 [P] [US1] Teste ponta a ponta: com 5 exercícios em 430 px, todos são alcançáveis e nenhum fica inatingível, em `tests/e2e/navegacaoExercicios.spec.ts` (SC-035, SC-036, FR-128)
+- [X] T005 [P] [US1] Teste ponta a ponta: arrastar horizontalmente troca de exercício; no primeiro e no último sinaliza o limite sem sair da sessão, em `tests/e2e/navegacaoExercicios.spec.ts` (FR-129, FR-131)
+- [X] T006 [P] [US1] Teste ponta a ponta de FR-130: arrastar começando **dentro do campo de carga** não troca de exercício, e arrastar sobre a faixa de exercícios rola a faixa sem trocar, em `tests/e2e/navegacaoExercicios.spec.ts`
+- [X] T007 [P] [US1] Teste ponta a ponta: trocar de exercício preserva todo valor já registrado, em `tests/e2e/navegacaoExercicios.spec.ts` (FR-132)
 
 ### Implementation for US1
 
-- [ ] T008 [US1] Implementar o gancho de gesto lateral em `src/funcionalidades/execucao/useGestoLateral.ts` — eventos de ponteiro, limiar de 60 px, exigindo que o deslocamento horizontal supere o vertical (D3)
-- [ ] T009 [US1] Implementar a guarda de origem do gesto no mesmo gancho — sobe a árvore do DOM a partir do alvo e desiste ao encontrar `input`, `textarea`, `[role="tab"]` ou elemento com rolagem horizontal (FR-130)
-- [ ] T010 [US1] Implementar o controle de paginação em `src/funcionalidades/execucao/NavegacaoExercicios.tsx` — anterior, posição, próximo, sempre visível, com a faixa mantida para salto direto (D4, FR-127, FR-128)
-- [ ] T011 [US1] Ligar gesto e paginação à `TelaExecucao.tsx`, com sinalização de limite no primeiro e no último exercício (FR-131)
-- [ ] T012 [US1] Aplicar a skill `frontend-design` à navegação e registrar a avaliação contra os 5 critérios de D9 em `docs/direcao-visual.md` — o controle precisa **parecer** navegação, que é exatamente o defeito relatado
+- [X] T008 [US1] Implementar o gancho de gesto lateral em `src/funcionalidades/execucao/useGestoLateral.ts` — eventos de ponteiro, limiar de 60 px, exigindo que o deslocamento horizontal supere o vertical (D3)
+- [X] T009 [US1] Implementar a guarda de origem do gesto no mesmo gancho — sobe a árvore do DOM a partir do alvo e desiste ao encontrar `input`, `textarea`, `[role="tab"]` ou elemento com rolagem horizontal (FR-130)
+- [X] T010 [US1] Implementar o controle de paginação em `src/funcionalidades/execucao/NavegacaoExercicios.tsx` — anterior, posição, próximo, sempre visível, com a faixa mantida para salto direto (D4, FR-127, FR-128)
+- [X] T011 [US1] Ligar gesto e paginação à `TelaExecucao.tsx`, com sinalização de limite no primeiro e no último exercício (FR-131)
+- [X] T012 [US1] Aplicar a skill `frontend-design` à navegação e registrar a avaliação contra os 5 critérios de D9 em `docs/direcao-visual.md` — o controle precisa **parecer** navegação, que é exatamente o defeito relatado
 
 **Checkpoint**: o treino de 5 exercícios fica utilizável. É o ajuste de maior valor imediato.
 
@@ -86,8 +86,8 @@ removê-la — tudo sem concluir a sessão.
 - [ ] T020 [US2] Acrescentar `corrigirSerieEmAndamento` e `removerSerieEmAndamento` a `src/dados/repositorios/sessoes.ts`, recusando quando `estado !== 'em_andamento'` — a fronteira é verificada na camada de dados, não na tela (FR-133, FR-134, FR-136)
 - [ ] T021 [US2] Implementar a edição de série registrada em `src/funcionalidades/execucao/EditorSerieRegistrada.tsx` — carga, repetições e RIR, alcançável a partir do livro-razão (FR-133, SC-037)
 - [ ] T022 [US2] Implementar a remoção com confirmação explícita no mesmo componente (FR-134)
-- [ ] T023 [US2] Implementar o estado de **exercício completo** na `TelaExecucao.tsx` — quando todas as planejadas estão registradas, sinalizar a conclusão e oferecer o próximo exercício, em vez de apresentar a série extra como o passo natural (FR-137)
-- [ ] T024 [US2] Tornar o registro de série além das planejadas uma ação explícita e distinta de confirmar a série seguinte (FR-138)
+- [X] T023 [US2] Implementar o estado de **exercício completo** na `TelaExecucao.tsx` — quando todas as planejadas estão registradas, sinalizar a conclusão e oferecer o próximo exercício, em vez de apresentar a série extra como o passo natural (FR-137)
+- [X] T024 [US2] Tornar o registro de série além das planejadas uma ação explícita e distinta de confirmar a série seguinte (FR-138)
 - [ ] T025 [US2] Aplicar a skill `frontend-design` às telas de US2
 
 **Checkpoint**: a armadilha que produziu a série indevida está fechada nas duas pontas.

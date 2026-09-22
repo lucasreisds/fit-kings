@@ -175,4 +175,20 @@ describe('restrições visuais da execução (D9 critério 2)', () => {
       expect(semComentarios(readFileSync(caminho, 'utf8'))).not.toMatch(/backdrop-filter/)
     }
   })
+
+  /**
+   * Opacidade sobre conteúdo derruba o contraste abaixo do piso, e o piso vale
+   * também para o estado indisponível. A verificação vale para **todas** as
+   * folhas: antes ela cobria só a da execução, e o mesmo problema estava em
+   * `componentes.module.css` sem ninguém acusar.
+   */
+  it('nenhuma folha usa opacidade fracionária sobre conteúdo', () => {
+    for (const caminho of arquivos(RAIZ, ['.css'])) {
+      const conteudo = semComentarios(readFileSync(caminho, 'utf8'))
+      expect(
+        [...conteudo.matchAll(/\bopacity:\s*0?\.\d+/g)].map((a) => a[0]),
+        relative(RAIZ, caminho),
+      ).toEqual([])
+    }
+  })
 })

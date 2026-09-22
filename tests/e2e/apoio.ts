@@ -43,7 +43,9 @@ export async function montarTreino(
 
   for (const exercicio of exercicios) {
     await pagina.getByRole('button', { name: 'Adicionar exercício' }).click()
-    await pagina.getByRole('button', { name: new RegExp(exercicio) }).first().click()
+    await pagina.getByLabel('Buscar exercício').fill(exercicio)
+    await pagina.waitForTimeout(250)
+    await pagina.getByRole('button', { name: new RegExp(exercicio.slice(0, 16)) }).first().click()
     await pagina.waitForTimeout(250)
   }
 
@@ -78,9 +80,15 @@ export async function registrarSerie(
   await expect(pagina.locator('[data-serie-registrada]')).toHaveCount(antes + 1)
 }
 
-/** Conclui a sessão em andamento e volta ao histórico. */
+/**
+ * Conclui a sessão em andamento e volta ao histórico.
+ *
+ * O botão fica no cartão de exercício completo quando ele está visível no
+ * último exercício, e no rodapé no resto do tempo — nunca nos dois ao mesmo
+ * tempo, para não repetir a mesma ação na mesma tela.
+ */
 export async function concluirTreino(pagina: Page): Promise<void> {
-  await pagina.getByRole('button', { name: 'Concluir treino' }).click()
+  await pagina.getByRole('button', { name: 'Concluir treino' }).first().click()
   await pagina.getByRole('button', { name: 'Ver no histórico' }).click()
   await pagina.waitForLoadState('networkidle')
 }
@@ -91,4 +99,26 @@ export async function abrirEditor(pagina: Page, _nome: string): Promise<void> {
   await pagina.waitForLoadState('networkidle')
   await pagina.getByRole('button', { name: 'Editar' }).first().click()
   await pagina.getByLabel('Nome do treino').waitFor()
+}
+
+/** Arrasta horizontalmente sobre um elemento, simulando o gesto do polegar. */
+export async function arrastar(
+  pagina: Page,
+  seletor: string,
+  direcao: 'esquerda' | 'direita',
+  opcoes: { distancia?: number } = {},
+): Promise<void> {
+  const caixa = await pagina.locator(seletor).first().boundingBox()
+  if (!caixa) throw new Error(`elemento não encontrado: ${seletor}`)
+
+  const distancia = opcoes.distancia ?? 120
+  const y = caixa.y + caixa.height / 2
+  const partida = caixa.x + caixa.width / 2
+  const chegada = direcao === 'esquerda' ? partida - distancia : partida + distancia
+
+  await pagina.mouse.move(partida, y)
+  await pagina.mouse.down()
+  await pagina.mouse.move(chegada, y, { steps: 10 })
+  await pagina.mouse.up()
+  await pagina.waitForTimeout(250)
 }

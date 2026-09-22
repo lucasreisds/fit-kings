@@ -48,6 +48,12 @@ export const CORES = {
   criticoTenue: '#FBEBEB',
   /** Régua do livro-razão. Decorativa, não delimita controle. */
   linha: '#E2E4E8',
+  /**
+   * Fundo de controle indisponível. Opacidade resolveria em uma linha e
+   * derrubaria o contraste abaixo do piso — o critério 1 de D9 exige que ele
+   * seja garantido por construção, inclusive nos estados.
+   */
+  desabilitadoFundo: '#EDEFF2',
   /** Contorno de controle — piso de 3:1 (WCAG 1.4.11). */
   contorno: '#737C8A',
   branco: '#FFFFFF',
@@ -84,6 +90,7 @@ export const PARES = {
   faixaCritica: { texto: CORES.critico, fundo: CORES.criticoTenue },
 
   positivoEmCarta: { texto: CORES.positivo, fundo: CORES.carta },
+  controleDesabilitado: { texto: CORES.tintaSecundaria, fundo: CORES.desabilitadoFundo },
   atencaoEmPagina: { texto: CORES.atencao, fundo: CORES.papel },
   criticoEmCarta: { texto: CORES.critico, fundo: CORES.carta },
 } as const satisfies Record<string, ParDeCor>

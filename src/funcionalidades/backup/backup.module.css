@@ -79,9 +79,13 @@
   font-size: var(--texto-apoio);
 }
 
+/*
+ * Este texto fica dentro da faixa crítica de um arquivo recusado. Ele é
+ * secundário, mas precisa continuar legível: opacidade derrubaria o contraste
+ * do par que a faixa já validou. O tamanho menor basta para recuá-lo.
+ */
 .caminhoDoProblema {
   font-size: var(--texto-rotulo);
-  opacity: 0.85;
 }
 
 .dataBackup {
