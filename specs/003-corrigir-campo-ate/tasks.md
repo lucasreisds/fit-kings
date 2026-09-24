@@ -21,9 +21,9 @@ caminho.
 **Purpose**: escrever primeiro a verificação que teria pegado o defeito. Ela **deve falhar** contra
 o código atual — se passar, não está verificando o que deveria.
 
-- [ ] T001 Criar o teste de ida e volta em `tests/unidade/funcionalidades/editorDeSeries.test.tsx` — grava uma série com **todos** os valores editáveis preenchidos, monta a tela de edição e verifica campo a campo que cada um chegou (FR-158, SC-047)
-- [ ] T002 Garantir que a falha de T001 **aponta qual valor se perdeu**, em vez de só acusar diferença (FR-159, SC-048)
-- [ ] T003 Confirmar que T001 **falha** contra o código atual, pelo motivo certo: `repeticoesMax` ausente
+- [X] T001 Criar o teste de ida e volta em `tests/unidade/funcionalidades/editorDeSeries.test.tsx` — grava uma série com **todos** os valores editáveis preenchidos, monta a tela de edição e verifica campo a campo que cada um chegou (FR-158, SC-047)
+- [X] T002 Garantir que a falha de T001 **aponta qual valor se perdeu**, em vez de só acusar diferença (FR-159, SC-048)
+- [X] T003 Confirmar que T001 **falha** contra o código atual, pelo motivo certo: `repeticoesMax` ausente
 
 **Checkpoint**: a lacuna está coberta e o defeito, demonstrado.
 
@@ -31,28 +31,28 @@ o código atual — se passar, não está verificando o que deveria.
 
 ## Phase 2: A correção
 
-- [ ] T004 Criar a projeção única dos valores planejados em `src/funcionalidades/treinos/projecaoDeSeries.ts` — deriva os valores editáveis do registro gravado, sem lista de campos a lembrar (D1, FR-153)
-- [ ] T005 Passar `ItemDoEditor` em `src/funcionalidades/treinos/EditorTreino.tsx` a usar a projeção, eliminando a enumeração de campos que causou o defeito (FR-152, FR-153)
-- [ ] T006 Confirmar que T001 passa
+- [X] T004 Criar a projeção única dos valores planejados em `src/funcionalidades/treinos/projecaoDeSeries.ts` — deriva os valores editáveis do registro gravado, sem lista de campos a lembrar (D1, FR-153)
+- [X] T005 Passar `ItemDoEditor` em `src/funcionalidades/treinos/EditorTreino.tsx` a usar a projeção, eliminando a enumeração de campos que causou o defeito (FR-152, FR-153)
+- [X] T006 Confirmar que T001 passa
 
 ---
 
 ## Phase 3: Os comportamentos que o defeito escondia
 
-- [ ] T007 [P] Teste: o valor gravado aparece ao abrir o editor; série de valor único mostra o campo vazio, e não o valor de repetições (FR-152, SC-044)
-- [ ] T008 [P] Teste: digitar um número de dois ou mais dígitos produz aquele número (FR-154, SC-045)
-- [ ] T009 [P] Teste: esvaziar o campo devolve a série ao valor único (FR-155, SC-046)
-- [ ] T010 [P] Teste: alterar e remover um máximo já gravado funciona — é o caminho de quem tem valor gravado sem intenção (FR-156)
-- [ ] T011 Teste de ponta a ponta: planejar 6-8, sair do editor, voltar, e encontrar 6-8 em `tests/e2e/intervaloNoEditor.spec.ts` (SC-044, SC-047)
-- [ ] T012 Teste de ponta a ponta: o intervalo planejado chega à execução e à avaliação de progressão — o caminho completo que o defeito interrompia
+- [X] T007 [P] Teste: o valor gravado aparece ao abrir o editor; série de valor único mostra o campo vazio, e não o valor de repetições (FR-152, SC-044)
+- [X] T008 [P] Teste: digitar um número de dois ou mais dígitos produz aquele número (FR-154, SC-045)
+- [X] T009 [P] Teste: esvaziar o campo devolve a série ao valor único (FR-155, SC-046)
+- [X] T010 [P] Teste: alterar e remover um máximo já gravado funciona — é o caminho de quem tem valor gravado sem intenção (FR-156)
+- [X] T011 Teste de ponta a ponta: planejar 6-8, sair do editor, voltar, e encontrar 6-8 em `tests/e2e/intervaloNoEditor.spec.ts` (SC-044, SC-047)
+- [X] T012 Teste de ponta a ponta: o intervalo planejado chega à execução e à avaliação de progressão — o caminho completo que o defeito interrompia
 
 ---
 
 ## Phase 4: Fecho
 
-- [ ] T013 Rodar a suíte inteira e confirmar que **os quatro portões passam inalterados**
-- [ ] T014 [P] Atualizar `CHANGELOG.md` e subir a versão em `package.json`
-- [ ] T015 Registrar em `docs/revisao-constitucional.md` a lição do defeito: testar as duas pontas de um caminho não testa o caminho
+- [X] T013 Rodar a suíte inteira e confirmar que **os quatro portões passam inalterados**
+- [X] T014 [P] Atualizar `CHANGELOG.md` e subir a versão em `package.json`
+- [X] T015 Registrar em `docs/revisao-constitucional.md` a lição do defeito: testar as duas pontas de um caminho não testa o caminho
 
 ---
 

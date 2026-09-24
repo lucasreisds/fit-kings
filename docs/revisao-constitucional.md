@@ -166,3 +166,49 @@ ampliação do escopo que a constituição fecha, e exige emenda, não uma decis
 
 **Nenhuma violação aberta.** As quatro pendências de aparelho da feature 001 seguem abertas, e
 soma-se a elas T063: validar no iPhone o alcance dos cinco exercícios e o gesto com a mão suada.
+
+---
+
+# Revisão da feature 003 — a lição do campo "até"
+
+**Data**: 2026-09-23
+
+Esta correção foi pequena. O que ela revelou, não.
+
+## O defeito atravessou 554 testes, e não foi por falta de cobertura
+
+Havia teste do componente do campo: ele recebia uma série pronta e a exibia certo. Havia teste da
+regra de domínio do intervalo: ela avaliava certo. **Nenhum teste percorria o trecho entre os
+dois** — e era exatamente ali, na reconstrução da série para o formulário, que o valor se perdia.
+
+> **Testar as duas pontas de um caminho não testa o caminho.**
+
+`tests/unidade/funcionalidades/editorDeSeries.test.tsx` fecha essa lacuna, e falha **nomeando** o
+campo que se perdeu.
+
+## A causa não era o campo esquecido
+
+Era a **existência de uma lista de campos que alguém precisa lembrar de atualizar**. Acrescentar
+`repeticoesMax` à lista teria corrigido o sintoma e deixado a causa de pé para o próximo campo.
+
+`projecaoDeSeries.ts` inverte isso: deriva a projeção **por omissão** do que não pertence ao
+formulário, em vez de enumeração do que pertence. Um campo novo no modelo aparece sem ninguém tocar
+naquele arquivo.
+
+## Princípio I: escrita invisível é perda de dado pelo outro lado
+
+O Princípio I fala em não perder o que o usuário registrou. Este defeito fez o contrário — **gravou
+o que ele não registrou**, sem mostrar. O efeito sobre a confiança é o mesmo: o histórico deixa de
+refletir o que aconteceu.
+
+FR-157 passa a exigir por escrito que nenhuma escrita de valor planejado ocorra sem que o resultado
+fique visível na mesma tela.
+
+## Sobre não migrar automaticamente
+
+Apagar os valores gravados durante o defeito removeria junto os intervalos gravados de propósito, e
+não há como distinguir uns dos outros. Torná-los visíveis e deixar a decisão com o usuário é o que
+o Princípio I pede — a alternativa seria o aplicativo destruir dado por conta própria, que é
+exatamente o que ele existe para não fazer.
+
+**Nenhuma violação aberta.** As pendências de aparelho seguem as mesmas.
