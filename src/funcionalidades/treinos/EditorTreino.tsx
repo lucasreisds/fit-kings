@@ -20,6 +20,7 @@ import {
 import { repositorioExercicios } from '../../dados/repositorios/exercicios'
 import type { Abordagem, Exercicio, Id } from '../../domain/tipos'
 import type { ValoresPlanejados } from '../../domain/treino'
+import { projetarSeriesPlanejadas } from './projecaoDeSeries'
 import { SeletorExercicio } from './SeletorExercicio'
 import { EditorSeries } from './EditorSeries'
 import { EditorDropset } from './EditorDropset'
@@ -202,11 +203,10 @@ function ItemDoEditor({
 }: PropsItem) {
   const [aberto, definirAberto] = useState(false)
 
-  const series: readonly ValoresPlanejados[] = item.series.map((serie) => ({
-    repeticoes: serie.repeticoes,
-    cargaKg: serie.cargaKg,
-    rir: serie.rir,
-  }))
+  // A enumeração de campos que existia aqui foi o que quebrou o campo de
+  // máximo do intervalo: ela esquecia `repeticoesMax`, e o campo ficava sempre
+  // vazio enquanto gravava a cada tecla. Ver `projecaoDeSeries.ts`.
+  const series = projetarSeriesPlanejadas(item.series)
 
   return (
     <section className={estilos.itemExercicio}>
