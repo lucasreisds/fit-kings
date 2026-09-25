@@ -212,3 +212,59 @@ o Princípio I pede — a alternativa seria o aplicativo destruir dado por conta
 exatamente o que ele existe para não fazer.
 
 **Nenhuma violação aberta.** As pendências de aparelho seguem as mesmas.
+
+---
+
+# 004 — Dupla progressão: quando a especificação é que está errada
+
+## O que aconteceu
+
+A regra de progressão exigia **superar** a meta para indicar aumento de carga. Com meta de valor
+único isso é evidente: meta 8, fez 9, suba. Quando a faixa de repetições foi acrescentada na 0.2.0,
+a mesma regra foi aplicada ao máximo do intervalo — numa faixa de 6-8, era preciso fazer 9.
+
+A implementação estava **correta em relação à especificação**, e a especificação é que estava
+errada. FR-142 dizia, com todas as letras, "ficar no topo é cumprir a meta, não superá-la", e havia
+um teste afirmando exatamente isso. Tudo passava. O recurso não servia para nada.
+
+## Por que nenhum portão pegou
+
+Os quatro portões verificam que o sistema faz o que foi especificado. Nenhum deles pergunta se o
+que foi especificado é o que o usuário precisa. A faixa de 6-8 com gatilho em 9 é internamente
+coerente e externamente inútil: o topo da faixa não era nem meta cumprida nem gatilho, era um lugar
+onde não acontecia nada.
+
+O que revelou o erro não foi um teste. Foi descrever o protocolo em voz alta — subir repetições
+dentro da faixa, chegar ao topo, subir o peso, as repetições caem para a base — e notar que o
+aplicativo não tinha o passo do meio.
+
+## A omissão que o compilador deixou passar três vezes
+
+Ao corrigir a regra, os testes de domínio passaram e o de ponta a ponta não. A tela mostrava
+"acima da meta" para 8 numa faixa de 6-8, que é a resposta de quem comparou contra **6**.
+
+`repeticoesMax` era opcional no tipo da meta (`repeticoesMax?: number | null`). Três lugares
+montavam a meta campo a campo e o esqueciam: o livro-razão da execução, o resumo da sessão e — a
+pior delas — a chamada da avaliação de progressão. O histórico, que passava o campo, era o único
+que comparava certo.
+
+Tornar o campo obrigatório fez as três aparecerem na mesma compilação. **Um campo opcional num tipo
+que descreve uma meta é um convite a esquecê-lo**, e o Princípio V depende de a meta chegar inteira
+a quem decide.
+
+## O padrão, outra vez
+
+Na 003 a causa foi uma lista de campos que alguém precisava lembrar de atualizar. Aqui foi um campo
+opcional que ninguém precisava preencher. São a mesma coisa vista de dois ângulos: o tipo permitia
+a construção incompleta, e a construção incompleta aconteceu em todo lugar onde era permitida.
+
+## O que fica
+
+- Um recurso pode estar implementado, testado e inerte ao mesmo tempo. Cobertura não é evidência
+  de utilidade.
+- Quando a implementação segue a especificação e o resultado não serve, corrigir o código é
+  corrigir o sintoma. FR-160 substitui FR-142 por escrito, com o teste antigo reescrito e comentado
+  dizendo qual regra o substituiu — apagá-lo silenciosamente esconderia que houve uma decisão.
+- Campo que descreve meta não é opcional.
+
+**Nenhuma violação aberta.** As pendências de aparelho seguem as mesmas.

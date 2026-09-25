@@ -77,7 +77,7 @@ export function ComparacaoSeries({ series, metas }: Props) {
 type Marca = ReturnType<typeof compararSerie>['repeticoes']
 
 function classeDaMarca(comparacao: Marca): string {
-  if (comparacao === 'acima') return estilos.marcaAcima!
+  if (comparacao === 'acima' || comparacao === 'no_topo') return estilos.marcaAcima!
   if (comparacao === 'abaixo') return estilos.marcaAbaixo!
   return estilos.marcaIgual!
 }
@@ -86,10 +86,12 @@ function textoDaMarca(comparacao: Marca): string {
   switch (comparacao) {
     case 'acima':
       return '▲ acima'
+    case 'no_topo':
+      return '▲ topo'
     case 'abaixo':
       return '▼ abaixo'
     case 'igual':
-      return '= na meta'
+      return '= na faixa'
     default:
       return ''
   }

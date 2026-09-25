@@ -38,8 +38,16 @@ export function ehPontaUnica(intervalo: IntervaloDeRepeticoes): boolean {
   return intervalo.minimo === intervalo.maximo
 }
 
-/** Classificação de FR-141. */
-export type PosicaoNoIntervalo = 'abaixo' | 'dentro' | 'acima'
+/**
+ * Classificação de FR-141 e FR-164.
+ *
+ * `no_topo` existe apenas em faixas, e não é preciosismo: com o gatilho de
+ * FR-160, alcançar o máximo de uma faixa é o que dispara o aviso de aumento de
+ * carga. Apresentá-lo como "dentro", igual a ter feito o mínimo, deixaria o
+ * usuário vendo o aviso sem conseguir ligá-lo ao que fez — e o Princípio V
+ * exige que ele consiga consultar o que fundamenta qualquer indicação.
+ */
+export type PosicaoNoIntervalo = 'abaixo' | 'dentro' | 'no_topo' | 'acima'
 
 export function posicaoNoIntervalo(
   realizado: number,
@@ -47,18 +55,34 @@ export function posicaoNoIntervalo(
 ): PosicaoNoIntervalo {
   if (realizado < intervalo.minimo) return 'abaixo'
   if (realizado > intervalo.maximo) return 'acima'
+  // Em ponta única não há topo a alcançar que não seja o próprio valor: dizer
+  // "no topo" ali seria inventar uma distinção que a prescrição não faz.
+  if (!ehPontaUnica(intervalo) && realizado === intervalo.maximo) return 'no_topo'
   return 'dentro'
 }
 
 /**
- * FR-142 — o critério de aumento de carga.
+ * O critério de aumento de carga — FR-160, FR-161, FR-162.
  *
- * Superar é fazer **estritamente mais que o máximo**. Com ponta única isso é
- * "estritamente maior que o planejado", que é literalmente FR-043 e FR-081 como
- * já estavam. Ficar no topo do intervalo é cumprir a meta, não superá-la.
+ * **O gatilho depende da forma da prescrição**, e isso não é inconsistência:
+ * faixa e valor único não são a mesma coisa escrita de jeitos diferentes.
+ *
+ * - Numa **faixa** `6-8`, o máximo é a **meta a alcançar**. "Trabalhe entre 6 e
+ *   8" significa que dominar o 8 é o objetivo, e alcançá-lo é a conquista que
+ *   o protocolo de dupla progressão usa como gatilho: subiu ao teto, aumenta o
+ *   peso, as repetições caem para a base e o ciclo reinicia.
+ * - Num **valor único** `8`, o número é a **expectativa**. Fazer 8 é cumprir, e
+ *   cumprir não é superar — indicar aumento aí contrariaria FR-081.
+ *
+ * Esta função substitui FR-142, que exigia passar do máximo em ambos os casos.
+ * A regra antiga esvaziava a faixa na prática: quem segue uma prescrição de 6-8
+ * não faz 9, então o gatilho nunca disparava.
+ *
+ * A não-uniformidade preserva integralmente a avaliação de todo treino de valor
+ * único já registrado (FR-165) — que é o que o Princípio I exige.
  */
 export function superouIntervalo(realizado: number, intervalo: IntervaloDeRepeticoes): boolean {
-  return realizado > intervalo.maximo
+  return ehPontaUnica(intervalo) ? realizado > intervalo.maximo : realizado >= intervalo.maximo
 }
 
 /** Texto do intervalo: `8` para ponta única, `6-8` para faixa. */

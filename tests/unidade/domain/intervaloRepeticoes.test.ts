@@ -33,22 +33,25 @@ describe('resolução do intervalo (FR-140)', () => {
   })
 })
 
-describe('posição no intervalo (FR-141)', () => {
+// FR-160 substitui a regra original de FR-141/FR-142: numa faixa, o topo não é
+// só mais um ponto "dentro" — é o fim do ciclo de repetições, e é ele que manda
+// subir a carga. Os casos de ponta única continuam valendo palavra por palavra.
+describe('posição no intervalo (FR-141, revisto por FR-160)', () => {
   const SEIS_A_OITO = intervaloDe({ repeticoes: 6, repeticoesMax: 8 })
 
   it.each([
     [5, 'abaixo'],
     [6, 'dentro'],
     [7, 'dentro'],
-    [8, 'dentro'],
+    [8, 'no_topo'],
     [9, 'acima'],
   ] as const)('%i repetições em 6-8 é %s', (realizado, esperado) => {
     expect(posicaoNoIntervalo(realizado, SEIS_A_OITO)).toBe(esperado)
   })
 
-  it('as pontas são inclusivas', () => {
+  it('as pontas continuam dentro da meta: nenhuma delas é "acima"', () => {
     expect(posicaoNoIntervalo(6, SEIS_A_OITO)).toBe('dentro')
-    expect(posicaoNoIntervalo(8, SEIS_A_OITO)).toBe('dentro')
+    expect(posicaoNoIntervalo(8, SEIS_A_OITO)).toBe('no_topo')
   })
 
   it('com ponta única, "dentro" é o antigo "igual"', () => {
@@ -59,15 +62,15 @@ describe('posição no intervalo (FR-141)', () => {
   })
 })
 
-describe('superar o intervalo (FR-142)', () => {
+describe('superar o intervalo (FR-142, revisto por FR-160)', () => {
   const SEIS_A_OITO = intervaloDe({ repeticoes: 6, repeticoesMax: 8 })
 
   it('supera quem passa do máximo', () => {
     expect(superouIntervalo(9, SEIS_A_OITO)).toBe(true)
   })
 
-  it('ficar no topo é cumprir a meta, não superá-la', () => {
-    expect(superouIntervalo(8, SEIS_A_OITO)).toBe(false)
+  it('alcançar o topo da faixa já é o gatilho para subir a carga', () => {
+    expect(superouIntervalo(8, SEIS_A_OITO)).toBe(true)
   })
 
   it('dentro e abaixo não superam', () => {

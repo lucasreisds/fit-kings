@@ -123,6 +123,7 @@ export function TelaExecucao({ sessaoId }: Props) {
               metas.map((meta) => ({
                 ordem: meta.ordem,
                 repeticoes: meta.repeticoes,
+                repeticoesMax: meta.repeticoesMax,
                 cargaKg: meta.cargaKg,
                 rir: meta.rir,
               })),
@@ -231,8 +232,7 @@ export function TelaExecucao({ sessaoId }: Props) {
   // FR-085: a carga vem da série anterior **do mesmo exercício**, e nunca na
   // primeira série. O valor herdado é dado efetivo, não sugestão (FR-119) — e
   // por isso é exibido igual a um digitado, sem marca d'água nem tom próprio.
-  const cargaDeBase =
-    rascunho.cargaKg ?? cargaHerdada(seriesRegistradas, proximaOrdem)
+  const cargaDeBase = rascunho.cargaKg ?? cargaHerdada(seriesRegistradas, proximaOrdem)
 
   const agora = agoraUtc()
   const indiceAtual = itens.findIndex((item) => item.exercicio.id === emFoco.exercicio.id)
@@ -266,8 +266,7 @@ export function TelaExecucao({ sessaoId }: Props) {
     aoAvancar: () => irPara(1),
     aoRecuar: () => irPara(-1),
     // O gesto não compete com um diálogo aberto.
-    desabilitado:
-      acrescentando || confirmandoDescarte || falha !== null || serieEmEdicao !== null,
+    desabilitado: acrescentando || confirmandoDescarte || falha !== null || serieEmEdicao !== null,
   })
 
   const estado = estadoExercicioSessao({
@@ -303,7 +302,8 @@ export function TelaExecucao({ sessaoId }: Props) {
       // valendo para **abrir** a sessão (FR-032); ela não decide a navegação
       // durante o treino.
       focar(emFoco.exercicio.id)
-      if (ehDropset) definirDegraus([{ ordem: 1, cargaKg: degraus[0]?.cargaKg ?? 0, repeticoes: 0 }])
+      if (ehDropset)
+        definirDegraus([{ ordem: 1, cargaKg: degraus[0]?.cargaKg ?? 0, repeticoes: 0 }])
     } catch (erro) {
       definirFalha(erro)
     } finally {
@@ -419,8 +419,8 @@ export function TelaExecucao({ sessaoId }: Props) {
         {estado === 'inconsistente' ? (
           <Faixa tom="critica" papel="alert">
             <div className={estilos.avisoInconsistente}>
-              Este exercício está marcado como não realizado e mesmo assim tem séries registradas.
-              O aplicativo não escolhe entre os dois. Desmarque-o ou remova as séries para resolver.
+              Este exercício está marcado como não realizado e mesmo assim tem séries registradas. O
+              aplicativo não escolhe entre os dois. Desmarque-o ou remova as séries para resolver.
             </div>
           </Faixa>
         ) : null}
@@ -454,7 +454,10 @@ export function TelaExecucao({ sessaoId }: Props) {
             </p>
             <p className={estilos.textoConcluido}>
               As <span className="numerico">{metas.length}</span>{' '}
-              {metas.length === 1 ? 'série planejada foi registrada' : 'séries planejadas foram registradas'}.
+              {metas.length === 1
+                ? 'série planejada foi registrada'
+                : 'séries planejadas foram registradas'}
+              .
             </p>
 
             <div className={estilos.acoesConcluido}>
@@ -479,135 +482,134 @@ export function TelaExecucao({ sessaoId }: Props) {
             </div>
           </section>
         ) : (
-        <section className={estilos.cartaoSerie}>
-          <div className={estilos.identificacaoSerie}>
-            <span className={estilos.numeroDaSerie}>
-              Série <span className="numerico">{proximaOrdem}</span>
-              {metas.length > 0 ? (
-                <span className="numerico"> de {Math.max(metas.length, proximaOrdem)}</span>
-              ) : null}
-            </span>
-            <span className={estilos.meta}>
-              {metaDaVez ? (
-                <>
-                  meta{' '}
-                  <span className="numerico">
-                    {formatarIntervalo(intervaloDe(metaDaVez))} reps,{' '}
-                    {formatarCarga(metaDaVez.cargaKg)} kg
-                    {metaDaVez.rir !== null ? `, RIR ${metaDaVez.rir}` : ''}
-                  </span>
-                </>
-              ) : (
-                'série extra'
-              )}
-            </span>
-          </div>
+          <section className={estilos.cartaoSerie}>
+            <div className={estilos.identificacaoSerie}>
+              <span className={estilos.numeroDaSerie}>
+                Série <span className="numerico">{proximaOrdem}</span>
+                {metas.length > 0 ? (
+                  <span className="numerico"> de {Math.max(metas.length, proximaOrdem)}</span>
+                ) : null}
+              </span>
+              <span className={estilos.meta}>
+                {metaDaVez ? (
+                  <>
+                    meta{' '}
+                    <span className="numerico">
+                      {formatarIntervalo(intervaloDe(metaDaVez))} reps,{' '}
+                      {formatarCarga(metaDaVez.cargaKg)} kg
+                      {metaDaVez.rir !== null ? `, RIR ${metaDaVez.rir}` : ''}
+                    </span>
+                  </>
+                ) : (
+                  'série extra'
+                )}
+              </span>
+            </div>
 
-          {descansos.get(emFoco.exercicio.id) !== null &&
-          descansos.get(emFoco.exercicio.id) !== undefined ? (
-            <p className={estilos.descanso} data-descanso>
-              descanso{' '}
-              <span className="numerico">{descansos.get(emFoco.exercicio.id)} s</span>
-            </p>
-          ) : null}
+            {descansos.get(emFoco.exercicio.id) !== null &&
+            descansos.get(emFoco.exercicio.id) !== undefined ? (
+              <p className={estilos.descanso} data-descanso>
+                descanso <span className="numerico">{descansos.get(emFoco.exercicio.id)} s</span>
+              </p>
+            ) : null}
 
-          {ehDropset ? (
-            <RegistroDropset degraus={degraus} aoMudar={definirDegraus} />
-          ) : (
-            <>
-              <div className={estilos.numerais}>
-                <div className={estilos.campoNumeral}>
-                  <span className={estilos.rotuloNumeral} id="rotulo-carga">
-                    carga
-                  </span>
-                  <input
-                    className={`${estilos.entradaNumeral} numerico`}
-                    type="number"
-                    inputMode="decimal"
-                    min={0}
-                    step={0.5}
-                    value={cargaDeBase ?? ''}
-                    aria-labelledby="rotulo-carga"
-                    onChange={(evento) =>
-                      definirRascunho(emFoco.exercicio.id, {
-                        cargaKg: evento.target.value === '' ? null : Number(evento.target.value),
-                      })
-                    }
-                  />
-                  <div className={estilos.reguaNumeral} />
-                  <span className={estilos.unidade}>kg</span>
+            {ehDropset ? (
+              <RegistroDropset degraus={degraus} aoMudar={definirDegraus} />
+            ) : (
+              <>
+                <div className={estilos.numerais}>
+                  <div className={estilos.campoNumeral}>
+                    <span className={estilos.rotuloNumeral} id="rotulo-carga">
+                      carga
+                    </span>
+                    <input
+                      className={`${estilos.entradaNumeral} numerico`}
+                      type="number"
+                      inputMode="decimal"
+                      min={0}
+                      step={0.5}
+                      value={cargaDeBase ?? ''}
+                      aria-labelledby="rotulo-carga"
+                      onChange={(evento) =>
+                        definirRascunho(emFoco.exercicio.id, {
+                          cargaKg: evento.target.value === '' ? null : Number(evento.target.value),
+                        })
+                      }
+                    />
+                    <div className={estilos.reguaNumeral} />
+                    <span className={estilos.unidade}>kg</span>
+                  </div>
+
+                  <div className={estilos.campoNumeral}>
+                    <span className={estilos.rotuloNumeral} id="rotulo-reps">
+                      repetições
+                    </span>
+                    <input
+                      className={`${estilos.entradaNumeral} numerico`}
+                      type="number"
+                      inputMode="numeric"
+                      min={0}
+                      step={1}
+                      value={rascunho.repeticoes ?? ''}
+                      aria-labelledby="rotulo-reps"
+                      onChange={(evento) =>
+                        definirRascunho(emFoco.exercicio.id, {
+                          repeticoes:
+                            evento.target.value === '' ? null : Number(evento.target.value),
+                        })
+                      }
+                    />
+                    <div className={estilos.reguaNumeral} />
+                    <span className={estilos.unidade}>reps</span>
+                  </div>
                 </div>
 
-                <div className={estilos.campoNumeral}>
-                  <span className={estilos.rotuloNumeral} id="rotulo-reps">
-                    repetições
-                  </span>
-                  <input
-                    className={`${estilos.entradaNumeral} numerico`}
-                    type="number"
-                    inputMode="numeric"
-                    min={0}
-                    step={1}
-                    value={rascunho.repeticoes ?? ''}
-                    aria-labelledby="rotulo-reps"
-                    onChange={(evento) =>
-                      definirRascunho(emFoco.exercicio.id, {
-                        repeticoes:
-                          evento.target.value === '' ? null : Number(evento.target.value),
-                      })
-                    }
-                  />
-                  <div className={estilos.reguaNumeral} />
-                  <span className={estilos.unidade}>reps</span>
-                </div>
-              </div>
-
-              {metaDaVez ? (
-                <div className={estilos.atalhos}>
-                  {/*
+                {metaDaVez ? (
+                  <div className={estilos.atalhos}>
+                    {/*
                     Com intervalo, os atalhos que importam são o topo da faixa —
                     o alvo cumprido — e um a mais, que é o que indica progressão
                     (FR-142). Com ponta única, os dois são os de sempre.
                   */}
-                  <button
-                    type="button"
-                    className={estilos.atalho}
-                    onClick={() =>
-                      definirRascunho(emFoco.exercicio.id, {
-                        repeticoes: intervaloDe(metaDaVez).maximo,
-                      })
-                    }
-                  >
-                    Fiz {intervaloDe(metaDaVez).maximo}
-                  </button>
-                  <button
-                    type="button"
-                    className={estilos.atalho}
-                    onClick={() =>
-                      definirRascunho(emFoco.exercicio.id, {
-                        repeticoes: intervaloDe(metaDaVez).maximo + 1,
-                      })
-                    }
-                  >
-                    Fiz {intervaloDe(metaDaVez).maximo + 1}
-                  </button>
-                </div>
-              ) : null}
+                    <button
+                      type="button"
+                      className={estilos.atalho}
+                      onClick={() =>
+                        definirRascunho(emFoco.exercicio.id, {
+                          repeticoes: intervaloDe(metaDaVez).maximo,
+                        })
+                      }
+                    >
+                      Fiz {intervaloDe(metaDaVez).maximo}
+                    </button>
+                    <button
+                      type="button"
+                      className={estilos.atalho}
+                      onClick={() =>
+                        definirRascunho(emFoco.exercicio.id, {
+                          repeticoes: intervaloDe(metaDaVez).maximo + 1,
+                        })
+                      }
+                    >
+                      Fiz {intervaloDe(metaDaVez).maximo + 1}
+                    </button>
+                  </div>
+                ) : null}
 
-              {/* RIR é opcional: a série é registrável sem ele (FR-029). */}
-              <div className={estilos.linhaRir}>
-                <PassoNumerico
-                  rotulo="RIR"
-                  sufixo="opcional"
-                  valor={rascunho.rir}
-                  aoMudar={(rir) => definirRascunho(emFoco.exercicio.id, { rir })}
-                  minimo={0}
-                  maximo={10}
-                />
-              </div>
-            </>
-          )}
-        </section>
+                {/* RIR é opcional: a série é registrável sem ele (FR-029). */}
+                <div className={estilos.linhaRir}>
+                  <PassoNumerico
+                    rotulo="RIR"
+                    sufixo="opcional"
+                    valor={rascunho.rir}
+                    aoMudar={(rir) => definirRascunho(emFoco.exercicio.id, { rir })}
+                    minimo={0}
+                    maximo={10}
+                  />
+                </div>
+              </>
+            )}
+          </section>
         )}
 
         {seriesRegistradas.length > 0 ? (
@@ -617,7 +619,12 @@ export function TelaExecucao({ sessaoId }: Props) {
               const meta = metas[serie.ordem - 1]
               const comparacao = compararSerie(
                 meta
-                  ? { repeticoes: meta.repeticoes, cargaKg: meta.cargaKg, rir: meta.rir }
+                  ? {
+                      repeticoes: meta.repeticoes,
+                      repeticoesMax: meta.repeticoesMax,
+                      cargaKg: meta.cargaKg,
+                      rir: meta.rir,
+                    }
                   : null,
                 serie,
               )
@@ -636,7 +643,7 @@ export function TelaExecucao({ sessaoId }: Props) {
                   ) : (
                     <span className={`${estilos.valoresRazao} numerico`}>
                       {formatarCarga(serie.cargaKg)} kg × {serie.repeticoes ?? '—'}
-                        <span className={classeDaMarca(comparacao.repeticoes)}>
+                      <span className={classeDaMarca(comparacao.repeticoes)}>
                         {' '}
                         {marca(comparacao.repeticoes)}
                       </span>
@@ -738,7 +745,9 @@ export function TelaExecucao({ sessaoId }: Props) {
 type Marca = ReturnType<typeof compararSerie>['repeticoes']
 
 function classeDaMarca(comparacao: Marca): string {
-  if (comparacao === 'acima') return estilos.marcaAcima!
+  // Alcançar o topo da faixa é conquista, não neutralidade: leva o mesmo tom
+  // de "acima", porque é o que dispara o aumento de carga (FR-160, FR-164).
+  if (comparacao === 'acima' || comparacao === 'no_topo') return estilos.marcaAcima!
   if (comparacao === 'abaixo') return estilos.marcaAbaixo!
   return estilos.marcaIgual!
 }
@@ -749,10 +758,12 @@ function marca(comparacao: Marca): string {
   switch (comparacao) {
     case 'acima':
       return '▲ acima da meta'
+    case 'no_topo':
+      return '▲ topo da faixa'
     case 'abaixo':
       return '▼ abaixo da meta'
     case 'igual':
-      return '= na meta'
+      return '= na faixa'
     default:
       return ''
   }

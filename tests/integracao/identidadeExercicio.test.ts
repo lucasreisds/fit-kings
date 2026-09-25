@@ -93,8 +93,8 @@ describe.each<OrigemExercicio>(['catalogo', 'personalizado'])(
         })),
       ).pontos
       const planejadas = [
-        { ordem: 1, repeticoes: 8, cargaKg: 45, rir: 2 },
-        { ordem: 2, repeticoes: 8, cargaKg: 45, rir: 2 },
+        { ordem: 1, repeticoes: 8, repeticoesMax: null, cargaKg: 45, rir: 2 },
+        { ordem: 2, repeticoes: 8, repeticoesMax: null, cargaKg: 45, rir: 2 },
       ]
       const progressaoAntes = avaliarProgressao({
         planejadas,
@@ -136,9 +136,9 @@ describe.each<OrigemExercicio>(['catalogo', 'personalizado'])(
       expect(evolucaoDepois.map((ponto) => ponto.cargaMaximaKg)).toEqual([40, 42.5, 45])
 
       // E a avaliação de progressão não muda.
-      expect(
-        avaliarProgressao({ planejadas, realizadas: execucoesDepois[0]!.series }),
-      ).toEqual(progressaoAntes)
+      expect(avaliarProgressao({ planejadas, realizadas: execucoesDepois[0]!.series })).toEqual(
+        progressaoAntes,
+      )
     })
 
     it('renomear não cria um segundo exercício', async () => {

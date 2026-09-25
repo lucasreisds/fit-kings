@@ -67,7 +67,14 @@ export function DetalheAviso({ indicacao, nomeDoExercicio, aoFechar }: Props) {
           <div key={detalhe.ordem} style={{ display: 'contents' }}>
             <span className={`${estilos.ordem} numerico`}>{detalhe.ordem}</span>
             <span className={`${estilos.planejado} numerico`}>
-              {detalhe.repeticoesPlanejadas} reps
+              {/*
+                Numa faixa, mostrar só o mínimo esconde o critério: o aviso fala
+                em topo, e a meta ao lado diria "6". A faixa inteira é a meta.
+              */}
+              {detalhe.repeticoesMaximas > detalhe.repeticoesPlanejadas
+                ? `${detalhe.repeticoesPlanejadas}-${detalhe.repeticoesMaximas}`
+                : detalhe.repeticoesPlanejadas}{' '}
+              reps
               {detalhe.rirPlanejado !== null ? `, RIR ${detalhe.rirPlanejado}` : ''}
             </span>
             <span className={`${estilos.realizado} numerico`}>
@@ -75,7 +82,11 @@ export function DetalheAviso({ indicacao, nomeDoExercicio, aoFechar }: Props) {
               {detalhe.rirRealizado !== null ? `, RIR ${detalhe.rirRealizado}` : ''}
             </span>
             <span className={detalhe.superou ? estilos.superou : estilos.naoSuperou}>
-              {detalhe.superou ? '▲ superou' : '— não superou'}
+              {detalhe.superou
+                ? detalhe.repeticoesMaximas > detalhe.repeticoesPlanejadas
+                  ? '▲ topo'
+                  : '▲ superou'
+                : '— não superou'}
             </span>
           </div>
         ))}

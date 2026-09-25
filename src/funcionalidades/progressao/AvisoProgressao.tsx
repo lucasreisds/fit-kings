@@ -39,15 +39,28 @@ export function AvisoProgressao({ indicacao, nomeDoExercicio, agora }: Props) {
           Dá para aumentar a carga
         </span>
         <span className={estilos.corpoAviso}>
-          {indicacao.baseadaEm
-            ? `Você superou a meta em todas as séries ${formatarTempoRelativo(
-                indicacao.baseadaEm.concluidaEm,
-                agora,
-              )}`
-            : 'Você superou a meta em todas as séries'}
+          {/*
+            Faixa dominada e meta superada são situações diferentes, e o usuário
+            reage a elas de forma diferente: na faixa, o passo seguinte é subir
+            o peso e ver as repetições caírem para a base (D3).
+          */}
+          {indicacao.avaliacao.motivo === 'dominou_a_faixa'
+            ? indicacao.baseadaEm
+              ? `Você alcançou o topo da faixa em todas as séries ${formatarTempoRelativo(
+                  indicacao.baseadaEm.concluidaEm,
+                  agora,
+                )}`
+              : 'Você alcançou o topo da faixa em todas as séries'
+            : indicacao.baseadaEm
+              ? `Você superou a meta em todas as séries ${formatarTempoRelativo(
+                  indicacao.baseadaEm.concluidaEm,
+                  agora,
+                )}`
+              : 'Você superou a meta em todas as séries'}
           {indicacao.cargaAnteriorKg !== null ? (
             <>
-              , com <strong className="numerico">{formatarCarga(indicacao.cargaAnteriorKg)} kg</strong>.
+              , com{' '}
+              <strong className="numerico">{formatarCarga(indicacao.cargaAnteriorKg)} kg</strong>.
             </>
           ) : (
             '.'

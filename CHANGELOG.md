@@ -23,6 +23,39 @@ simuláveis. Enquanto não forem feitas, esta versão não está pronta para uso
 - Tempo de registro de uma série abaixo de 5 segundos. A contagem de toques já está verificada:
   2 no caminho comum, 3 no pior caso, contra um piso de 3.
 
+## [0.3.0] — 2026-09-24
+
+### Alterado
+
+- **Alcançar o topo de uma faixa de repetições agora indica aumento de carga.** Num planejamento
+  de 6-8, fazer 8 em todas as séries faz o aviso aparecer. Antes era preciso fazer **9** — sair da
+  faixa planejada — para que qualquer coisa acontecesse.
+
+  Esta é a dupla progressão como ela funciona na prática: você sobe as repetições dentro da faixa,
+  e quando chega ao topo em todas as séries, sobe o peso; as repetições caem para a base e o ciclo
+  recomeça. Da forma antiga o topo da faixa não era lugar nenhum — nem meta cumprida, nem gatilho —
+  e a faixa, entregue na 0.2.0, não servia para progredir.
+
+  **Planejamentos de valor único não mudaram.** Uma meta de 8 continua exigindo 9 para indicar
+  aumento. Os dez casos-limite do Portão 4 passam sem uma linha alterada.
+
+- **A comparação ao lado de cada série distingue o topo da faixa do meio dela.** Uma série de 8 em
+  6-8 aparece como "topo da faixa"; uma de 7, como estando na faixa. Sem isso o aviso apareceria
+  sem que nada na tela explicasse o porquê.
+
+### Corrigido
+
+- **A faixa de repetições não chegava à avaliação de progressão nem ao livro-razão da execução.**
+  Três pontos do código montavam a meta campo a campo e esqueciam o máximo do intervalo, então a
+  comparação era feita contra o **mínimo**. O efeito prático: num planejamento de 6-8, qualquer
+  série de 7 já contava como "acima da meta", e três séries de 7 disparavam o aviso de aumentar a
+  carga — no meio da faixa, não no fim dela.
+
+  O campo deixou de ser opcional no tipo que descreve a meta, que é o que permitia a omissão passar
+  pelo compilador. As três omissões apareceram de uma vez quando essa frouxidão foi retirada.
+
+  O histórico já comparava certo; execução, resumo da sessão e avaliação de progressão, não.
+
 ## [0.2.2] — 2026-09-23
 
 ### Corrigido

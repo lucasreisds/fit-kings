@@ -34,8 +34,13 @@ export function temAlgumaSerieValida(series: readonly SerieAvaliavel[]): boolean
 export type Planejado = {
   /** Mínimo do intervalo de repetições (FR-140). */
   readonly repeticoes: number
-  /** Máximo. `null` = ponta única, o comportamento de sempre. */
-  readonly repeticoesMax?: number | null
+  /**
+   * Máximo. `null` = ponta única, o comportamento de sempre.
+   *
+   * Obrigatório de propósito: quando era opcional, dois chamadores o omitiram
+   * sem que o compilador reclamasse, e a faixa era comparada contra o mínimo.
+   */
+  readonly repeticoesMax: number | null
   readonly cargaKg: number
   readonly rir: number | null
 }
@@ -52,7 +57,14 @@ export type Realizado = {
  * exercício fora do plano; `sem_registro` é o que ainda não foi feito;
  * `nao_realizada` é a recusa explícita, que FR-024 exige distinguir da ausência.
  */
-export type Comparacao = 'acima' | 'igual' | 'abaixo' | 'sem_meta' | 'sem_registro' | 'nao_realizada'
+/**
+ * `no_topo` só ocorre em planejamento **em faixa**, e é a conquista que dispara
+ * o aumento de carga (FR-160, FR-164). Sem ela, alcançar 8 numa faixa de 6-8
+ * apareceria como "na meta", igual a ter feito 6 — e o usuário veria o aviso de
+ * progressão sem conseguir ligá-lo ao que fez.
+ */
+export type Comparacao =
+  'acima' | 'no_topo' | 'igual' | 'abaixo' | 'sem_meta' | 'sem_registro' | 'nao_realizada'
 
 export type ComparacaoDaSerie = {
   readonly repeticoes: Comparacao
@@ -98,6 +110,8 @@ function compararComIntervalo(realizado: number | null, planejado: Planejado): C
   switch (posicaoNoIntervalo(realizado, intervalo)) {
     case 'acima':
       return 'acima'
+    case 'no_topo':
+      return 'no_topo'
     case 'abaixo':
       return 'abaixo'
     case 'dentro':
