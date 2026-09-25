@@ -45,6 +45,22 @@ simuláveis. Enquanto não forem feitas, esta versão não está pronta para uso
 
 ### Corrigido
 
+- **Preencher o mínimo e o máximo de uma série em seguida perdia o mínimo.** Planejar 6 a 8
+  digitando "6" e depois "8" gravava `{10, 8}`: o 6 era descartado sem aviso, e a série ficava com
+  um intervalo que ninguém pediu.
+
+  O editor grava a cada tecla e relê o valor do banco. Entre a escrita e o retorno há uma ida ao
+  IndexedDB, e nessa janela a tela ainda mostra o valor anterior — a segunda tecla montava a
+  gravação sobre esse valor velho e desfazia a primeira. Quanto mais lento o aparelho, mais larga a
+  janela; num celular ela cabe num polegar comum, e o defeito existia desde a 0.2.0.
+
+  A gravação passou a partir do que está no banco, lido dentro da própria transação, em vez do que
+  a tela renderizou por último. É a mesma ideia do `setState` com função, e pela mesma razão.
+
+  O teste de regressão roda com a CPU estrangulada em 20x, porque numa máquina de desenvolvimento a
+  janela é estreita demais para o defeito aparecer — ele passou por duas versões aqui e só foi
+  pego pela integração contínua.
+
 - **A faixa de repetições não chegava à avaliação de progressão nem ao livro-razão da execução.**
   Três pontos do código montavam a meta campo a campo e esqueciam o máximo do intervalo, então a
   comparação era feita contra o **mínimo**. O efeito prático: num planejamento de 6-8, qualquer

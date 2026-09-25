@@ -137,6 +137,9 @@ dois.
 - **FR-165**: A avaliação de progressão de todo treino planejado com valor único NÃO DEVE mudar de
   resultado em consequência desta alteração.
 
+- **FR-166**: Alterações consecutivas a campos da mesma série planejada DEVEM todas persistir,
+  independentemente da velocidade do aparelho. Nenhuma alteração pode desfazer a anterior.
+
 **FR-142 é substituído por FR-160 e FR-161.**
 
 ---
@@ -151,6 +154,8 @@ dois.
   alteração.
 - **SC-052**: Numa faixa, a série que alcança o topo é apresentada de forma distinguível da que fica
   dentro da faixa, em 100% dos casos.
+- **SC-053**: Preencher o mínimo e o máximo de uma série em sequência imediata grava os dois valores
+  em 100% das tentativas, inclusive com a CPU estrangulada em 20x.
 
 ---
 

@@ -2,8 +2,28 @@ import { describe, expect, it, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { EditorSeries } from '../../../src/funcionalidades/treinos/EditorSeries'
 import { projetarSeriesPlanejadas } from '../../../src/funcionalidades/treinos/projecaoDeSeries'
+import type { ValoresPlanejados } from '../../../src/domain/treino'
 import { umaSeriePlanejada } from '../../apoio/fabricas'
 import type { SeriePlanejada } from '../../../src/domain/tipos'
+
+/**
+ * Aplica a alteração pedida sobre a base indicada.
+ *
+ * `aoMudar` passou a receber **como alterar** em vez do conjunto pronto, para
+ * que a gravação parta do que está no banco e não do que a tela renderizou por
+ * último — ver `EditorSeries`. Aqui a base é explícita, que é o que torna o
+ * teste capaz de dizer se a alteração foi aplicada ao lugar certo.
+ */
+function aplicar(
+  aoMudar: ReturnType<typeof vi.fn>,
+  base: readonly ValoresPlanejados[],
+  chamada = 0,
+): readonly ValoresPlanejados[] {
+  const transformar = aoMudar.mock.calls[chamada]![0] as (
+    atuais: readonly ValoresPlanejados[],
+  ) => readonly ValoresPlanejados[]
+  return transformar(base)
+}
 
 /**
  * T001, T002 — FR-158, FR-159, SC-047, SC-048.
@@ -98,7 +118,10 @@ describe('comportamentos que o defeito escondia', () => {
     })
 
     expect(aoMudar).toHaveBeenCalledTimes(1)
-    expect(aoMudar.mock.calls[0]![0][0]).toMatchObject({ repeticoesMax: 12 })
+    expect(aplicar(aoMudar, projetarSeriesPlanejadas([gravada]))[0]).toMatchObject({
+      repeticoes: 6,
+      repeticoesMax: 12,
+    })
   })
 
   it('esvaziar o campo devolve a série ao valor único (FR-155, SC-046)', () => {
@@ -110,7 +133,10 @@ describe('comportamentos que o defeito escondia', () => {
       target: { value: '' },
     })
 
-    expect(aoMudar.mock.calls[0]![0][0]).toMatchObject({ repeticoesMax: null })
+    expect(aplicar(aoMudar, projetarSeriesPlanejadas([gravada]))[0]).toMatchObject({
+      repeticoes: 6,
+      repeticoesMax: null,
+    })
   })
 
   it('alterar um máximo já gravado funciona (FR-156)', () => {
@@ -123,6 +149,34 @@ describe('comportamentos que o defeito escondia', () => {
     expect(campo.value).toBe('9')
 
     fireEvent.change(campo, { target: { value: '10' } })
-    expect(aoMudar.mock.calls[0]![0][0]).toMatchObject({ repeticoesMax: 10 })
+    expect(aplicar(aoMudar, projetarSeriesPlanejadas([gravada]))[0]).toMatchObject({
+      repeticoes: 6,
+      repeticoesMax: 10,
+    })
+  })
+
+  /**
+   * A alteração é aplicada sobre o que está gravado, não sobre o que a tela
+   * renderizou. É esta a propriedade que faz a segunda tecla parar de desfazer
+   * a primeira — o resto é consequência dela (FR-166).
+   */
+  it('a alteração parte do conjunto que receber, não do que foi renderizado', () => {
+    const renderizada = umaSeriePlanejada({ repeticoes: 10, repeticoesMax: null })
+    const aoMudar = vi.fn()
+    render(<EditorSeries series={projetarSeriesPlanejadas([renderizada])} aoMudar={aoMudar} />)
+
+    fireEvent.change(screen.getByLabelText(/Máximo de repetições da série 1/), {
+      target: { value: '8' },
+    })
+
+    // Enquanto o "8" ia pelo ar, o "6" do mínimo já tinha sido gravado.
+    const gravadaDesde = projetarSeriesPlanejadas([
+      umaSeriePlanejada({ repeticoes: 6, repeticoesMax: null }),
+    ])
+
+    expect(aplicar(aoMudar, gravadaDesde)[0]).toMatchObject({
+      repeticoes: 6,
+      repeticoesMax: 8,
+    })
   })
 })

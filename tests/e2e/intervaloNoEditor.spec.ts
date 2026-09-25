@@ -14,7 +14,10 @@ test.describe('intervalo de repetições no editor', () => {
     await montarTreino(page, 'Treino A', ['Supino reto com barra'])
 
     await abrirEditor(page, 'Treino A')
-    await page.getByRole('button', { name: /Supino reto com barra/ }).first().click()
+    await page
+      .getByRole('button', { name: /Supino reto com barra/ })
+      .first()
+      .click()
 
     const minimo = page.getByLabel('Repetições da série 1', { exact: true })
     const maximo = page.getByLabel(/Máximo de repetições da série 1/)
@@ -31,7 +34,10 @@ test.describe('intervalo de repetições no editor', () => {
     await page.getByRole('button', { name: 'Concluir' }).click()
     await page.waitForTimeout(400)
     await abrirEditor(page, 'Treino A')
-    await page.getByRole('button', { name: /Supino reto com barra/ }).first().click()
+    await page
+      .getByRole('button', { name: /Supino reto com barra/ })
+      .first()
+      .click()
 
     await expect(page.getByLabel('Repetições da série 1', { exact: true })).toHaveValue('6')
     await expect(page.getByLabel(/Máximo de repetições da série 1/)).toHaveValue('8')
@@ -42,7 +48,10 @@ test.describe('intervalo de repetições no editor', () => {
     await montarTreino(page, 'Treino A', ['Supino reto com barra'])
 
     await abrirEditor(page, 'Treino A')
-    await page.getByRole('button', { name: /Supino reto com barra/ }).first().click()
+    await page
+      .getByRole('button', { name: /Supino reto com barra/ })
+      .first()
+      .click()
 
     const maximo = page.getByLabel(/Máximo de repetições da série 1/)
     // Tecla a tecla, que é como o defeito aparecia: cada dígito substituía o
@@ -59,7 +68,10 @@ test.describe('intervalo de repetições no editor', () => {
     await montarTreino(page, 'Treino A', ['Supino reto com barra'])
 
     await abrirEditor(page, 'Treino A')
-    await page.getByRole('button', { name: /Supino reto com barra/ }).first().click()
+    await page
+      .getByRole('button', { name: /Supino reto com barra/ })
+      .first()
+      .click()
 
     const maximo = page.getByLabel(/Máximo de repetições da série 1/)
     await maximo.fill('9')
@@ -83,7 +95,10 @@ test.describe('intervalo de repetições no editor', () => {
     await montarTreino(page, 'Treino A', ['Supino reto com barra'])
 
     await abrirEditor(page, 'Treino A')
-    await page.getByRole('button', { name: /Supino reto com barra/ }).first().click()
+    await page
+      .getByRole('button', { name: /Supino reto com barra/ })
+      .first()
+      .click()
     await page.getByLabel('Repetições da série 1', { exact: true }).fill('6')
     await page.getByLabel(/Máximo de repetições da série 1/).fill('8')
     await page.getByLabel(/Máximo de repetições da série 1/).blur()
@@ -97,5 +112,40 @@ test.describe('intervalo de repetições no editor', () => {
     await expect(page.getByText(/meta 6-8 reps/)).toBeVisible()
     await expect(page.getByRole('button', { name: 'Fiz 8' })).toBeVisible()
     await expect(page.getByRole('button', { name: 'Fiz 9' })).toBeVisible()
+  })
+
+  /**
+   * FR-166 — a segunda tecla não pode desfazer a primeira.
+   *
+   * O editor grava a cada tecla e relê por `liveQuery`. Entre a escrita e o
+   * retorno há uma ida ao IndexedDB, e nessa janela a tela ainda mostra o valor
+   * anterior. Enquanto a alteração era montada sobre o que a tela tinha em
+   * mãos, preencher o mínimo e o máximo em seguida gravava `{ 10, 8 }`: o 6
+   * sumia sem aviso, que é o Princípio I pelo avesso.
+   *
+   * **A CPU estrangulada não é firula.** Numa máquina de desenvolvimento a
+   * janela é estreita demais para o defeito aparecer, e ele passou despercebido
+   * por duas versões aqui enquanto derrubava a integração contínua. Com o
+   * estrangulamento ele falha todas as vezes — foi assim que foi encontrado.
+   */
+  test('preencher mínimo e máximo em seguida não perde o mínimo (FR-166)', async ({ page }) => {
+    const cdp = await page.context().newCDPSession(page)
+    await cdp.send('Emulation.setCPUThrottlingRate', { rate: 20 })
+
+    await abrirLimpo(page)
+    await montarTreino(page, 'Treino A', ['Supino reto com barra'])
+    await abrirEditor(page, 'Treino A')
+    await page
+      .getByRole('button', { name: /Supino reto com barra/ })
+      .first()
+      .click()
+
+    // Sem espera entre um campo e outro — é o que um polegar comum faz.
+    await page.getByLabel('Repetições da série 1', { exact: true }).fill('6')
+    await page.getByLabel(/Máximo de repetições da série 1/).fill('8')
+    await page.waitForTimeout(1500)
+
+    await expect(page.getByLabel('Repetições da série 1', { exact: true })).toHaveValue('6')
+    await expect(page.getByLabel(/Máximo de repetições da série 1/)).toHaveValue('8')
   })
 })

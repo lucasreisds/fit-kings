@@ -14,31 +14,39 @@ import estilos from './treinos.module.css'
 
 type Props = {
   degraus: readonly ValoresPlanejados[]
-  aoMudar: (degraus: readonly ValoresPlanejados[]) => void
+  /** Recebe **como alterar**. A razão está em `EditorSeries`. */
+  aoMudar: (
+    transformar: (atuais: readonly ValoresPlanejados[]) => readonly ValoresPlanejados[],
+  ) => void
 }
 
 export function EditorDropset({ degraus, aoMudar }: Props) {
   function alterar(indice: number, campo: 'cargaKg' | 'repeticoes', bruto: string) {
     const valor = bruto === '' ? 0 : Number(bruto)
-    aoMudar(degraus.map((degrau, i) => (i === indice ? { ...degrau, [campo]: valor } : degrau)))
+    aoMudar((atuais) =>
+      atuais.map((degrau, i) => (i === indice ? { ...degrau, [campo]: valor } : degrau)),
+    )
   }
 
   function acrescentar() {
-    const ultimo = degraus[degraus.length - 1]
-    aoMudar([
-      ...degraus,
-      {
-        // O degrau seguinte começa mais leve: é o que dropset significa. O valor
-        // é ponto de partida editável, não regra.
-        cargaKg: ultimo ? Math.max(0, Math.round(ultimo.cargaKg * 0.8 * 2) / 2) : 0,
-        repeticoes: ultimo?.repeticoes ?? 8,
-        rir: ultimo?.rir ?? null,
-      },
-    ])
+    aoMudar((atuais) => {
+      const ultimo = atuais[atuais.length - 1]
+      return [
+        ...atuais,
+        {
+          // O degrau seguinte começa mais leve: é o que dropset significa. O
+          // valor é ponto de partida editável, não regra.
+          cargaKg: ultimo ? Math.max(0, Math.round(ultimo.cargaKg * 0.8 * 2) / 2) : 0,
+          repeticoes: ultimo?.repeticoes ?? 8,
+          repeticoesMax: ultimo?.repeticoesMax ?? null,
+          rir: ultimo?.rir ?? null,
+        },
+      ]
+    })
   }
 
   function remover(indice: number) {
-    aoMudar(degraus.filter((_, i) => i !== indice))
+    aoMudar((atuais) => atuais.filter((_, i) => i !== indice))
   }
 
   return (

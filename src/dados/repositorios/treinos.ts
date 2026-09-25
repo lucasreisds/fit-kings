@@ -63,7 +63,31 @@ export type RepositorioTreinos = {
   adicionarItem(treinoId: Id, entrada: EntradaDeItem): Promise<ItemCompleto>
   removerItem(treinoId: Id, itemId: Id): Promise<void>
   reordenarItens(treinoId: Id, de: number, para: number): Promise<void>
+  /**
+   * Substitui as séries do item por um conjunto já pronto.
+   *
+   * Use quando o conjunto não depende do que está gravado. Para uma alteração
+   * — mexer num campo, acrescentar, remover — use `transformarSeries`.
+   */
   definirSeries(itemTreinoId: Id, series: readonly ValoresPlanejados[]): Promise<SeriePlanejada[]>
+  /**
+   * Altera as séries do item a partir do que está gravado, dentro da transação.
+   *
+   * Existe porque o editor escreve a cada tecla e relê por `liveQuery`: entre a
+   * escrita e o retorno há uma ida ao IndexedDB, e nessa janela a tela ainda
+   * mostra o valor anterior. Mandar o conjunto inteiro montado sobre o que a
+   * tela tinha em mãos faz a segunda tecla desfazer a primeira — preencher
+   * "6" no mínimo e "8" no máximo em seguida gravava `{ 10, 8 }`, perdendo o 6
+   * sem aviso. Num aparelho lento a janela é larga o bastante para acontecer
+   * com um polegar comum.
+   *
+   * `transformar` recebe o que está gravado e devolve o que deve ficar, e a
+   * leitura acontece aqui dentro — não há base velha para partir.
+   */
+  transformarSeries(
+    itemTreinoId: Id,
+    transformar: (atuais: readonly SeriePlanejada[]) => readonly ValoresPlanejados[],
+  ): Promise<SeriePlanejada[]>
   definirAbordagem(itemTreinoId: Id, abordagem: Abordagem): Promise<ItemTreino>
   /** FR-148 — descanso planejado do item. Valor exibido, não temporizador. */
   definirDescanso(itemTreinoId: Id, descansoSegundos: number | null): Promise<ItemTreino>
@@ -86,6 +110,59 @@ export function criarRepositorioTreinos(
   async function seriesDe(itemTreinoId: Id): Promise<SeriePlanejada[]> {
     const series = await db.seriesPlanejadas.where('itemTreinoId').equals(itemTreinoId).toArray()
     return series.filter((serie) => serie.excluidoEm === null).sort((a, b) => a.ordem - b.ordem)
+  }
+
+  async function transformarSeries(
+    itemTreinoId: Id,
+    transformar: (atuais: readonly SeriePlanejada[]) => readonly ValoresPlanejados[],
+  ): Promise<SeriePlanejada[]> {
+    return db.transaction('rw', [db.seriesPlanejadas, db.exerciciosSessao], async () => {
+      const jaExecutado = await foiExecutado(itemTreinoId)
+      const atuais = await seriesDe(itemTreinoId)
+
+      // A base da alteração é o que está gravado **agora**, lido dentro da
+      // transação — não o que a tela tem em mãos. Ver a interface.
+      const series = transformar(atuais)
+
+      for (let indice = 0; indice < series.length; indice += 1) {
+        const valores = series[indice]!
+        const atual = atuais[indice]
+        const alteracao = {
+          ordem: indice + 1,
+          repeticoes: valores.repeticoes,
+          repeticoesMax: valores.repeticoesMax ?? null,
+          cargaKg: valores.cargaKg,
+          rir: valores.rir,
+        }
+
+        if (!atual) {
+          await baseSeries.criar({ itemTreinoId, ...alteracao } as never)
+          continue
+        }
+
+        const mudou =
+          atual.repeticoes !== valores.repeticoes ||
+          atual.repeticoesMax !== (valores.repeticoesMax ?? null) ||
+          atual.cargaKg !== valores.cargaKg ||
+          atual.rir !== valores.rir ||
+          atual.ordem !== indice + 1
+
+        if (!mudou) continue
+
+        if (jaExecutado) {
+          await baseSeries.excluir(atual.id)
+          await baseSeries.criar({ itemTreinoId, ...alteracao } as never)
+        } else {
+          await baseSeries.atualizar(atual.id, alteracao as never)
+        }
+      }
+
+      for (const excedente of atuais.slice(series.length)) {
+        await baseSeries.excluir(excedente.id)
+      }
+
+      return seriesDe(itemTreinoId)
+    })
   }
 
   /** O item já foi levado para alguma sessão — em andamento ou concluída? */
@@ -229,50 +306,10 @@ export function criarRepositorioTreinos(
      * As que saem também são apenas marcadas, nunca removidas fisicamente.
      */
     async definirSeries(itemTreinoId, series) {
-      return db.transaction('rw', [db.seriesPlanejadas, db.exerciciosSessao], async () => {
-        const jaExecutado = await foiExecutado(itemTreinoId)
-        const atuais = await seriesDe(itemTreinoId)
-
-        for (let indice = 0; indice < series.length; indice += 1) {
-          const valores = series[indice]!
-          const atual = atuais[indice]
-          const alteracao = {
-            ordem: indice + 1,
-            repeticoes: valores.repeticoes,
-            repeticoesMax: valores.repeticoesMax ?? null,
-            cargaKg: valores.cargaKg,
-            rir: valores.rir,
-          }
-
-          if (!atual) {
-            await baseSeries.criar({ itemTreinoId, ...alteracao } as never)
-            continue
-          }
-
-          const mudou =
-            atual.repeticoes !== valores.repeticoes ||
-            atual.repeticoesMax !== (valores.repeticoesMax ?? null) ||
-            atual.cargaKg !== valores.cargaKg ||
-            atual.rir !== valores.rir ||
-            atual.ordem !== indice + 1
-
-          if (!mudou) continue
-
-          if (jaExecutado) {
-            await baseSeries.excluir(atual.id)
-            await baseSeries.criar({ itemTreinoId, ...alteracao } as never)
-          } else {
-            await baseSeries.atualizar(atual.id, alteracao as never)
-          }
-        }
-
-        for (const excedente of atuais.slice(series.length)) {
-          await baseSeries.excluir(excedente.id)
-        }
-
-        return seriesDe(itemTreinoId)
-      })
+      return transformarSeries(itemTreinoId, () => series)
     },
+
+    transformarSeries,
 
     async definirAbordagem(itemTreinoId, abordagem) {
       return baseItens.atualizar(itemTreinoId, { abordagem } as never)
