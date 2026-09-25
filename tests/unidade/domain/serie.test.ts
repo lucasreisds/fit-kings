@@ -50,7 +50,7 @@ describe('série válida (FR-092)', () => {
 })
 
 describe('comparação planejado x realizado (FR-020, FR-019)', () => {
-  const planejado = { repeticoes: 8, cargaKg: 40, rir: 2 }
+  const planejado = { repeticoes: 8, repeticoesMax: null, cargaKg: 40, rir: 2 }
 
   it('marca acima, igual e abaixo', () => {
     expect(
@@ -88,7 +88,7 @@ describe('comparação planejado x realizado (FR-020, FR-019)', () => {
   it('trata RIR planejado e realizado como dados independentes (FR-019)', () => {
     // RIR planejado ausente não impede comparar repetições e carga.
     const comparacao = compararSerie(
-      { repeticoes: 8, cargaKg: 40, rir: null },
+      { repeticoes: 8, repeticoesMax: null, cargaKg: 40, rir: null },
       { repeticoes: 9, cargaKg: 42.5, rir: 1, naoRealizada: false },
     )
     expect(comparacao.repeticoes).toBe('acima')

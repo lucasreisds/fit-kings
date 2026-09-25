@@ -12,7 +12,18 @@ import estilos from './treinos.module.css'
 
 type Props = {
   series: readonly ValoresPlanejados[]
-  aoMudar: (series: readonly ValoresPlanejados[]) => void
+  /**
+   * Recebe **como alterar**, não o resultado pronto.
+   *
+   * `series` vem do banco por `liveQuery` e fica um instante atrás da última
+   * tecla. Montar o conjunto novo sobre ela faz a segunda alteração desfazer a
+   * primeira: digitar "6" no mínimo e "8" no máximo em seguida gravava
+   * `{ 10, 8 }`. A função é aplicada sobre o que está gravado, dentro da
+   * transação — igual ao `setState` com função do React, e pela mesma razão.
+   */
+  aoMudar: (
+    transformar: (atuais: readonly ValoresPlanejados[]) => readonly ValoresPlanejados[],
+  ) => void
 }
 
 const SERIE_PADRAO: ValoresPlanejados = {
@@ -29,19 +40,20 @@ export function EditorSeries({ series, aoMudar }: Props) {
     // campo esvaziado durante a digitação vira 0, que a validação recusa.
     const aceitaNulo = campo === 'rir' || campo === 'repeticoesMax'
 
-    const proximas = series.map((serie, i) =>
-      i === indice ? { ...serie, [campo]: aceitaNulo ? valor : (valor ?? 0) } : serie,
+    aoMudar(
+      (atuais) =>
+        atuais.map((serie, i) =>
+          i === indice ? { ...serie, [campo]: aceitaNulo ? valor : (valor ?? 0) } : serie,
+        ) as readonly ValoresPlanejados[],
     )
-    aoMudar(proximas as readonly ValoresPlanejados[])
   }
 
   function acrescentar() {
-    const ultima = series[series.length - 1] ?? SERIE_PADRAO
-    aoMudar([...series, { ...ultima }])
+    aoMudar((atuais) => [...atuais, { ...(atuais[atuais.length - 1] ?? SERIE_PADRAO) }])
   }
 
   function remover(indice: number) {
-    aoMudar(series.filter((_, i) => i !== indice))
+    aoMudar((atuais) => atuais.filter((_, i) => i !== indice))
   }
 
   return (

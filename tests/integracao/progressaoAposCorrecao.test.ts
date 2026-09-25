@@ -25,9 +25,9 @@ describe('progressão depois da correção (FR-117)', () => {
   })
 
   const PLANEJADAS: SeriePlanejadaParaAvaliar[] = [
-    { ordem: 1, repeticoes: 8, cargaKg: 40, rir: null },
-    { ordem: 2, repeticoes: 8, cargaKg: 40, rir: null },
-    { ordem: 3, repeticoes: 8, cargaKg: 40, rir: null },
+    { ordem: 1, repeticoes: 8, repeticoesMax: null, cargaKg: 40, rir: null },
+    { ordem: 2, repeticoes: 8, repeticoesMax: null, cargaKg: 40, rir: null },
+    { ordem: 3, repeticoes: 8, repeticoesMax: null, cargaKg: 40, rir: null },
   ]
 
   async function sessaoConcluida(repeticoes: readonly number[]) {
@@ -109,7 +109,9 @@ describe('progressão depois da correção (FR-117)', () => {
 
     // A versão anterior, com o 7, continua no banco — e é ignorada pela leitura.
     expect(await db.seriesRealizadas.filter((s) => s.repeticoes === 7).count()).toBe(1)
-    expect(indicacao.avaliacao.detalhePorSerie.map((d) => d.repeticoesRealizadas)).toEqual([9, 9, 9])
+    expect(indicacao.avaliacao.detalhePorSerie.map((d) => d.repeticoesRealizadas)).toEqual([
+      9, 9, 9,
+    ])
   })
 
   it('a carga da execução anterior também reflete a correção (FR-083)', async () => {

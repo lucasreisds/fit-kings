@@ -46,6 +46,8 @@ export type EntradaDaAvaliacao = {
 
 export type MotivoDaAvaliacao =
   | 'superou_em_todas'
+  /** Faixa dominada: o teto foi alcançado em todas as séries (FR-160). */
+  | 'dominou_a_faixa'
   | 'sem_plano'
   | 'sem_execucao'
   | 'serie_sem_registro'
@@ -89,9 +91,15 @@ export function avaliarProgressao(entrada: EntradaDaAvaliacao): AvaliacaoDeProgr
   const porOrdem = new Map(entrada.realizadas.map((serie) => [serie.ordem, serie]))
   const detalhePorSerie: DetalheDaSerie[] = []
 
-  let motivo: MotivoDaAvaliacao = 'superou_em_todas'
   let indica = true
   let rirConsiderado = false
+  // Numa faixa, o passo seguinte do usuário é outro — subir o peso e ver as
+  // repetições caírem para a base. Dizer "você superou" onde ele cumpriu
+  // exatamente o planejado seria impreciso (D3).
+  const haFaixa = entrada.planejadas.some(
+    (planejada) => (planejada.repeticoesMax ?? planejada.repeticoes) > planejada.repeticoes,
+  )
+  let motivo: MotivoDaAvaliacao = haFaixa ? 'dominou_a_faixa' : 'superou_em_todas'
 
   // Percorre **as planejadas**. A série extra fica de fora do laço por
   // construção — é o que FR-079 quer dizer com "ignorada".
@@ -160,11 +168,13 @@ export function avaliarProgressao(entrada: EntradaDaAvaliacao): AvaliacaoDeProgr
 
 const TEXTOS: Record<MotivoDaAvaliacao, string> = {
   superou_em_todas: 'Você superou a meta em todas as séries. Dá para subir a carga.',
+  dominou_a_faixa:
+    'Você alcançou o topo da faixa em todas as séries. Suba a carga — as repetições vão cair para a base da faixa, e o ciclo recomeça.',
   sem_plano: 'Este exercício entrou fora do plano, então não há meta para comparar.',
   sem_execucao: 'Ainda não há uma execução registrada deste exercício para comparar.',
   serie_sem_registro: 'Uma das séries planejadas ficou sem registro.',
   serie_nao_realizada: 'Uma das séries planejadas foi marcada como não realizada.',
-  repeticoes_nao_superadas: 'As repetições não superaram a meta em todas as séries.',
+  repeticoes_nao_superadas: 'As repetições não alcançaram a meta em todas as séries.',
   rir_abaixo_do_planejado: 'O RIR ficou abaixo do planejado em alguma série.',
 }
 

@@ -102,8 +102,13 @@ export function EditorTreino({ treinoId }: Props) {
     await repositorioTreinos.reordenarItens(idAtual, de, para)
   }
 
-  async function definirSeries(itemId: Id, series: readonly ValoresPlanejados[]) {
-    await repositorioTreinos.definirSeries(itemId, series)
+  async function definirSeries(
+    itemId: Id,
+    transformar: (atuais: readonly ValoresPlanejados[]) => readonly ValoresPlanejados[],
+  ) {
+    await repositorioTreinos.transformarSeries(itemId, (gravadas) =>
+      transformar(projetarSeriesPlanejadas(gravadas)),
+    )
   }
 
   async function definirAbordagem(itemId: Id, abordagem: Abordagem) {
@@ -144,7 +149,7 @@ export function EditorTreino({ treinoId }: Props) {
             aoRemover={() => void remover(item.item.id)}
             aoSubir={() => void reordenar(indice, indice - 1)}
             aoDescer={() => void reordenar(indice, indice + 1)}
-            aoDefinirSeries={(series) => void definirSeries(item.item.id, series)}
+            aoDefinirSeries={(transformar) => void definirSeries(item.item.id, transformar)}
             aoDefinirAbordagem={(abordagem) => void definirAbordagem(item.item.id, abordagem)}
             aoDefinirDescanso={(segundos) => void definirDescanso(item.item.id, segundos)}
           />
@@ -184,7 +189,9 @@ type PropsItem = {
   aoRemover: () => void
   aoSubir: () => void
   aoDescer: () => void
-  aoDefinirSeries: (series: readonly ValoresPlanejados[]) => void
+  aoDefinirSeries: (
+    transformar: (atuais: readonly ValoresPlanejados[]) => readonly ValoresPlanejados[],
+  ) => void
   aoDefinirAbordagem: (abordagem: Abordagem) => void
   aoDefinirDescanso: (descansoSegundos: number | null) => void
 }

@@ -1,23 +1,47 @@
 import { expect, type Page } from '@playwright/test'
 
-/** Apaga o armazenamento do navegador — o equivalente a um aparelho novo. */
+/**
+ * Apaga o armazenamento do navegador — o equivalente a um aparelho novo.
+ *
+ * `blocked` **não** é conclusão: significa que a exclusão ficou pendente atrás
+ * de uma conexão aberta. Tratá-lo como sucesso — que era o que este apoio
+ * fazia — devolve o controle enquanto o banco ainda existe, e o teste seguinte
+ * começa com os treinos do anterior. Como quase todo apoio daqui escolhe pelo
+ * primeiro botão da lista, sobra é o bastante para agir no treino errado.
+ *
+ * O aplicativo mantém a conexão do Dexie aberta o tempo todo, então `blocked`
+ * é o caminho comum, não a exceção: o Dexie fecha a conexão ao ouvir o pedido
+ * e a exclusão prossegue. Por isso esperar é obrigatório, e confirmar também.
+ */
 export async function limparArmazenamento(pagina: Page): Promise<void> {
   await pagina.evaluate(async () => {
-    const bancos = (await indexedDB.databases?.()) ?? []
-    await Promise.all(
-      bancos
-        .map((banco) => banco.name)
-        .filter((nome): nome is string => typeof nome === 'string')
-        .map(
-          (nome) =>
-            new Promise<void>((resolver) => {
-              const pedido = indexedDB.deleteDatabase(nome)
-              pedido.onsuccess = () => resolver()
-              pedido.onerror = () => resolver()
-              pedido.onblocked = () => resolver()
-            }),
-        ),
-    )
+    const apagar = (nome: string) =>
+      new Promise<void>((resolver, rejeitar) => {
+        const pedido = indexedDB.deleteDatabase(nome)
+        pedido.onsuccess = () => resolver()
+        pedido.onerror = () => rejeitar(new Error(`falha ao apagar ${nome}`))
+        // Sem handler de `blocked`: a promessa continua pendente até que a
+        // conexão se feche e o `success` chegue, que é o que se quer esperar.
+      })
+
+    const nomes = ((await indexedDB.databases?.()) ?? [])
+      .map((banco) => banco.name)
+      .filter((nome): nome is string => typeof nome === 'string')
+
+    await Promise.all(nomes.map(apagar))
+
+    // E confirma: um `success` por banco ainda deixa de fora o banco que
+    // apareceu no meio do caminho, e o que interessa é a lista vazia.
+    const limite = Date.now() + 5000
+    for (;;) {
+      const restantes = ((await indexedDB.databases?.()) ?? []).filter((banco) => banco.name)
+      if (restantes.length === 0) break
+      if (Date.now() > limite) {
+        throw new Error(`armazenamento não ficou limpo: ${restantes.map((b) => b.name).join(', ')}`)
+      }
+      await Promise.all(restantes.map((banco) => apagar(banco.name as string)))
+    }
+
     localStorage.clear()
     sessionStorage.clear()
   })
@@ -45,7 +69,10 @@ export async function montarTreino(
     await pagina.getByRole('button', { name: 'Adicionar exercício' }).click()
     await pagina.getByLabel('Buscar exercício').fill(exercicio)
     await pagina.waitForTimeout(250)
-    await pagina.getByRole('button', { name: new RegExp(exercicio.slice(0, 16)) }).first().click()
+    await pagina
+      .getByRole('button', { name: new RegExp(exercicio.slice(0, 16)) })
+      .first()
+      .click()
     await pagina.waitForTimeout(250)
   }
 

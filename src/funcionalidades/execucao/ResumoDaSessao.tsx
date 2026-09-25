@@ -34,83 +34,86 @@ export function ResumoDaSessao({ sessao, plano, exercicios, aoSair }: Props) {
             </h1>
             <p className={estilos.meta}>
               {sessao.sessao.nomeTreino}
-              {sessao.sessao.concluidaEm
-                ? `, ${formatarDataHora(sessao.sessao.concluidaEm)}`
-                : ''}
+              {sessao.sessao.concluidaEm ? `, ${formatarDataHora(sessao.sessao.concluidaEm)}` : ''}
             </p>
           </div>
 
-          {descartada ? null : (
-            sessao.exercicios.map((item) => {
-              const metas = plano.porExercicioSessao.get(item.exercicio.id) ?? []
-              const estado = estadoExercicioSessao({
-                series: item.series,
-                naoRealizado: item.exercicio.naoRealizado,
-                seriesPlanejadas: metas.length,
-              })
+          {descartada
+            ? null
+            : sessao.exercicios.map((item) => {
+                const metas = plano.porExercicioSessao.get(item.exercicio.id) ?? []
+                const estado = estadoExercicioSessao({
+                  series: item.series,
+                  naoRealizado: item.exercicio.naoRealizado,
+                  seriesPlanejadas: metas.length,
+                })
 
-              return (
-                <section key={item.exercicio.id} className={estilos.grupoResumo}>
-                  <h2 className={estilos.numeroDaSerie}>
-                    {exercicios.get(item.exercicio.exercicioId)?.nome ?? 'Exercício'}
-                  </h2>
-                  <span className={estilos.meta}>{textoDoEstado(estado)}</span>
+                return (
+                  <section key={item.exercicio.id} className={estilos.grupoResumo}>
+                    <h2 className={estilos.numeroDaSerie}>
+                      {exercicios.get(item.exercicio.exercicioId)?.nome ?? 'Exercício'}
+                    </h2>
+                    <span className={estilos.meta}>{textoDoEstado(estado)}</span>
 
-                  <div className={estilos.razao}>
-                    {item.series.length === 0 ? (
-                      <span className={estilos.serieNaoRealizada}>Nenhuma série registrada.</span>
-                    ) : (
-                      item.series.map((serie) => {
-                        const meta = metas[serie.ordem - 1]
-                        const comparacao = compararSerie(
-                          meta
-                            ? {
-                                repeticoes: meta.repeticoes,
-                                cargaKg: meta.cargaKg,
-                                rir: meta.rir,
-                              }
-                            : null,
-                          serie,
-                        )
-                        return (
-                          <div key={serie.id} className={estilos.linhaRazao}>
-                            <span className={`${estilos.ordemRazao} numerico`}>{serie.ordem}</span>
-                            <span className={`${estilos.rirRazao} numerico`}>
-                              {meta
-                                ? `meta ${meta.repeticoes} × ${formatarCarga(meta.cargaKg)} kg`
-                                : 'série extra'}
-                            </span>
-                            {serie.naoRealizada ? (
-                              <span className={estilos.serieNaoRealizada}>não realizada</span>
-                            ) : (
-                              <span className={`${estilos.valoresRazao} numerico`}>
-                                {formatarCarga(serie.cargaKg)} kg × {serie.repeticoes ?? '—'}
+                    <div className={estilos.razao}>
+                      {item.series.length === 0 ? (
+                        <span className={estilos.serieNaoRealizada}>Nenhuma série registrada.</span>
+                      ) : (
+                        item.series.map((serie) => {
+                          const meta = metas[serie.ordem - 1]
+                          const comparacao = compararSerie(
+                            meta
+                              ? {
+                                  repeticoes: meta.repeticoes,
+                                  repeticoesMax: meta.repeticoesMax,
+                                  cargaKg: meta.cargaKg,
+                                  rir: meta.rir,
+                                }
+                              : null,
+                            serie,
+                          )
+                          return (
+                            <div key={serie.id} className={estilos.linhaRazao}>
+                              <span className={`${estilos.ordemRazao} numerico`}>
+                                {serie.ordem}
                               </span>
-                            )}
-                            <span
-                              className={
-                                comparacao.repeticoes === 'acima'
-                                  ? estilos.marcaAcima
+                              <span className={`${estilos.rirRazao} numerico`}>
+                                {meta
+                                  ? `meta ${meta.repeticoes} × ${formatarCarga(meta.cargaKg)} kg`
+                                  : 'série extra'}
+                              </span>
+                              {serie.naoRealizada ? (
+                                <span className={estilos.serieNaoRealizada}>não realizada</span>
+                              ) : (
+                                <span className={`${estilos.valoresRazao} numerico`}>
+                                  {formatarCarga(serie.cargaKg)} kg × {serie.repeticoes ?? '—'}
+                                </span>
+                              )}
+                              <span
+                                className={
+                                  comparacao.repeticoes === 'acima' ||
+                                  comparacao.repeticoes === 'no_topo'
+                                    ? estilos.marcaAcima
+                                    : comparacao.repeticoes === 'abaixo'
+                                      ? estilos.marcaAbaixo
+                                      : estilos.marcaIgual
+                                }
+                              >
+                                {comparacao.repeticoes === 'acima' ||
+                                comparacao.repeticoes === 'no_topo'
+                                  ? '▲'
                                   : comparacao.repeticoes === 'abaixo'
-                                    ? estilos.marcaAbaixo
-                                    : estilos.marcaIgual
-                              }
-                            >
-                              {comparacao.repeticoes === 'acima'
-                                ? '▲'
-                                : comparacao.repeticoes === 'abaixo'
-                                  ? '▼'
-                                  : ''}
-                            </span>
-                          </div>
-                        )
-                      })
-                    )}
-                  </div>
-                </section>
-              )
-            })
-          )}
+                                    ? '▼'
+                                    : ''}
+                              </span>
+                            </div>
+                          )
+                        })
+                      )}
+                    </div>
+                  </section>
+                )
+              })}
         </div>
       </div>
 
