@@ -71,6 +71,43 @@ for (const viewport of LARGURAS) {
       expect(acao!.height).toBeGreaterThanOrEqual(44)
     })
 
+    /**
+     * A tela de execução com o cronômetro rodando — FR-181 e a hierarquia que a
+     * constituição fixa: carga e repetições são os elementos de maior peso, e a
+     * contagem não pode disputar esse lugar nem empurrar nada para fora.
+     */
+    test('a contagem de descanso não desarruma a tela de execução', async ({ page }) => {
+      await abrirLimpo(page)
+      await montarTreino(page, 'Treino A', ['Supino reto com barra'])
+      await iniciarTreino(page)
+
+      await page.getByRole('button', { name: /^Descansar / }).click()
+      await expect(page.getByRole('timer')).toBeVisible()
+
+      const excesso = await page.evaluate(
+        () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      )
+      expect(excesso, 'rolagem horizontal com a contagem visível').toBeLessThanOrEqual(0)
+
+      // O numeral da contagem é menor que o da carga. A distância entre os dois
+      // tamanhos é a hierarquia, e ela é verificada, não prometida.
+      const tamanho = async (seletor: string) =>
+        Number.parseFloat(
+          await page
+            .locator(seletor)
+            .first()
+            .evaluate((no) => getComputedStyle(no).fontSize),
+        )
+
+      const carga = await tamanho('input[aria-labelledby="rotulo-carga"]')
+      const contagem = await tamanho('[role="timer"] span')
+      expect(contagem).toBeLessThan(carga)
+
+      // Cancelar continua sendo um alvo de toque legítimo.
+      const cancelar = await page.getByRole('button', { name: 'Cancelar' }).boundingBox()
+      expect(cancelar!.height).toBeGreaterThanOrEqual(44)
+    })
+
     test('todo alvo interativo visível tem ao menos 44 x 44 pt (SC-009)', async ({ page }) => {
       await abrirLimpo(page)
       await montarTreino(page, 'Treino A', ['Supino reto com barra'])
@@ -88,7 +125,9 @@ for (const viewport of LARGURAS) {
           if (caixa.height < 44 || caixa.width < 24) {
             problemas.push(
               `${elemento.tagName.toLowerCase()}[${
-                elemento.getAttribute('aria-label') ?? elemento.textContent?.trim().slice(0, 24) ?? ''
+                elemento.getAttribute('aria-label') ??
+                elemento.textContent?.trim().slice(0, 24) ??
+                ''
               }] ${Math.round(caixa.width)}x${Math.round(caixa.height)}`,
             )
           }

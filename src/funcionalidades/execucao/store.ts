@@ -15,15 +15,25 @@
  * ir ao histórico e voltar não apaga o que já estava preenchido na tela.
  */
 import { create } from 'zustand'
+import { CARGA_HERDADA, type CampoDeCarga } from '../../domain/serie/campoDeCarga'
 import type { Id } from '../../domain/tipos'
 
 export type Rascunho = {
-  readonly cargaKg: number | null
+  /**
+   * Carrega a própria origem, porque `null` sozinho não distingue "não mexi"
+   * de "apaguei" — e essa ambiguidade impedia apagar o campo. Ver
+   * `campoDeCarga.ts`.
+   */
+  readonly cargaKg: CampoDeCarga
   readonly repeticoes: number | null
   readonly rir: number | null
 }
 
-export const RASCUNHO_VAZIO: Rascunho = { cargaKg: null, repeticoes: null, rir: null }
+export const RASCUNHO_VAZIO: Rascunho = {
+  cargaKg: CARGA_HERDADA,
+  repeticoes: null,
+  rir: null,
+}
 
 type EstadoDaExecucao = {
   readonly sessaoId: Id | null

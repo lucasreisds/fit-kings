@@ -23,6 +23,56 @@ simuláveis. Enquanto não forem feitas, esta versão não está pronta para uso
 - Tempo de registro de uma série abaixo de 5 segundos. A contagem de toques já está verificada:
   2 no caminho comum, 3 no pior caso, contra um piso de 3.
 
+## [0.4.0] — 2026-09-27
+
+### Adicionado
+
+- **Cronômetro de descanso, iniciado por você.** Na tela de execução há um botão que já mostra
+  quanto tempo vai contar: "Descansar 1:30" quando o exercício tem descanso planejado, "Descansar
+  2:00" quando não tem. Nada começa sozinho — nem ao confirmar uma série, nem ao entrar num
+  exercício. Ao chegar a zero, um som curto e um aviso na tela.
+
+  A contagem é feita **pelo relógio**, a partir do instante em que você tocou. Recarregar a página,
+  sair do aplicativo e voltar, ou o iPhone congelar a aba em segundo plano: em todos os casos o
+  tempo mostrado está certo, inclusive quando a resposta é "já acabou". Um contador que decrementa
+  a cada segundo pararia junto com a aba e voltaria mentindo.
+
+  Com a contagem rodando dá para registrar séries, trocar de exercício e concluir o treino, sem
+  nenhum toque para tirar o cronômetro do caminho. O descanso é um por sessão, não um por exercício:
+  quem descansa é você.
+
+  **O que o cronômetro não faz**: avisar com o aplicativo fechado ou a tela bloqueada. Isso exigiria
+  notificação do sistema, que exige um servidor — e o aplicativo é inteiramente local, sem conta,
+  sem nuvem e sem rede. Se você sair do aplicativo e voltar depois do tempo, o aviso está lá; o som
+  é que não terá tocado.
+
+### Corrigido
+
+- **O campo de carga não deixava apagar o último dígito.** Com 45 kg herdados da série anterior,
+  apagar o "5" funcionava, apagar o "4" não: o campo voltava sozinho para 45. Dava para chegar a 49
+  e não dava para chegar a 50. O único jeito era selecionar os dois dígitos e substituí-los de uma
+  vez.
+
+  O rascunho guardava a carga de um jeito em que "não mexi, herde da série anterior" e "apaguei"
+  eram a mesma coisa. O instante em que o campo ficava vazio era exatamente o instante em que a
+  herança voltava. A constituição já exigia que a carga herdada permanecesse **editável** — e ela
+  era editável pela metade.
+
+  Agora o valor carrega a própria origem, e o estado ambíguo não tem como ser escrito. Como efeito,
+  confirmar uma série com o campo apagado de propósito registra a série **sem carga**: o que fica
+  gravado é o que estava na tela.
+
+### Alterado
+
+- **Constituição emendada para v1.5.0.** A v1.4.0 listava "cronômetro de descanso" entre os itens
+  fora de escopo, e exigia emenda para ampliar isso. A proibição não era sobre cronômetros: era
+  sobre o aplicativo impor ritmo a quem treina. Um cronômetro que começa sozinho ao fim de cada
+  série continua proibido; um que só existe quando você pede é outra coisa.
+
+  O teste de fronteira que a feature 002 deixou na suíte — "FRONTEIRA CONSTITUCIONAL: não é
+  cronômetro" — quebrou nesta feature e disse por quê, que era o trabalho dele. Ele não foi apagado:
+  foi reescrito com a condição nova, e agora quebra se alguém fizer a contagem começar sozinha.
+
 ## [0.3.0] — 2026-09-24
 
 ### Alterado

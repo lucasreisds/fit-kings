@@ -156,10 +156,17 @@ A skill `frontend-design` DEVE ser utilizada na implementação das telas.
 **Unidades e domínio**: carga em quilogramas, com suporte a valores fracionados; RIR como inteiro
 não negativo; repetições planejadas como valor-alvo por série.
 
+**Cronômetro de descanso**: permitido sob condição. A contagem DEVE ser iniciada por ação explícita
+do usuário e NUNCA por conta própria — nem ao confirmar uma série, nem ao entrar num exercício, nem
+por qualquer outro gatilho automático. Ela NÃO DEVE bloquear, interromper nem exigir interação, e
+está sujeita ao Princípio II como qualquer outro aviso. O aviso de fim DEVE funcionar sem rede e sem
+servidor, conforme o Princípio III. O tempo decorrido NÃO DEVE ser gravado no histórico: a contagem
+é estado da sessão em andamento, não registro do que foi executado.
+
 **Fora de escopo desta versão**: conta de usuário, backup em nuvem, sincronização, compartilhamento
-entre contas, cronômetro de descanso, periodização, mídia demonstrativa dos exercícios, exportação
-para formatos de terceiros, integração com dispositivos vestíveis e interface de administração do
-catálogo. Ampliar este escopo exige emenda.
+entre contas, periodização, mídia demonstrativa dos exercícios, exportação para formatos de
+terceiros, integração com dispositivos vestíveis e interface de administração do catálogo. Ampliar
+este escopo exige emenda.
 
 ## Fluxo de Desenvolvimento e Portões de Qualidade
 
@@ -205,4 +212,21 @@ gerar tarefas. Complexidade adicional DEVE ser justificada por um requisito — 
 é justificativa insuficiente, exceto onde o Princípio IV já a torna obrigatória. Portões de
 qualidade não são dispensáveis por prazo.
 
-**Version**: 1.4.0 | **Ratified**: 2026-09-19 | **Last Amended**: 2026-09-19
+**Version**: 1.5.0 | **Ratified**: 2026-09-19 | **Last Amended**: 2026-09-27
+
+### Histórico de emendas
+
+**1.5.0 — 2026-09-27.** O cronômetro de descanso sai da lista de fora de escopo e passa a ser
+permitido sob condição.
+
+A proibição original não era sobre cronômetros. Era sobre o aplicativo impor ritmo a quem está
+treinando — o mesmo receio que o Princípio II registra a respeito de avisos que interrompem. Um
+cronômetro que começa sozinho ao fim de cada série é exatamente isso, e continua proibido.
+
+Um cronômetro que só existe quando o usuário pede é outra coisa: é o usuário usando uma ferramenta,
+e recusá-la o manda para o cronômetro do sistema, fora do aplicativo, no meio da sessão. A condição
+de início explícito é o que separa os dois casos, e é ela que esta emenda fixa.
+
+MINOR: ampliação material de orientação existente. Nenhum princípio foi removido ou redefinido, e os
+pisos do Princípio II permanecem inteiros — a contagem está sujeita a eles como qualquer outro
+aviso. FR-151 da feature 002 é substituído por FR-172 a FR-186 da feature 005.

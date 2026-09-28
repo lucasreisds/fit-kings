@@ -268,3 +268,76 @@ a construção incompleta, e a construção incompleta aconteceu em todo lugar o
 - Campo que descreve meta não é opcional.
 
 **Nenhuma violação aberta.** As pendências de aparelho seguem as mesmas.
+
+---
+
+# 005 — Emendar é diferente de contornar
+
+## O que aconteceu
+
+O usuário pediu um cronômetro de descanso. A constituição v1.4.0 listava "cronômetro de descanso"
+entre os itens fora de escopo, e dizia, na mesma frase, que ampliar aquele escopo exige emenda — não
+uma decisão da fase de planejamento.
+
+Havia três caminhos. Construir e não mexer no documento, deixando-o dizer o contrário do que o
+aplicativo faz. Recusar o pedido, citando um texto que o próprio usuário escreveu. Ou emendar,
+registrando o quê e o porquê.
+
+## Por que a proibição existia
+
+Relendo, a proibição não era sobre cronômetros. Era sobre **o aplicativo impor ritmo a quem está
+treinando** — o mesmo receio que o Princípio II registra a respeito de avisos que interrompem. Um
+cronômetro que começa sozinho ao fim de cada série é exatamente isso.
+
+Um cronômetro que só existe quando o usuário pede é outra coisa: é o usuário usando uma ferramenta.
+E recusá-lo não evita nada — manda a pessoa para o cronômetro do sistema, fora do aplicativo, no
+meio da sessão.
+
+A emenda fixa a condição que separa os dois casos, em vez de remover a restrição. A lista "fora de
+escopo" perdeu um item e a seção de restrições ganhou um parágrafo com regras mais apertadas do que
+a ausência anterior: início explícito, sem bloqueio, sem rede, fora do histórico.
+
+## O teste de fronteira fez o trabalho dele
+
+A feature 002 deixou na suíte um teste chamado `FRONTEIRA CONSTITUCIONAL: não é cronômetro`. O
+comentário dele dizia, em 2026-09-22, que acrescentar a contagem regressiva ia parecer inofensivo
+numa alteração futura, e que quebraria este teste se alguém o fizesse.
+
+Quebrou. Cinco dias depois, e exatamente como previsto.
+
+**Um teste que codifica uma fronteira não impede a mudança — obriga a mudança a ser deliberada.**
+Foi ele que transformou "implementar o pedido" em "emendar a constituição e depois implementar". Sem
+ele, a proibição continuaria escrita no documento enquanto o código a contrariava, e o documento
+teria deixado de valer para qualquer decisão seguinte.
+
+Ele não foi apagado. Foi reescrito com a condição nova: agora quebra se alguém fizer a contagem
+começar sozinha.
+
+## O defeito do campo de carga, e o padrão que não acaba
+
+Pela terceira feature seguida, a causa foi um tipo que permitia representar o estado errado.
+
+- Na 003, uma lista de campos que alguém precisava lembrar de atualizar.
+- Na 004, um campo opcional que ninguém precisava preencher.
+- Aqui, um `null` que respondia a duas perguntas diferentes: "não mexi" e "apaguei".
+
+Em todas, o código estava escrito como alguém razoável escreveria, e o tipo aceitou o que não devia.
+A correção, nas três, foi a mesma em forma: **tornar irrepresentável o estado ambíguo**, e não
+lembrar melhor.
+
+Vale registrar o que o defeito fazia, porque é o Princípio II sendo contrariado por escrito: a
+constituição exige que a carga herdada permaneça **editável**. Ela era editável pela metade — dava
+para chegar a 49 partindo de 45, e não dava para chegar a 50.
+
+## Sobre o cronômetro não avisar com a tela bloqueada
+
+Foi decidido com o usuário antes de escrever a especificação, e está registrado na spec como
+comportamento, não como limitação escondida: o aviso visual está lá quando ele voltar; o som é que
+não terá tocado.
+
+A alternativa alcançaria a tela bloqueada e exigiria Web Push — logo, um servidor. O Princípio III
+não é uma preferência de arquitetura: a rede na academia é instável, e o produto tem um usuário. A
+funcionalidade que exige servidor custa mais do que entrega.
+
+**Nenhuma violação aberta.** As pendências de aparelho seguem as mesmas, mais três novas registradas
+em `docs/validacao.md`.
