@@ -27,6 +27,7 @@ import { lerPlanoDaSessao, type MetaDaSerie } from './iniciarSessao'
 import { pontoDeRetomada } from './retomar'
 import { execucaoAnterior } from './consultas'
 import { cargaHerdada } from '../../domain/serie/heranca'
+import { cargaDigitada, cargaEfetiva } from '../../domain/serie/campoDeCarga'
 import { compararSerie } from '../../domain/serie/validade'
 import { formatarIntervalo, intervaloDe } from '../../domain/serie/intervalo'
 import { estadoExercicioSessao, textoDoEstado } from '../../domain/sessao/estadoExercicio'
@@ -45,6 +46,8 @@ import { FalhaAoPersistir } from './FalhaAoPersistir'
 import { ConfirmarDescarte } from './ConfirmarDescarte'
 import { ResumoDaSessao } from './ResumoDaSessao'
 import { SeletorExercicio } from '../treinos/SeletorExercicio'
+import { Descanso } from './Descanso'
+import { useDescanso } from './useDescanso'
 import estilos from './execucao.module.css'
 
 type Props = { sessaoId: Id }
@@ -57,6 +60,13 @@ export function TelaExecucao({ sessaoId }: Props) {
   const encerrarStore = useExecucao((estado) => estado.encerrar)
   const exercicioEmFoco = useExecucao((estado) => estado.exercicioEmFoco)
   const rascunhos = useExecucao((estado) => estado.rascunhos)
+
+  /*
+    FR-173: `descanso.iniciar` é chamado num lugar só — o botão. Nenhum efeito
+    desta tela o chama, e é isso que separa esta feature da proibição que
+    FR-151 registrava.
+  */
+  const descanso = useDescanso(sessaoId)
 
   const [falha, definirFalha] = useState<unknown>(null)
   const [confirmandoDescarte, definirConfirmandoDescarte] = useState(false)
@@ -232,7 +242,7 @@ export function TelaExecucao({ sessaoId }: Props) {
   // FR-085: a carga vem da série anterior **do mesmo exercício**, e nunca na
   // primeira série. O valor herdado é dado efetivo, não sugestão (FR-119) — e
   // por isso é exibido igual a um digitado, sem marca d'água nem tom próprio.
-  const cargaDeBase = rascunho.cargaKg ?? cargaHerdada(seriesRegistradas, proximaOrdem)
+  const cargaDeBase = cargaEfetiva(rascunho.cargaKg, cargaHerdada(seriesRegistradas, proximaOrdem))
 
   const agora = agoraUtc()
   const indiceAtual = itens.findIndex((item) => item.exercicio.id === emFoco.exercicio.id)
@@ -365,6 +375,8 @@ export function TelaExecucao({ sessaoId }: Props) {
   async function encerrar(transicao: 'concluir' | 'descartar') {
     try {
       await repositorioSessoes.encerrar(sessaoId, transicao)
+      // FR-183: a contagem não sobrevive à sessão que a originou.
+      descanso.encerrar()
       definirConfirmandoDescarte(false)
       if (transicao === 'descartar') {
         encerrarStore()
@@ -436,7 +448,9 @@ export function TelaExecucao({ sessaoId }: Props) {
               : null
           }
           agora={agora}
-          aoAplicarCarga={(cargaKg) => definirRascunho(emFoco.exercicio.id, { cargaKg })}
+          aoAplicarCarga={(cargaKg) =>
+            definirRascunho(emFoco.exercicio.id, { cargaKg: cargaDigitada(cargaKg) })
+          }
         />
 
         {indicacoes.get(emFoco.exercicio.id) ? (
@@ -506,12 +520,16 @@ export function TelaExecucao({ sessaoId }: Props) {
               </span>
             </div>
 
-            {descansos.get(emFoco.exercicio.id) !== null &&
-            descansos.get(emFoco.exercicio.id) !== undefined ? (
-              <p className={estilos.descanso} data-descanso>
-                descanso <span className="numerico">{descansos.get(emFoco.exercicio.id)} s</span>
-              </p>
-            ) : null}
+            {/*
+              FR-180: um descanso por sessão, não por exercício — quem descansa
+              é a pessoa. Por isso a contagem segue visível ao trocar de
+              exercício, e só a duração de um descanso **novo** vem do exercício
+              em foco.
+            */}
+            <Descanso
+              descanso={descanso}
+              planejadoSegundos={descansos.get(emFoco.exercicio.id) ?? null}
+            />
 
             {ehDropset ? (
               <RegistroDropset degraus={degraus} aoMudar={definirDegraus} />
@@ -532,7 +550,11 @@ export function TelaExecucao({ sessaoId }: Props) {
                       aria-labelledby="rotulo-carga"
                       onChange={(evento) =>
                         definirRascunho(emFoco.exercicio.id, {
-                          cargaKg: evento.target.value === '' ? null : Number(evento.target.value),
+                          // Apagar é uma digitação como outra qualquer: vira
+                          // `usuario` com valor nulo, e o campo fica vazio.
+                          cargaKg: cargaDigitada(
+                            evento.target.value === '' ? null : Number(evento.target.value),
+                          ),
                         })
                       }
                     />

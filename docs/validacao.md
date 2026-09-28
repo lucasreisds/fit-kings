@@ -192,3 +192,16 @@ Sobre T117, o que já se pode afirmar do código: no caminho comum — carga her
 registrar uma série custa **2 toques** (aplicar as repetições num dos dois atalhos, confirmar), e
 **3** quando as repetições não são nem a meta nem a meta mais uma. O piso da constituição é 3. O que
 falta medir é o tempo, não a contagem.
+
+## Feature 005 — cronômetro de descanso
+
+Três verificações que só o aparelho responde:
+
+- [ ] **O som toca no iPhone.** Com o aplicativo instalado pela Tela de Início, iniciar um descanso
+      curto e confirmar que o bipe soa ao chegar a zero, com a tela acesa e o aplicativo à frente. O
+      áudio é liberado pelo toque que inicia a contagem; se não soar, é aí que está o problema.
+- [ ] **Voltar do segundo plano mostra o tempo certo.** Iniciar um descanso de dois minutos, sair do
+      aplicativo, esperar três minutos e voltar. Deve aparecer o descanso **terminado** — não uma
+      contagem recomeçada nem congelada onde parou.
+- [ ] **A contagem é legível de longe.** Com o celular no chão e o brilho reduzido, conferir se dá
+      para ler quanto falta sem pegar o aparelho. A régua que encurta existe para esse caso.

@@ -585,12 +585,81 @@
  * Descanso planejado — FR-150, FR-151.
  *
  * Valor escrito ao lado da meta, e nada mais. **Não é cronômetro**: não conta,
- * não avisa, não interrompe. A constituição veda o cronômetro de descanso, e a
- * distinção está fixada em FR-151 — transformar isto numa contagem regressiva
- * exigiria emenda, não uma decisão de implementação.
+ * O cronômetro passou a ser permitido pela emenda constitucional v1.5.0, sob a
+ * condição de ser iniciado pelo usuário — FR-172 a FR-183 substituem FR-151. A
+ * proibição original não era sobre contar tempo; era sobre o aplicativo impor
+ * ritmo a quem treina. Uma contagem que só existe quando o usuário pede é o
+ * usuário usando uma ferramenta, e continua sujeita ao Princípio II.
  */
 .descanso {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--espaco-x2);
   font-size: var(--texto-apoio);
   color: var(--par-carta-secundaria-texto);
   text-align: center;
+}
+
+.contagem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--espaco-x1);
+}
+
+/*
+  40 px contra os 72 px de carga e repetições. A constituição exige que aqueles
+  sejam os elementos de maior peso desta tela, e a distância entre os dois
+  tamanhos é o que mantém a ordem legível sem precisar de cor nem de moldura.
+*/
+.numeralDescanso {
+  font-size: var(--texto-numeral-medio);
+  font-weight: 600;
+  line-height: 1;
+  color: var(--par-carta-primaria-texto);
+}
+
+.rotuloDescanso {
+  font-size: var(--texto-rotulo);
+  color: var(--par-carta-secundaria-texto);
+}
+
+/*
+  A régua encurta na proporção do que falta. É o que se lê de pé, com o celular
+  no chão, sem enxergar os dígitos — informação, e não enfeite.
+*/
+.reguaDescanso {
+  width: 100%;
+  max-width: 14rem;
+  height: 3px;
+  border-radius: var(--raio-pilula);
+  background: var(--cor-linha);
+  overflow: hidden;
+}
+
+.reguaDescansoPreenchida {
+  height: 100%;
+  width: 100%;
+  transform-origin: left center;
+  background: var(--cor-acento);
+  transition: transform 1s linear;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reguaDescansoPreenchida {
+    transition: none;
+  }
+}
+
+.descansoConcluido {
+  padding: var(--espaco-x3) var(--espaco-x4);
+  border-radius: var(--raio-campo);
+  background: var(--par-faixa-positiva-fundo);
+  color: var(--par-faixa-positiva-texto);
+}
+
+.tituloConcluido {
+  font-weight: 600;
+  color: var(--par-faixa-positiva-texto);
 }
