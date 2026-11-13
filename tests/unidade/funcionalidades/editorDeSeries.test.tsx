@@ -180,3 +180,61 @@ describe('comportamentos que o defeito escondia', () => {
     })
   })
 })
+
+/**
+ * T002 — FR-187 a FR-189, SC-062, SC-063.
+ *
+ * O caminho completo da tela: tecla no campo → `transformar` → séries
+ * resultantes. A regra em si é testada em `espelharSeries.test.ts`; aqui o que
+ * se prova é que o editor a usa, e com o índice certo.
+ */
+describe('séries que acompanham a primeira (FR-187)', () => {
+  const quatro = () =>
+    projetarSeriesPlanejadas(
+      [1, 2, 3, 4].map((ordem) =>
+        umaSeriePlanejada({ ordem, repeticoes: 10, repeticoesMax: null, cargaKg: 0, rir: null }),
+      ),
+    )
+
+  it('mudar a carga da série 1 muda a das quatro (SC-062)', () => {
+    const aoMudar = vi.fn()
+    render(<EditorSeries series={quatro()} aoMudar={aoMudar} />)
+
+    fireEvent.change(screen.getByLabelText('Carga da série 1 em quilos'), {
+      target: { value: '40' },
+    })
+
+    expect(aplicar(aoMudar, quatro()).map((s) => s.cargaKg)).toEqual([40, 40, 40, 40])
+  })
+
+  it('a série com valor próprio fica como está (FR-188, SC-063)', () => {
+    const aoMudar = vi.fn()
+    const base = quatro().map((s, i) => (i === 3 ? { ...s, cargaKg: 35 } : s))
+    render(<EditorSeries series={base} aoMudar={aoMudar} />)
+
+    fireEvent.change(screen.getByLabelText('Carga da série 1 em quilos'), {
+      target: { value: '42.5' },
+    })
+
+    expect(aplicar(aoMudar, base).map((s) => s.cargaKg)).toEqual([42.5, 42.5, 42.5, 35])
+  })
+
+  it('mudar a série 3 muda só a 3 (FR-189)', () => {
+    const aoMudar = vi.fn()
+    render(<EditorSeries series={quatro()} aoMudar={aoMudar} />)
+
+    fireEvent.change(screen.getByLabelText('Repetições da série 3'), { target: { value: '8' } })
+
+    expect(aplicar(aoMudar, quatro()).map((s) => s.repeticoes)).toEqual([10, 10, 8, 10])
+  })
+
+  it('esvaziar o RIR da série 1 esvazia o das que a acompanham', () => {
+    const aoMudar = vi.fn()
+    const base = quatro().map((s) => ({ ...s, rir: 2 }))
+    render(<EditorSeries series={base} aoMudar={aoMudar} />)
+
+    fireEvent.change(screen.getByLabelText('RIR da série 1, opcional'), { target: { value: '' } })
+
+    expect(aplicar(aoMudar, base).map((s) => s.rir)).toEqual([null, null, null, null])
+  })
+})

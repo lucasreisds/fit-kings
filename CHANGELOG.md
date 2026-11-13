@@ -11,6 +11,21 @@ O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/), e o
 
 ## [Não publicado]
 
+### Adicionado
+
+- **As séries acompanham a primeira ao montar o treino.** Planejar 4x10 com 40 kg é digitar uma
+  vez: ajustar repetições, máximo, carga ou RIR da série 1 leva junto toda série que estava igual
+  a ela. A série que você ajustar à parte ganha valores próprios e deixa de acompanhar — até
+  voltar a ficar igual à primeira. Não há marca guardada: "acompanhar" é estar igual, e por isso
+  vale do mesmo jeito ao reabrir o treino ou em outro aparelho. Um exercício recém-acrescentado
+  agora nasce com as três séries idênticas (antes a terceira vinha com RIR 1 e ficava de fora).
+- **O que você fez da última vez, série a série, neste treino.** Durante a execução, cada série
+  mostra discretamente o que foi feito na mesma série da última vez em que o exercício apareceu
+  **neste mesmo treino** — "anterior 40 kg × 10" sob a meta da série corrente, e sob cada série
+  já registrada, para comparar na vertical. É só referência: nenhum campo é preenchido a partir
+  dela. Exercício nunca feito neste treino, ou série sem correspondente, não mostra nada. A linha
+  "Última vez" do cabeçalho, que olha qualquer treino, continua igual.
+
 ### Pendente de validação em aparelho
 
 Quatro verificações exigem um iPhone com o aplicativo instalado pela Tela de Início e não são

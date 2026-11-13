@@ -26,10 +26,15 @@ import { EditorSeries } from './EditorSeries'
 import { EditorDropset } from './EditorDropset'
 import estilos from './treinos.module.css'
 
+/**
+ * FR-203 — as três nascem idênticas, para que todas acompanhem a primeira
+ * (FR-187). Antes a terceira nascia com RIR 1, e ajustar a série 1 de um
+ * exercício recém-acrescentado deixava a 3 para trás sem motivo aparente.
+ */
 const SERIES_INICIAIS: readonly ValoresPlanejados[] = [
   { repeticoes: 10, cargaKg: 0, rir: 2 },
   { repeticoes: 10, cargaKg: 0, rir: 2 },
-  { repeticoes: 10, cargaKg: 0, rir: 1 },
+  { repeticoes: 10, cargaKg: 0, rir: 2 },
 ]
 
 type Props = { treinoId: Id | null }
