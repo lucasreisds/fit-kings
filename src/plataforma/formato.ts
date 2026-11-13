@@ -45,6 +45,22 @@ export function formatarCarga(cargaKg: number | null): string {
   })}`
 }
 
+/**
+ * Referência da última vez (FR-194), na **mesma ordem da série registrada**
+ * — carga, depois repetições — porque é logo abaixo dela que a referência
+ * aparece, e comparar duas linhas em ordem trocada é ler em zigue-zague.
+ * Sem carga — peso corporal ou não informada — mostra só as repetições: um
+ * "0 kg ×" seria ruído no canto do olho.
+ */
+export function formatarReferencia(referencia: {
+  readonly repeticoes: number
+  readonly cargaKg: number | null
+}): string {
+  if (referencia.cargaKg === null || referencia.cargaKg === 0)
+    return `${referencia.repeticoes} reps`
+  return `${formatarCarga(referencia.cargaKg)} kg × ${referencia.repeticoes}`
+}
+
 export function formatarDuracao(ms: number): string {
   const minutos = Math.floor(ms / 60000)
   if (minutos < 60) return `${minutos} min`

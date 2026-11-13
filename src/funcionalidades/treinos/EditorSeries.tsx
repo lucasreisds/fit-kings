@@ -4,9 +4,12 @@
  * Cada série tem seus próprios valores. Uma linha por série, colunas alinhadas,
  * números tabulares: planejar 3x8 com cargas 40 / 42,5 / 45 precisa ser tão
  * fácil de ler quanto de digitar.
+ *
+ * FR-187: o caso comum, séries iguais, se digita uma vez só — as séries que
+ * estão iguais à primeira acompanham as alterações dela.
  */
 import type { ValoresPlanejados } from '../../domain/treino'
-import { validarSeriePlanejada } from '../../domain/treino'
+import { espelhar, validarSeriePlanejada } from '../../domain/treino'
 import { Botao } from '../../ui/Botao'
 import estilos from './treinos.module.css'
 
@@ -40,12 +43,11 @@ export function EditorSeries({ series, aoMudar }: Props) {
     // campo esvaziado durante a digitação vira 0, que a validação recusa.
     const aceitaNulo = campo === 'rir' || campo === 'repeticoesMax'
 
-    aoMudar(
-      (atuais) =>
-        atuais.map((serie, i) =>
-          i === indice ? { ...serie, [campo]: aceitaNulo ? valor : (valor ?? 0) } : serie,
-        ) as readonly ValoresPlanejados[],
-    )
+    // FR-187: alterar a série 1 leva junto as que estavam iguais a ela. A
+    // igualdade é avaliada sobre o **gravado**, dentro da transação — a mesma
+    // razão por que `aoMudar` recebe função. E, sendo um único `transformar`,
+    // todas as séries mudam numa gravação só (FR-191).
+    aoMudar((atuais) => espelhar(atuais, indice, campo, aceitaNulo ? valor : (valor ?? 0)))
   }
 
   function acrescentar() {

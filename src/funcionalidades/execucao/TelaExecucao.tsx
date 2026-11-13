@@ -25,7 +25,8 @@ import { db } from '../../dados/db'
 import { repositorioExercicios } from '../../dados/repositorios/exercicios'
 import { lerPlanoDaSessao, type MetaDaSerie } from './iniciarSessao'
 import { pontoDeRetomada } from './retomar'
-import { execucaoAnterior } from './consultas'
+import { execucaoAnterior, execucaoAnteriorNoTreino } from './consultas'
+import { referenciasPorSerie, type ReferenciaDeSerie } from '../../domain/serie/referencia'
 import { cargaHerdada } from '../../domain/serie/heranca'
 import { cargaDigitada, cargaEfetiva } from '../../domain/serie/campoDeCarga'
 import { compararSerie } from '../../domain/serie/validade'
@@ -33,7 +34,7 @@ import { formatarIntervalo, intervaloDe } from '../../domain/serie/intervalo'
 import { estadoExercicioSessao, textoDoEstado } from '../../domain/sessao/estadoExercicio'
 import type { Degrau, Id } from '../../domain/tipos'
 import { agoraUtc } from '../../plataforma/tempo'
-import { formatarCarga } from '../../plataforma/formato'
+import { formatarCarga, formatarReferencia } from '../../plataforma/formato'
 import { rascunhoDe, useExecucao } from './store'
 import { CabecalhoExercicio } from './CabecalhoExercicio'
 import { NavegacaoExercicios } from './NavegacaoExercicios'
@@ -144,11 +145,37 @@ export function TelaExecucao({ sessaoId }: Props) {
       ),
     )
 
+    // FR-194, FR-195 — a referência série a série vem da última vez **neste
+    // treino**, e não de qualquer um como `anteriores`. Consultada a cada vez,
+    // nunca gravada (FR-202). A ocorrência casa o mesmo exercício repetido no
+    // treino: o primeiro supino com o primeiro, o segundo com o segundo.
+    const ocorrencias = new Map<Id, number>()
+    const referencias = new Map(
+      await Promise.all(
+        [...sessao.exercicios]
+          .sort((a, b) => a.exercicio.ordem - b.exercicio.ordem)
+          .map((item) => {
+            const ocorrencia = ocorrencias.get(item.exercicio.exercicioId) ?? 0
+            ocorrencias.set(item.exercicio.exercicioId, ocorrencia + 1)
+            return execucaoAnteriorNoTreino(
+              item.exercicio.exercicioId,
+              sessao.sessao.treinoId,
+              ocorrencia,
+              { ignorarSessaoId: sessao.sessao.id },
+            ).then(
+              (anterior) =>
+                [item.exercicio.id, referenciasPorSerie(anterior?.series ?? [])] as const,
+            )
+          }),
+      ),
+    )
+
     return {
       sessao,
       plano,
       exercicios,
       anteriores,
+      referencias,
       indicacoes,
       descansos,
       ponto: pontoDeRetomada(sessao, plano),
@@ -170,7 +197,7 @@ export function TelaExecucao({ sessaoId }: Props) {
     )
   }
 
-  const { sessao, plano, exercicios, anteriores, indicacoes, descansos, ponto } = dados
+  const { sessao, plano, exercicios, anteriores, referencias, indicacoes, descansos, ponto } = dados
 
   if (sessao.sessao.estado !== 'em_andamento') {
     return (
@@ -225,6 +252,7 @@ export function TelaExecucao({ sessaoId }: Props) {
   const seriesRegistradas = emFoco.series
   const proximaOrdem = seriesRegistradas.length + 1
   const metaDaVez: MetaDaSerie | undefined = metas[proximaOrdem - 1]
+  const referenciasDoExercicio = referencias.get(emFoco.exercicio.id)
   const rascunho = rascunhoDe(rascunhos, emFoco.exercicio.id)
   const ehDropset = emFoco.exercicio.abordagem === 'dropset'
 
@@ -504,19 +532,25 @@ export function TelaExecucao({ sessaoId }: Props) {
                   <span className="numerico"> de {Math.max(metas.length, proximaOrdem)}</span>
                 ) : null}
               </span>
-              <span className={estilos.meta}>
-                {metaDaVez ? (
-                  <>
-                    meta{' '}
-                    <span className="numerico">
-                      {formatarIntervalo(intervaloDe(metaDaVez))} reps,{' '}
-                      {formatarCarga(metaDaVez.cargaKg)} kg
-                      {metaDaVez.rir !== null ? `, RIR ${metaDaVez.rir}` : ''}
-                    </span>
-                  </>
-                ) : (
-                  'série extra'
-                )}
+              <span className={estilos.metaEReferencia}>
+                <span className={estilos.meta}>
+                  {metaDaVez ? (
+                    <>
+                      meta{' '}
+                      <span className="numerico">
+                        {formatarIntervalo(intervaloDe(metaDaVez))} reps,{' '}
+                        {formatarCarga(metaDaVez.cargaKg)} kg
+                        {metaDaVez.rir !== null ? `, RIR ${metaDaVez.rir}` : ''}
+                      </span>
+                    </>
+                  ) : (
+                    'série extra'
+                  )}
+                </span>
+                <ReferenciaAnterior
+                  ordem={proximaOrdem}
+                  referencia={referenciasDoExercicio?.get(proximaOrdem)}
+                />
               </span>
             </div>
 
@@ -658,19 +692,36 @@ export function TelaExecucao({ sessaoId }: Props) {
                   data-serie-registrada={serie.ordem}
                   onClick={() => definirSerieEmEdicao(serie.id)}
                   aria-label={`Corrigir ou remover a série ${serie.ordem}`}
+                  aria-describedby={
+                    referenciasDoExercicio?.has(serie.ordem)
+                      ? `referencia-anterior-${serie.id}`
+                      : undefined
+                  }
                 >
                   <span className={`${estilos.ordemRazao} numerico`}>{serie.ordem}</span>
-                  {serie.naoRealizada ? (
-                    <span className={estilos.serieNaoRealizada}>não realizada</span>
-                  ) : (
-                    <span className={`${estilos.valoresRazao} numerico`}>
-                      {formatarCarga(serie.cargaKg)} kg × {serie.repeticoes ?? '—'}
-                      <span className={classeDaMarca(comparacao.repeticoes)}>
-                        {' '}
-                        {marca(comparacao.repeticoes)}
+                  {/*
+                    FR-200 — hoje em cima, a última vez embaixo, na mesma coluna
+                    e na mesma ordem (carga × repetições): a comparação se lê na
+                    vertical, como numa conta armada.
+                  */}
+                  <span className={estilos.celulaRazao}>
+                    {serie.naoRealizada ? (
+                      <span className={estilos.serieNaoRealizada}>não realizada</span>
+                    ) : (
+                      <span className={`${estilos.valoresRazao} numerico`}>
+                        {formatarCarga(serie.cargaKg)} kg × {serie.repeticoes ?? '—'}
+                        <span className={classeDaMarca(comparacao.repeticoes)}>
+                          {' '}
+                          {marca(comparacao.repeticoes)}
+                        </span>
                       </span>
-                    </span>
-                  )}
+                    )}
+                    <ReferenciaAnterior
+                      ordem={serie.ordem}
+                      referencia={referenciasDoExercicio?.get(serie.ordem)}
+                      idAcessivel={`referencia-anterior-${serie.id}`}
+                    />
+                  </span>
                   <span className={`${estilos.rirRazao} numerico`}>
                     {serie.rir !== null ? `RIR ${serie.rir}` : ''}
                   </span>
@@ -789,4 +840,43 @@ function marca(comparacao: Marca): string {
     default:
       return ''
   }
+}
+
+/**
+ * FR-194, FR-198 — o que foi feito nesta série da última vez neste treino.
+ *
+ * É o lápis da semana passada na margem do caderno: texto secundário, sem
+ * fundo, sem borda, e **não é botão**. Parecer tocável sugeriria que ele
+ * preenche o campo, e o Princípio II proíbe exatamente isso.
+ *
+ * "anterior", e não "última vez": o cabeçalho já usa "Última vez" para a carga
+ * de qualquer treino, e a mesma expressão com dois sentidos na mesma tela
+ * confundiria. O rótulo acessível diz por extenso.
+ */
+function ReferenciaAnterior({
+  ordem,
+  referencia,
+  idAcessivel,
+}: {
+  ordem: number
+  referencia: ReferenciaDeSerie | undefined
+  /** Dentro de um botão rotulado, o rótulo cobre o conteúdo: a referência entra como descrição. */
+  idAcessivel?: string
+}) {
+  // FR-196, FR-197: sem correspondente, nada — nem traço nem "0".
+  if (!referencia) return null
+  return (
+    <span className={estilos.referenciaAnterior} data-referencia-anterior={ordem}>
+      <span aria-hidden="true">
+        anterior <span className="numerico">{formatarReferencia(referencia)}</span>
+      </span>
+      <span className="apenasLeitorDeTela" id={idAcessivel}>
+        {textoAcessivelDaReferencia(ordem, referencia)}
+      </span>
+    </span>
+  )
+}
+
+function textoAcessivelDaReferencia(ordem: number, referencia: ReferenciaDeSerie): string {
+  return `Na última vez neste treino, série ${ordem}: ${formatarReferencia(referencia)}.`
 }
