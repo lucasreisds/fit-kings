@@ -11,6 +11,20 @@ O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/), e o
 
 ## [Não publicado]
 
+### Pendente de validação em aparelho
+
+Quatro verificações exigem um iPhone com o aplicativo instalado pela Tela de Início e não são
+simuláveis. Enquanto não forem feitas, esta versão não está pronta para uso diário — ver
+[docs/validacao.md](docs/validacao.md).
+
+- Persistência do armazenamento após reiniciar o aparelho e após dias sem uso (risco R1).
+- Modo avião de ponta a ponta: treino completo, histórico e exportação sem erro de rede.
+- Legibilidade sob luz forte e com brilho de tela reduzido.
+- Tempo de registro de uma série abaixo de 5 segundos. A contagem de toques já está verificada:
+  2 no caminho comum, 3 no pior caso, contra um piso de 3.
+
+## [0.5.0] — 2026-11-13
+
 ### Adicionado
 
 - **As séries acompanham a primeira ao montar o treino.** Planejar 4x10 com 40 kg é digitar uma
@@ -25,18 +39,6 @@ O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/), e o
   já registrada, para comparar na vertical. É só referência: nenhum campo é preenchido a partir
   dela. Exercício nunca feito neste treino, ou série sem correspondente, não mostra nada. A linha
   "Última vez" do cabeçalho, que olha qualquer treino, continua igual.
-
-### Pendente de validação em aparelho
-
-Quatro verificações exigem um iPhone com o aplicativo instalado pela Tela de Início e não são
-simuláveis. Enquanto não forem feitas, esta versão não está pronta para uso diário — ver
-[docs/validacao.md](docs/validacao.md).
-
-- Persistência do armazenamento após reiniciar o aparelho e após dias sem uso (risco R1).
-- Modo avião de ponta a ponta: treino completo, histórico e exportação sem erro de rede.
-- Legibilidade sob luz forte e com brilho de tela reduzido.
-- Tempo de registro de uma série abaixo de 5 segundos. A contagem de toques já está verificada:
-  2 no caminho comum, 3 no pior caso, contra um piso de 3.
 
 ## [0.4.0] — 2026-09-27
 
